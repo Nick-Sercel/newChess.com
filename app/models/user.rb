@@ -10,8 +10,21 @@ class User < ApplicationRecord
 
     has_many :goals,
 
-    has_many :friends,
-    has_many :games,
+    has_many :friends_requested,
+        foreign_key: :central_user_id,
+        class_name: :Friend
+
+    has_many :friends_received,
+        foreign_key: :foreign_user_id,
+        class_name: :Friend
+    
+    has_many :games_begun,
+        foreign_key: :central_user_id,
+        class_name: :Game
+
+    has_many :games_joined,
+        foreign_key: :foreign_user_id,
+        class_name: :Game
 
     attr_reader :password
 

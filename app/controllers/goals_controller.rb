@@ -12,7 +12,7 @@ class GoalsController < ApplicationController
             redirect_to user_url(params[:user_id])
         end
     end
-    
+
     def update
         @goal = Goal.find_by(id: params[id])
         if @goal && @goal.user_id == current_user.id
@@ -22,8 +22,6 @@ class GoalsController < ApplicationController
             redirect_to new_session_url
         end
     end
-
-    # i think there's an R in crud - whatever that one is
 
     def destroy
         @goal = Goal.find_by(id: params[:id])
