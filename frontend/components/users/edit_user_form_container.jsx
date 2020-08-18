@@ -20,7 +20,6 @@ class EditUserForm extends React.Component {
     }
 }
 
-
 const mSTP = (state, ownProps) => ({
     user: state.users[ownProps.match.params.userId],
     formType: 'Update User',
