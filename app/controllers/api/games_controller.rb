@@ -1,3 +1,3 @@
-class GamesController < ApplicationController
+class Api::GamesController < ApplicationController
     
 end

@@ -1,4 +1,4 @@
-class UsersController < ApplicationController
+class Api::UsersController < ApplicationController
     
     before_action :require_logged_in, only: [:show, :index]
 
@@ -13,7 +13,7 @@ class UsersController < ApplicationController
         @user = User.create(user_params)
         if @user.save
             login!(@user)
-            render: show
+            render :show
         else
             render json: @user.errors.full_messages, status: 422
         end
@@ -22,9 +22,9 @@ class UsersController < ApplicationController
     def edit
         @user = User.find_by(id: params[:id])
         if @user && @user.id == current_user.id && @user.update
-            render: show
+            render :show
         else
-            render: show # return to login page or something
+            render :show # return to login page or something
         end
     end
 
@@ -35,6 +35,6 @@ class UsersController < ApplicationController
 
     private
     def user_params
-        self.params.require(:user).permit(:username, :email, :password)
+        self.params.require(:user).permit(:username, :email, :elo, :password)
     end
 end

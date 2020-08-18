@@ -1,3 +1,3 @@
-class FriendsController < ApplicationController
+class Api::FriendsController < ApplicationController
     
 end

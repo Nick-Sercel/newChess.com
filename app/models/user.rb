@@ -8,7 +8,7 @@ class User < ApplicationRecord
     validates :username, :email, uniqueness: true
     validates :password, length: {minimum: 6}, allow_nil: true
 
-    has_many :goals,
+    has_many :goals
 
     has_many :friends_requested,
         foreign_key: :central_user_id,
