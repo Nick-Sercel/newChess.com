@@ -7,6 +7,12 @@ class SplashPage extends React.Component {
         return (
             <div>
                 <Link to={`/users/new`}>Create New User</Link>
+                <p>
+
+
+                    
+                </p>
+                <Link to={`/session/new`}>Returning User? Login</Link>
             </div>
         )
     }

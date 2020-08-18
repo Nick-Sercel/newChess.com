@@ -20,8 +20,8 @@ class UserForm extends React.Component {
     render() {
         return (
             <div>
-                <form onSubmit={this.handleSubmit()}>
-                    <p>{this.props.formType}</p>
+                <form>
+                    <h1>{this.props.formType}</h1>
                     <label>
                         Username: <input type='text' value={this.state.username} onChange={this.update('username')} />
                     </label>
@@ -30,6 +30,7 @@ class UserForm extends React.Component {
                     </label>
                     <label>
                         Password: <input type='text' onChange={this.update('password')} />
+                        <button onClick={this.handleSubmit}>Sign Up!</button>
                     </label>
                 </form>
             </div>

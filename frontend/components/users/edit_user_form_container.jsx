@@ -12,10 +12,7 @@ class EditUserForm extends React.Component {
         const { action, formType, user } = this.props;
         if (!user) return null;
         return (
-            <UserForm
-                action={action}
-                formType={formType}
-                user={user} />
+            <UserForm action={action} formType={formType} user={user} />
         );
     }
 }
