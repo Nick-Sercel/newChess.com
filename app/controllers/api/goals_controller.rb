@@ -20,10 +20,10 @@ class Api::GoalsController < ApplicationController
         if @goal && @goal.user_id == current_user.id
             @goal.update
             # redirect_to users_url
-            render: show # need users/show url
+            render :show # need users/show url
         else
             # redirect_to new_session_url
-            render: show # maybe need to add users/new ?
+            render :show # maybe need to add users/new ?
         end
     end
 
@@ -32,10 +32,10 @@ class Api::GoalsController < ApplicationController
         if @goal && @goal.user_id == current_user.id
             @goal.destroy
             # redirect_to users_url
-            render: show # need users/show url
+            render :show # need users/show url
         else
             # redirect_to new_session_url
-            render: show # maybe need to add users/new ?
+            render :show # maybe need to add users/new ?
         end
     end
 
