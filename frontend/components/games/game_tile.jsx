@@ -11,9 +11,9 @@ class Tile extends React.Component {
         }
         // `${this.props.tile.color}`
         return (
-            <div className='board-element'>
+            <div className={`board-element ${this.props.tile.color}`}>
                 <p className='piece-type'>
-                    {symbol}  {this.props.tile.color}
+                    {symbol}
                 </p>
             </div>
         )
