@@ -5,9 +5,29 @@ import configureStore from "./store/store";
 
 document.addEventListener('DOMContentLoaded', () => {
     const root = document.getElementById('root');
-    const store = configureStore();
-    // comment for git add .
+    let store;
+    if (window.currentUser) {
+        const preloadedState = {
+            session: { id: window.currentUser.id },
+            entities: {
+                users: { [window.currentUser.id]: window.currentUser }
+            }
+        };
+        store = configureStore(preloadedState);
+        delete window.currentUser;
+    } else {
+        store = configureStore();
+    }
+
     window.store = store;
+
 
     ReactDOM.render(<Root store={store} />, root);
 })
+
+//sudo service postgresql start
+
+
+// route_util
+// controller routes
+// CSS location

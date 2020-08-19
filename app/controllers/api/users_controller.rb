@@ -19,7 +19,7 @@ class Api::UsersController < ApplicationController
         end
     end
 
-    def edit
+    def update
         @user = User.find_by(id: params[:id])
         if @user && @user.id == current_user.id && @user.update
             render :show

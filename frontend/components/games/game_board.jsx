@@ -1,20 +1,22 @@
 import React from 'react';
-import Space from './game_space';
+import Tile from './game_tile';
 
 class GameBoard extends React.Component {
+    constructor(props) {
+        super(props);
+    }
 
     render() {
-        let board = Array.new(8);
-        for (let i = 0; i < 8; i++) {
-            board[i].push(Array.new(8));
-            for (let j = 0; j < 8; j++) {
-                board[i][j] = <span class='board-element'></span>;
-            }
-        }
-
+        let grid = this.props.board.grid;
         return (
             <div id='board-container'>
-                {board}
+                {grid.map(row => {
+                        return (
+                            row.map(tile => {
+                                return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} /> )
+                            })
+                        )
+                }   )}
             </div>
         )
     }

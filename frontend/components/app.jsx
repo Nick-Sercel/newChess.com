@@ -8,24 +8,30 @@ import UserShowContainer from './users/user_show_container';
 import EditUserFormContainer from './users/edit_user_form_container';
 import CreateUserFormContainer from './users/create_user_form_container';
 import LoginFormContainer from './session/login_container';
+import GameBoardContainer from './games/game_board_container';
 import Splash from './splash/splash_page';
 
 const App = () => (
     <div>
         <h1>Play Chess With Friends!</h1>
         <Switch>
-            <AuthRoute path="/users/new" component={CreateUserFormContainer} />
+            <AuthRoute exact path="/users/new" component={CreateUserFormContainer} />
+            <Route exact path="/game/new" component={GameBoardContainer} />
+            <AuthRoute exact path="/session/new" component={LoginFormContainer} />
             <ProtectedRoute path="/users/:userId/edit" component={EditUserFormContainer} />
             <ProtectedRoute path="/users/:userId" component={UserShowContainer} />
-            <AuthRoute path="/session/new" component={LoginFormContainer} />
             <Route path="/" component={Splash} />
         </Switch>
         <p>
 
 
-
         </p>
         <Link to='/'>Return to Splash Page</Link>
+        <p>
+            
+
+        </p>
+        <Link to='/game/new'>Play a Game</Link>
     </div>
 );
 
