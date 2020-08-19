@@ -11,9 +11,12 @@ import LoginFormContainer from './session/login_container';
 import GameBoardContainer from './games/game_board_container';
 import Splash from './splash/splash_page';
 
+import UserBannerContainer from './users/user_auth_banner/user_auth_banner_container';
+
 const App = () => (
     <div>
-        <h1>Play Chess With Friends!</h1>
+        {/* <h1>Play Chess With Friends!</h1> */}
+        <UserBannerContainer />
         <Switch>
             <ProtectedRoute exact path="/users/new" component={CreateUserFormContainer} />
             <Route exact path="/game/new" component={GameBoardContainer} />
@@ -22,41 +25,8 @@ const App = () => (
             <AuthRoute path="/users/:userId" component={UserShowContainer} />
             <Route path="/" component={Splash} />
         </Switch>
-        <p>
-
-
-        </p>
         <Link to='/'>Return to Splash Page</Link>
-        <p>
-
-
-        </p>
-        <Link to='/game/new'>Play a Game</Link>
     </div>
 );
 
 export default App;
-
-
-// /
-// Splash
-//     / login
-// SessionForm
-//     / signup
-// SessionForm
-//     / users /: userId
-// ProfileComponent
-// GoalIndex
-// GoalIndexItem
-// FriendIndex
-// FriendIndexItem
-// GameIndex
-// GameIndexItem
-//     / goals / new
-//         GoalForm
-//     / goals /: goalId
-// GoalShow
-//     / goals /: goalsId / edit
-// GoalForm
-//     / game
-// GameShow

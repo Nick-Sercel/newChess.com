@@ -14,6 +14,23 @@
  *= require_self
  */
 
+ #user-auth-banner {
+    height: 100px;
+    display: flex;
+    width: 1000px;
+    background-color: turquoise;
+ }
+
+ .user-auth-banner-title {
+    justify-content: left;
+    font-size: 50px;
+    color: forestgreen;
+ }
+
+ .user-auth-banner-links {
+    justify-content: right;
+    color: forestgreen;
+ }
 
  #board-container {
     display: flex;

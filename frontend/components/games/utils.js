@@ -49,9 +49,9 @@ export class Board {
                 }
                 if (piece) {
                     if (piece.pos[0] > 5) {
-                        piece.color = 'black';
-                    } else {
                         piece.color = 'white';
+                    } else {
+                        piece.color = 'black';
                     }
                 }
                 const tile = new Tile(this, [i, j], piece);

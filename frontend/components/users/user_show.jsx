@@ -13,7 +13,7 @@ class UserShow extends React.Component {
                 <h2>{this.props.user.email}</h2>
                 <h3>{this.props.user.elo}</h3>
                 <Link to={`/users/${this.props.user.id}/edit`}>Edit User Information</Link>
-                
+                <Link to='/game/new'>Play a Game</Link>
             </div>
         )
     }
