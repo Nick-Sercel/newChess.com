@@ -21,7 +21,7 @@ class Api::UsersController < ApplicationController
 
     def update
         @user = User.find_by(id: params[:id])
-        if @user && @user.id == current_user.id && @user.update
+        if @user && @user.id == current_user.id && @user.update(user_params)
             render :show
         else
             render :show # return to login page or something

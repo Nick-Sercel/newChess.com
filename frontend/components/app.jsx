@@ -15,11 +15,11 @@ const App = () => (
     <div>
         <h1>Play Chess With Friends!</h1>
         <Switch>
-            <AuthRoute exact path="/users/new" component={CreateUserFormContainer} />
+            <ProtectedRoute exact path="/users/new" component={CreateUserFormContainer} />
             <Route exact path="/game/new" component={GameBoardContainer} />
-            <AuthRoute exact path="/session/new" component={LoginFormContainer} />
-            <ProtectedRoute path="/users/:userId/edit" component={EditUserFormContainer} />
-            <ProtectedRoute path="/users/:userId" component={UserShowContainer} />
+            <ProtectedRoute exact path="/session/new" component={LoginFormContainer} />
+            <AuthRoute path="/users/:userId/edit" component={EditUserFormContainer} />
+            <AuthRoute path="/users/:userId" component={UserShowContainer} />
             <Route path="/" component={Splash} />
         </Switch>
         <p>
@@ -28,7 +28,7 @@ const App = () => (
         </p>
         <Link to='/'>Return to Splash Page</Link>
         <p>
-            
+
 
         </p>
         <Link to='/game/new'>Play a Game</Link>

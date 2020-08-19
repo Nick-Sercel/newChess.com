@@ -1,4 +1,5 @@
 import React from 'react';
+import {withRouter} from 'react-router-dom';
 
 class UserForm extends React.Component {
     constructor(props) {
@@ -14,7 +15,8 @@ class UserForm extends React.Component {
     }
 
     handleSubmit() {
-        this.props.action(this.state);
+        this.props.action(this.state)
+            .then(this.props.history.push(`/users/${this.props.match.params.userId}`))
     }
 
     render() {
@@ -38,4 +40,4 @@ class UserForm extends React.Component {
     }
 }
 
-export default UserForm;
+export default withRouter(UserForm);

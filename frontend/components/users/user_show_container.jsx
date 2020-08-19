@@ -3,7 +3,7 @@ import UserShow from './user_show';
 import { fetchUser } from '../../actions/user_actions';
 
 const mSTP = (state, ownProps) => ({
-    user: state.users[ownProps.match.params.userId],
+    user: state.entities.users[ownProps.match.params.userId],
 
 })
 

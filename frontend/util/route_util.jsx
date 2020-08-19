@@ -11,13 +11,6 @@ const mapStateToProps = state => {
 })};
 
 const Auth = ({ component: Component, loggedIn, path, currentUser }) => {
-    // let loggedIn = Boolean(currentUserId) || Boolean(currentUser);
-    // let useId;
-    // if (currentUserId) {
-    //     useId = currentUserId;
-    // } else if (currentUserId) {
-    //     useId = currentUser.id;
-    // }
     return (
         <Route
             path={path}
