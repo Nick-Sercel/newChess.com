@@ -22,6 +22,8 @@ export class Piece {
 export class Board {
     constructor() {
         this.grid = [];
+        this.whiteCaptures = [];
+        this.blackCaptures = [];
         this.generateBoard();
     }
 
@@ -63,6 +65,26 @@ export class Board {
             pos[0] >= 0 && pos[0] < 8 &&
             pos[1] >= 0 && pos[1] < 8
         );
+    }
+
+    validMove(pos) {
+        if (this.onBoard(pos)) {
+            return true;
+        }
+        return false;
+    }
+
+    movePiece(moveTile, endTile) {
+        const piece = moveTile.piece;
+        if (endTile.piece) {
+            if (endTile.piece.color === 'black-tile') {
+                this.whiteCaptures.push(piece);
+            } else {
+                this.blackCaptures.push(piece);
+            }
+        }
+        endTile.piece = piece;
+        moveTile.piece = null;
     }
 
     checkmate() {

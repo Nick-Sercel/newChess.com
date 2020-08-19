@@ -1,6 +1,14 @@
 import React from 'react';
 
 class Tile extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    handleClick() {
+        this.props.updateGame(this.props.tile); // click piece/click destination logic in container
+    }
 
     render () {
         // want to set a second class="this.props.tile.color on head div"
@@ -11,7 +19,7 @@ class Tile extends React.Component {
         }
         // `${this.props.tile.color}`
         return (
-            <div className={`board-element ${this.props.tile.color}`}>
+            <div className={`board-element ${this.props.tile.color}`} onClick={this.handleClick} >
                 <p className='piece-type'>
                     {symbol}
                 </p>

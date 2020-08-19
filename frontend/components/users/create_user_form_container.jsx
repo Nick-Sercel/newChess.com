@@ -7,7 +7,7 @@ const mSTP = state => ({
         username: '',
         email: '',
         elo: 0,
-        password: '', // check that no other variables are needed for defaulting
+        password: '',
     },
     formType: 'Create User'
 })

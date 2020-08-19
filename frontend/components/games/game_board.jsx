@@ -13,7 +13,7 @@ class GameBoard extends React.Component {
                 {grid.map(row => {
                         return (
                             row.map(tile => {
-                                return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} /> )
+                                return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} /> )
                             })
                         )
                 }   )}

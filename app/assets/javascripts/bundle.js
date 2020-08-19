@@ -334,6 +334,8 @@ var GameBoard = /*#__PURE__*/function (_React$Component) {
   _createClass(GameBoard, [{
     key: "render",
     value: function render() {
+      var _this = this;
+
       var grid = this.props.board.grid;
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         id: "board-container"
@@ -341,7 +343,8 @@ var GameBoard = /*#__PURE__*/function (_React$Component) {
         return row.map(function (tile) {
           return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_tile__WEBPACK_IMPORTED_MODULE_1__["default"], {
             key: tile.pos[0] * 8 + tile.pos[1],
-            tile: tile
+            tile: tile,
+            updateGame: _this.props.updateGame
           });
         });
       }));
@@ -408,25 +411,79 @@ var Game = /*#__PURE__*/function (_React$Component) {
     var board = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"]();
     _this.state = {
       board: board
-    }; // this.restartGame = this.restartGame.bind(this);
-    // this.updateGame = this.updateGame.bind(this);
-
+    };
+    _this.restartGame = _this.restartGame.bind(_assertThisInitialized(_this));
+    _this.updateGame = _this.updateGame.bind(_assertThisInitialized(_this));
+    _this.currentTile = null;
+    _this.currentTurn = 'white';
     return _this;
-  } // restartGame() {
-  //     const board = new Utils.Board();
-  //     this.setState({ board: board });
-  // }
-  // updateGame() {
-  //     // game logic
-  //     this.setState({ board: this.state.board });
-  // }
-
+  }
 
   _createClass(Game, [{
+    key: "restartGame",
+    value: function restartGame() {
+      var board = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"]();
+      this.setState({
+        board: board
+      });
+    }
+  }, {
+    key: "updateGame",
+    value: function updateGame(tile) {
+      // game logic
+      console.log(tile);
+      console.log(this.currentTile);
+
+      if (!this.currentTile) {
+        console.log('initial click');
+
+        if (tile.piece && tile.piece.color === this.currentTurn) {
+          // set piece to be moved
+          this.currentTile = tile;
+        } else {
+          console.log('invalid piece selected');
+          console.log(tile.piece.color);
+          console.log(this.currentTurn);
+        }
+      } else if (tile.piece) {
+        if (tile.piece.color !== this.currentTurn) {
+          // set place to move piece
+          console.log('secondary click');
+          this.state.board.movePiece(this.currentTile, tile);
+          this.currentTile = null;
+
+          if (this.currentTurn === 'white') {
+            this.currentTurn = 'black';
+          } else {
+            this.currentTurn = 'white';
+          }
+        } else {
+          console.log('You cannot capture your own piece!');
+          this.currentTile = null;
+        }
+      } else {
+        // set place to move piece
+        console.log('secondary click');
+        this.state.board.movePiece(this.currentTile, tile);
+        this.currentTile = null;
+
+        if (this.currentTurn === 'white') {
+          this.currentTurn = 'black';
+        } else {
+          this.currentTurn = 'white';
+        }
+      }
+
+      this.setState({
+        board: this.state.board
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_game_board__WEBPACK_IMPORTED_MODULE_0__["default"], {
-        board: this.state.board
+        board: this.state.board,
+        updateGame: this.updateGame
       }));
     }
   }]);
@@ -478,13 +535,22 @@ var Tile = /*#__PURE__*/function (_React$Component) {
 
   var _super = _createSuper(Tile);
 
-  function Tile() {
+  function Tile(props) {
+    var _this;
+
     _classCallCheck(this, Tile);
 
-    return _super.apply(this, arguments);
+    _this = _super.call(this, props);
+    _this.handleClick = _this.handleClick.bind(_assertThisInitialized(_this));
+    return _this;
   }
 
   _createClass(Tile, [{
+    key: "handleClick",
+    value: function handleClick() {
+      this.props.updateGame(this.props.tile); // click piece/click destination logic in container
+    }
+  }, {
     key: "render",
     value: function render() {
       // want to set a second class="this.props.tile.color on head div"
@@ -497,7 +563,8 @@ var Tile = /*#__PURE__*/function (_React$Component) {
 
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        className: "board-element ".concat(this.props.tile.color)
+        className: "board-element ".concat(this.props.tile.color),
+        onClick: this.handleClick
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
         className: "piece-type"
       }, symbol));
@@ -558,6 +625,8 @@ var Board = /*#__PURE__*/function () {
     _classCallCheck(this, Board);
 
     this.grid = [];
+    this.whiteCaptures = [];
+    this.blackCaptures = [];
     this.generateBoard();
   }
 
@@ -603,6 +672,31 @@ var Board = /*#__PURE__*/function () {
     key: "onBoard",
     value: function onBoard(pos) {
       return pos[0] >= 0 && pos[0] < 8 && pos[1] >= 0 && pos[1] < 8;
+    }
+  }, {
+    key: "validMove",
+    value: function validMove(pos) {
+      if (this.onBoard(pos)) {
+        return true;
+      }
+
+      return false;
+    }
+  }, {
+    key: "movePiece",
+    value: function movePiece(moveTile, endTile) {
+      var piece = moveTile.piece;
+
+      if (endTile.piece) {
+        if (endTile.piece.color === 'black-tile') {
+          this.whiteCaptures.push(piece);
+        } else {
+          this.blackCaptures.push(piece);
+        }
+      }
+
+      endTile.piece = piece;
+      moveTile.piece = null;
     }
   }, {
     key: "checkmate",
@@ -868,8 +962,7 @@ var mSTP = function mSTP(state) {
       username: '',
       email: '',
       elo: 0,
-      password: '' // check that no other variables are needed for defaulting
-
+      password: ''
     },
     formType: 'Create User'
   };
@@ -1395,18 +1488,25 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var mapStateToProps = function mapStateToProps(state) {
-  console.log("logged in? ".concat(Boolean(state.session.currentUser)));
   return {
     loggedIn: Boolean(state.session.currentUser),
-    currentUser: state.session.currentUser
+    currentUser: state.session.currentUser // currentUserId: state.session.id,
+
   };
 };
 
 var Auth = function Auth(_ref) {
   var Component = _ref.component,
-      path = _ref.path,
       loggedIn = _ref.loggedIn,
+      path = _ref.path,
       currentUser = _ref.currentUser;
+  // let loggedIn = Boolean(currentUserId) || Boolean(currentUser);
+  // let useId;
+  // if (currentUserId) {
+  //     useId = currentUserId;
+  // } else if (currentUserId) {
+  //     useId = currentUser.id;
+  // }
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_2__["Route"], {
     path: path,
     render: function render(props) {
