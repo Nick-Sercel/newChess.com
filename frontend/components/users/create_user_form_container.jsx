@@ -9,7 +9,8 @@ const mSTP = state => ({
         elo: 0,
         password: '',
     },
-    formType: 'Create User'
+    formType: 'Create User',
+    formClassName: 'create',
 })
 
 const mDTP = dispatch => ({

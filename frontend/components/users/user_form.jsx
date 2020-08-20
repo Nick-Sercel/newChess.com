@@ -15,26 +15,36 @@ class UserForm extends React.Component {
     }
 
     handleSubmit() {
+        this.toggleShow();
         this.props.action(this.state)
-            .then(this.props.history.push(`/users/${this.props.match.params.userId}`))
+            // .then(this.props.history.push(`/users/${this.props.match.params.userId}`))
+    }
+
+    toggleShow() {
+        // add class 'activeForm'
+        document.getElementById('create').classList.remove('active-form')
     }
 
     render() {
         return (
-            <div>
-                <form>
-                    <h1>{this.props.formType}</h1>
-                    <label>
-                        Username: <input type='text' value={this.state.username} onChange={this.update('username')} />
-                    </label>
-                    <label>
-                        Email: <input type='text' value={this.state.email} onChange={this.update('email')} />
-                    </label>
-                    <label>
-                        Password: <input type='text' onChange={this.update('password')} />
-                        <button onClick={this.handleSubmit}>Sign Up!</button>
-                    </label>
-                </form>
+            <div id='create' className={`overlay-form ${this.props.formClassName}`}>
+                <div className='close-btn' onClick={() => this.toggleShow()}>&times;</div>
+                <h1>{this.props.formType}</h1>
+                <div className='form-element'>
+                    <label>Username:</label>
+                    <input type='text' value={this.state.username} onChange={this.update('username')} />
+                </div>
+                <div className='form-element'>
+                    <label>Email:</label>
+                    <input type='email' value={this.state.email} onChange={this.update('email')} />
+                </div>
+                <div className='form-element'>
+                    <label>Password:</label>
+                    <input type='text' onChange={this.update('password')} />
+                </div>
+                <div className='form-element'>
+                    <button onClick={this.handleSubmit}>{this.props.formType}</button>
+                </div>
             </div>
         )
     }

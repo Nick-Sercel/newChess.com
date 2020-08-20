@@ -13,8 +13,8 @@ class SignedOut extends React.Component {
     render() {
         return (
             <div className='user-auth-banner-links'>
-                <p>Welcome, {`${this.props.currentUser.username}`}</p>
-                <button onClick={() => this.click()}>Logout</button>
+                <li><a>Welcome, {`${this.props.currentUser.username}`}</a></li>
+                <li><a><button onClick={() => this.click()}>Logout</button></a></li>
             </div>
         )
     }

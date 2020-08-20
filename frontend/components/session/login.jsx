@@ -15,24 +15,33 @@ class Login extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
+        this.toggleShow();
         this.props.login(this.state);
+    }
+
+    toggleShow() {
+        // add class 'activeForm'
+        document.getElementById('login').classList.remove('active-form')
     }
 
     render() {
         return (
-            <div>
-                <h2>Sign In</h2>
-                <form>
-                    <label>Username:
-                        <input type="text" value={this.state.username} onChange={this.update('username')} />
-                    </label>
-                    <label>Password:
-                        <input type="password" value={this.state.password} onChange={this.update('password')} />
-                        <button onClick={this.handleSubmit}>Log In!</button>
-                    </label>
-                </form>
+            <div id='login' className={`overlay-form ${this.props.formClassName}`}>
+                <div className='close-btn' onClick={() => this.toggleShow()}>&times;</div>
+                <h1>{this.props.formType}</h1>
+                <div className='form-element'>
+                    <label>Username:</label>
+                    <input type='text' value={this.state.username} onChange={this.update('username')} />
+                </div>
+                <div className='form-element'>
+                    <label>Password:</label>
+                    <input type='text' onChange={this.update('password')} />
+                </div>
+                <div className='form-element'>
+                    <button onClick={this.handleSubmit}>{this.props.formType}</button>
+                </div>
             </div>
-        );
+        )
     }
 }
 

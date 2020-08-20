@@ -1,3 +1,152 @@
 // Place all the styles related to the users controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+// Form
+
+.overlay-form {
+    position:absolute;
+    top:50vh;
+    left:0px;
+    width:100vw;
+    height:0vh;
+    background:rgba(0,0,0,0.8);
+    z-index:-1;
+    opacity:0;
+    padding:80px 100px;
+    overflow:hidden;
+    box-sizing:border-box;
+    transition: top 500ms ease-in-out,
+                opacity 500ms ease-in-out,
+                height 0ms ease-in-out 500ms;  
+}
+.overlay-form .close-btn {
+    position:absolute;
+    top:20px;
+    right:40px;
+    color:#fff;
+    font-size:40px;
+    font-weight:600;
+    cursor:pointer;
+}
+.overlay-form h1 {
+    font-size:32px;
+    color:#fff;
+}
+.overlay-form p {
+    font-size:16px;
+    color:#eee;
+    margin:-15px 0px 30px;
+}
+.overlay-form .form-element {
+    margin:20px 0px;
+}
+.overlay-form label {
+    display:block;
+    font-size:17px;
+    color:#eee;
+    margin-bottom:5px;
+}
+.overlay-form input {
+    width:100%;
+    padding:6px;
+    font-size:17px;
+    border:2px solid #eee;
+    background:transparent;
+    outline:none;
+    border-radius:10px;
+}
+.overlay-form button {
+    margin-top:10px;
+    width:100px;
+    height:35px;
+    font-size:15px;
+    background:#fff;
+    color:#222;
+    border:none;
+    outline:none;
+    border-radius:10px;
+}
+
+.active-form {
+    z-index:2;
+    opacity:1;
+    top:0px;
+    height:100vh;
+    transition: top 500ms ease-in-out,
+                opacity 500ms ease-in-out,
+                height 0ms ease-in-out 0ms;
+}
+
+
+
+// Banner
+#user-auth-banner-container {
+    padding: 0;
+    margin: 0 auto;
+    background: palegreen;
+    font-weight: 300;
+    width: 100%;
+}
+
+#user-auth-banner-container::after {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+.user-auth-banner-title {
+    float: left;
+    font-size: 30px;
+    padding-top: 10px;
+    padding-left: 5px;
+    list-style: none;
+    color: black;
+}
+
+#user-auth-banner {
+    float: right;
+}
+
+.user-auth-banner-links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.user-auth-banner-links li {
+    display: inline-block;
+    margin: 0 35px;
+    padding-top: 15px;
+
+    position: relative;
+}
+
+.user-auth-banner-links a,
+.user-auth-banner-links button {
+    text-decoration: none;
+    font-size: 25px;
+    color: darkgreen;
+}
+
+.user-auth-banner-links a:hover,
+.user-auth-banner-links button:hover {
+    color: #000;
+}
+
+.user-auth-banner-links a::before {
+    content: '';
+    display: block;
+    height: 5px;
+    background-color: #444;
+
+    position: absolute;
+    top: 0;
+    width: 0%;
+
+    transition: all ease-in-out 250ms;
+}
+
+.user-auth-banner-links a:hover::before {
+    width: 100%;
+}

@@ -14,51 +14,6 @@
  *= require_self
  */
 
- #user-auth-banner {
-    height: 100px;
-    display: flex;
-    width: 1000px;
-    background-color: turquoise;
- }
-
- .user-auth-banner-title {
-    justify-content: left;
-    font-size: 50px;
-    color: forestgreen;
- }
-
- .user-auth-banner-links {
-    justify-content: right;
-    color: forestgreen;
- }
-
- #board-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    background-color: red;
-    width: 760px;
-    height: 760px;
- }
-
- .board-element {
-    height: 75px;
-    width: 75px;
-    background-color: blue;
-    border: 5px solid gray;
-    padding: 5px;
- }
-
- .piece-type {
-    color: red;
-    text-align: center;
-    font-size: 35px;
- }
-
- .black-tile {
-    background-color: black;
- }
-
- .white-tile {
-    background-color: white;
+ body {
+    background: #ddd;
  }

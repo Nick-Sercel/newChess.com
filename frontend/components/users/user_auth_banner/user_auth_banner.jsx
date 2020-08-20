@@ -19,11 +19,11 @@ class UserAuthBanner extends React.Component {
             renderedComponent = <SignedOut login={this.props.login} />;
         }
         return (
-            <div id='user-auth-banner'>
-                <p className='user-auth-banner-title'>Chess with Friends</p>
-                {
-                    renderedComponent
-                }
+            <div id='user-auth-banner-container'>
+                <li className='user-auth-banner-title'>Chess with Friends</li>
+                <nav id='user-auth-banner'>
+                    {renderedComponent}
+                </nav>
             </div>
         )
     }
