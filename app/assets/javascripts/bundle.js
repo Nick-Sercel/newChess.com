@@ -928,11 +928,7 @@ var SplashPage = /*#__PURE__*/function (_React$Component) {
   _createClass(SplashPage, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-        to: "/users/new"
-      }, "Create New User"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-        to: "/session/new"
-      }, "Returning User? Login"));
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
     }
   }]);
 
@@ -1315,7 +1311,7 @@ var UserAuthBanner = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       var renderedComponent;
 
-      if (this.id) {
+      if (this.id || this.props.currentUser) {
         renderedComponent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_signed_in__WEBPACK_IMPORTED_MODULE_1__["default"], {
           logout: this.props.logout,
           currentUser: this.props.currentUser

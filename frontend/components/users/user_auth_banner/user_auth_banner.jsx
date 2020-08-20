@@ -13,7 +13,7 @@ class UserAuthBanner extends React.Component {
 
     render() {
         let renderedComponent;
-        if (this.id) {
+        if (this.id || this.props.currentUser) {
             renderedComponent = <SignedIn logout={this.props.logout} currentUser={this.props.currentUser} />;
         } else {
             renderedComponent = <SignedOut login={this.props.login} />;

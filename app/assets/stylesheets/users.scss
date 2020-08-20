@@ -67,7 +67,6 @@
     outline:none;
     border-radius:10px;
 }
-
 .active-form {
     z-index:2;
     opacity:1;
@@ -127,6 +126,9 @@
     text-decoration: none;
     font-size: 25px;
     color: darkgreen;
+    background-color: transparent;
+    border: none;
+    outline: none;
 }
 
 .user-auth-banner-links a:hover,
