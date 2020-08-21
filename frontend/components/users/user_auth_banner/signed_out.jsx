@@ -12,8 +12,14 @@ class SignedOut extends React.Component {
     click(actionType) {
         if (actionType === 'new') {
             document.getElementById('create').classList.add('active-form')
-        } else {
+        } else if (actionType === 'login') {
             document.getElementById('login').classList.add('active-form')
+        } else if (actionType === 'demo') {
+            const demoUser = {
+                username: 'Demo User',
+                password: '123456',
+            }
+            this.props.login(demoUser);
         }
     }
 
@@ -25,6 +31,7 @@ class SignedOut extends React.Component {
                     <li><Link to={`/session/new`}>Login</Link></li> */}
                     <li><a><button onClick={() => this.click('new')}>Create New User</button></a></li>
                     <li><a><button onClick={() => this.click('login')}>Login</button></a></li>
+                    <li><a><button onClick={() => this.click('demo')}>Demo User</button></a></li>
                 </div>
                 <CreateUserContainer />
                 <LoginUserContainer />

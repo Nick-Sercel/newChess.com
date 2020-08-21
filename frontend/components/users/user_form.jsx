@@ -16,8 +16,9 @@ class UserForm extends React.Component {
 
     handleSubmit() {
         this.toggleShow();
+        debugger;
         this.props.action(this.state)
-            // .then(this.props.history.push(`/users/${this.props.match.params.userId}`))
+            // .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`))
     }
 
     toggleShow() {

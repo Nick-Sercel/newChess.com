@@ -527,19 +527,17 @@ var Tile = /*#__PURE__*/function (_React$Component) {
   _createClass(Tile, [{
     key: "handleClick",
     value: function handleClick() {
-      this.props.updateGame(this.props.tile); // click piece/click destination logic in container
+      this.props.updateGame(this.props.tile);
     }
   }, {
     key: "render",
     value: function render() {
-      // want to set a second class="this.props.tile.color on head div"
       var piece = this.props.tile.piece;
       var symbol = null;
 
       if (piece) {
         symbol = piece.symbol;
-      } // `${this.props.tile.color}`
-
+      }
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "board-element ".concat(this.props.tile.color),
@@ -603,9 +601,10 @@ var Board = /*#__PURE__*/function () {
   function Board() {
     _classCallCheck(this, Board);
 
-    this.grid = [];
+    this.board = [];
     this.whiteCaptures = [];
     this.blackCaptures = [];
+    this.currentPieces = {};
     this.generateBoard();
   }
 
@@ -613,7 +612,7 @@ var Board = /*#__PURE__*/function () {
     key: "generateBoard",
     value: function generateBoard() {
       for (var i = 0; i < 8; i++) {
-        this.grid.push([]);
+        this.board.push([]);
 
         for (var j = 0; j < 8; j++) {
           var piece = null;
@@ -642,8 +641,9 @@ var Board = /*#__PURE__*/function () {
             }
           }
 
+          this.currentPieces[piece.pos] = piece;
           var tile = new Tile(this, [i, j], piece);
-          this.grid[i].push(tile);
+          this.board[i].push(tile);
         }
       }
     }
@@ -653,12 +653,144 @@ var Board = /*#__PURE__*/function () {
       return pos[0] >= 0 && pos[0] < 8 && pos[1] >= 0 && pos[1] < 8;
     }
   }, {
-    key: "validMove",
-    value: function validMove(pos) {
-      if (this.onBoard(pos)) {
-        return true;
+    key: "pawnMoves",
+    value: function pawnMoves(piece) {
+      var possibleMoves = [];
+
+      if (piece.color === 'white') {
+        var currentPos = [piece.pos[0] - 1, piece.pos[1]];
+
+        if (!this.currentPieces[currentPos]) {
+          possibleMoves.push(currentPos);
+          currentPos = [piece.pos[0] - 2, piece.pos[1]];
+
+          if (piece.pos[0] === 6 && !this.currentPieces[currentPos]) {
+            possibleMoves.push(currentPos);
+          }
+        }
+
+        currentPos = [piece.pos[0] - 1, piece.pos[1] + 1];
+        var currentPiece = this.currentPieces[currentPos];
+
+        if (currentPiece && currentPiece.color !== piece.color) {
+          possibleMoves.push(currentPos);
+        }
+
+        currentPos = [piece.pos[0] - 1, piece.pos[1] - 1];
+        currentPiece = this.currentPieces[currentPos];
+
+        if (currentPiece && currentPiece.color !== piece.color) {
+          possibleMoves.push(currentPos);
+        }
+      } else {
+        var _currentPos = [piece.pos[0] + 1, piece.pos[1]];
+
+        if (!this.currentPieces[_currentPos]) {
+          possibleMoves.push(_currentPos);
+          _currentPos = [piece.pos[0] + 2, piece.pos[1]];
+
+          if (piece.pos[0] === 6 && !this.currentPieces[_currentPos]) {
+            possibleMoves.push(_currentPos);
+          }
+        }
+
+        _currentPos = [piece.pos[0] + 1, piece.pos[1] + 1];
+        var _currentPiece = this.currentPieces[_currentPos];
+
+        if (_currentPiece && _currentPiece.color !== piece.color) {
+          possibleMoves.push(_currentPos);
+        }
+
+        _currentPos = [piece.pos[0] + 1, piece.pos[1] - 1];
+        _currentPiece = this.currentPieces[_currentPos];
+
+        if (_currentPiece && _currentPiece.color !== piece.color) {
+          possibleMoves.push(_currentPos);
+        }
       }
 
+      return possibleMoves;
+    }
+  }, {
+    key: "moveDir",
+    value: function moveDir(piece, dir) {
+      var currentPos = [piece.pos[0] + dir[0], piece.pos[1] + dir[1]];
+      var moves = [];
+
+      while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
+        moves.push(currentPos);
+        currentPos[0] += dir[0];
+        currentPos[1] += dir[1];
+      }
+
+      if (this.onBoard(currentPos) && this.currentPieces[currentPos]) {
+        if (this.currentPieces[currentPos].color !== piece.color) {
+          moves.push(currentPos);
+        }
+      }
+
+      return moves;
+    }
+  }, {
+    key: "rookMoves",
+    value: function rookMoves(piece) {
+      var moves = [];
+      moves.push(this.moveDir(piece, [1, 0]));
+      moves.push(this.moveDir(piece, [0, 1]));
+      moves.push(this.moveDir(piece, [-1, 0]));
+      moves.push(this.moveDir(piece, [0, -1]));
+      return moves;
+    }
+  }, {
+    key: "bishopMoves",
+    value: function bishopMoves(piece) {
+      var moves = [];
+      moves.push(this.moveDir(piece, [1, 1]));
+      moves.push(this.moveDir(piece, [-1, -1]));
+      moves.push(this.moveDir(piece, [1, -1]));
+      moves.push(this.moveDir(piece, [-1, 1]));
+      return moves;
+    }
+  }, {
+    key: "knightMoves",
+    value: function knightMoves(piece) {}
+  }, {
+    key: "potentialMoves",
+    value: function potentialMoves(piece) {
+      var possibleMoves = [];
+
+      switch (piece.symbol) {
+        case 'P':
+          possibleMoves.push(this.pawnMoves(piece));
+          break;
+
+        case 'R':
+          possibleMoves.push(this.rookMoves(piece));
+          break;
+
+        case 'N':
+          break;
+
+        case 'B':
+          possibleMoves.push(this.bishopMoves(piece));
+          break;
+
+        case 'Q':
+          possibleMoves.push(this.rookMoves(piece));
+          possibleMoves.push(this.bishopMoves(piece));
+          break;
+
+        case 'K':
+          break;
+
+        default:
+          console.log('that piece doesn\'t exist');
+          return;
+      }
+    }
+  }, {
+    key: "validMove",
+    value: function validMove(pos) {
       return false;
     }
   }, {
@@ -1217,8 +1349,14 @@ var SignedOut = /*#__PURE__*/function (_React$Component) {
     value: function click(actionType) {
       if (actionType === 'new') {
         document.getElementById('create').classList.add('active-form');
-      } else {
+      } else if (actionType === 'login') {
         document.getElementById('login').classList.add('active-form');
+      } else if (actionType === 'demo') {
+        var demoUser = {
+          username: 'Demo User',
+          password: '123456'
+        };
+        this.props.login(demoUser);
       }
     }
   }, {
@@ -1236,7 +1374,11 @@ var SignedOut = /*#__PURE__*/function (_React$Component) {
         onClick: function onClick() {
           return _this2.click('login');
         }
-      }, "Login")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_create_user_form_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_session_login_container__WEBPACK_IMPORTED_MODULE_3__["default"], null));
+      }, "Login"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+        onClick: function onClick() {
+          return _this2.click('demo');
+        }
+      }, "Demo User")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_create_user_form_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_session_login_container__WEBPACK_IMPORTED_MODULE_3__["default"], null));
     }
   }]);
 
@@ -1372,8 +1514,8 @@ var mSTP = function mSTP(state) {
 
 var mDTP = function mDTP(dispatch) {
   return {
-    login: function login() {
-      return dispatch(Object(_actions_session_actions__WEBPACK_IMPORTED_MODULE_2__["login"])());
+    login: function login(user) {
+      return dispatch(Object(_actions_session_actions__WEBPACK_IMPORTED_MODULE_2__["login"])(user));
     },
     logout: function logout() {
       return dispatch(Object(_actions_session_actions__WEBPACK_IMPORTED_MODULE_2__["logout"])());
@@ -1453,7 +1595,8 @@ var UserForm = /*#__PURE__*/function (_React$Component) {
     key: "handleSubmit",
     value: function handleSubmit() {
       this.toggleShow();
-      this.props.action(this.state); // .then(this.props.history.push(`/users/${this.props.match.params.userId}`))
+      debugger;
+      this.props.action(this.state); // .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`))
     }
   }, {
     key: "toggleShow",
@@ -1824,6 +1967,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var mapStateToProps = function mapStateToProps(state) {
+  // debugger;
   return {
     loggedIn: Boolean(state.session.currentUser),
     currentUser: state.session.currentUser // currentUserId: state.session.id,
