@@ -1,5 +1,5 @@
-@posts.each do |post|
-  json.set! post.id do
-    json.partial! 'post', post: post
+@goals.each do |goal|
+  json.set! goal.id do
+    json.partial! 'goal', goal: goal
   end
 end

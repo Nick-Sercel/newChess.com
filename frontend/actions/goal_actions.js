@@ -26,7 +26,7 @@ const removeGoal = (goalId) => {
 }
 
 export const fetchGoals = () => dispatch => {
-    return GoalApiUtil.fetchGoal(goalId)
+    return GoalApiUtil.fetchGoals()
         .then((goals) => dispatch(receiveGoals(goals)))
 }
 

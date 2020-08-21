@@ -2,12 +2,12 @@ class Api::UsersController < ApplicationController
     
     before_action :require_logged_in, only: [:show, :index]
 
-    def new
-        @user = User.new
-        render :show
-        # this prob needs to change from show --
-        # also make new corresponding file in views/api/users
-    end
+    # def new
+    #     @user = User.new
+    #     render :show
+    #     # this prob needs to change from show --
+    #     # also make new corresponding file in views/api/users
+    # end
 
     def create
         @user = User.create(user_params)

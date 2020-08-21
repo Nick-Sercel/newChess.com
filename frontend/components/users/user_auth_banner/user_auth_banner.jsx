@@ -6,7 +6,7 @@ class UserAuthBanner extends React.Component {
     constructor(props) {
         super(props);
     }
-
+    
     render() {
         let renderedComponent;
         if (this.props.currentUser) {

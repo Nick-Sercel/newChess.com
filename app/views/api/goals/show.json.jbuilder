@@ -1,1 +1,1 @@
-json.partial! 'post', post: @post
+json.partial! 'goal', goal: @goal

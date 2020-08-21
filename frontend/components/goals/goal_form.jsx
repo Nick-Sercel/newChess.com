@@ -3,7 +3,7 @@ import React from 'react';
 class GoalForm extends React.Component {
     constructor(props) {
         super(props);
-        this.state = this.props.user;
+        this.state = this.props.goal;
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
@@ -15,7 +15,7 @@ class GoalForm extends React.Component {
 
     handleSubmit() {
         this.props.action(this.state)
-        // .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`)) // user show page
+            .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`)) // user show page
     }
 
     render() {

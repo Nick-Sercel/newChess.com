@@ -132,7 +132,7 @@ var removeGoal = function removeGoal(goalId) {
 
 var fetchGoals = function fetchGoals() {
   return function (dispatch) {
-    return _util_goal_api_util__WEBPACK_IMPORTED_MODULE_0__["fetchGoal"](goalId).then(function (goals) {
+    return _util_goal_api_util__WEBPACK_IMPORTED_MODULE_0__["fetchGoals"]().then(function (goals) {
       return dispatch(receiveGoals(goals));
     });
   };
@@ -693,6 +693,7 @@ var Piece = function Piece(pos, symbol) {
   this.pos = pos;
   this.symbol = symbol;
   this.color = color;
+  this.moves = [];
 };
 var Board = /*#__PURE__*/function () {
   function Board() {
@@ -702,9 +703,13 @@ var Board = /*#__PURE__*/function () {
     this.whiteCaptures = [];
     this.blackCaptures = [];
     this.currentPieces = {};
-    this.whiteThreats = {}; // { piece.pos => [movePos' leading to king] }
+    this.whiteThreats = {}; // { indirect => {piece.pos => [movePos' leading to king] }  direct => {piece.pos => [movePos' leading to king] } }
 
     this.blackThreats = {};
+    this.whiteThreats["direct"] = {};
+    this.blackThreats["direct"] = {};
+    this.whiteKing = null;
+    this.blackKing = null;
     this.generateBoard();
   }
 
@@ -736,8 +741,16 @@ var Board = /*#__PURE__*/function () {
           if (piece) {
             if (piece.pos[0] > 5) {
               piece.color = 'white';
+
+              if (piece.symbol === 'K') {
+                this.whiteKing = piece;
+              }
             } else {
               piece.color = 'black';
+
+              if (piece.symbol === 'K') {
+                this.blackKing = piece;
+              }
             }
 
             this.currentPieces[piece.pos] = piece;
@@ -781,27 +794,28 @@ var Board = /*#__PURE__*/function () {
       for (var i = 0; i < dirs.length; i++) {
         var currentPos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
         console.log(this.currentPieces[currentPos]);
+        var movesForTheKing = [];
 
         while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
           var tempPush = currentPos.slice();
-          moves.push(tempPush);
+          movesForTheKing.push(tempPush);
           currentPos[0] += dirs[i][0];
           currentPos[1] += dirs[i][1];
         }
+
+        moves.push(movesForTheKing);
 
         if (this.onBoard(currentPos) && this.currentPieces[currentPos]) {
           var currentPiece = this.currentPieces[currentPos];
 
           if (currentPiece.color !== piece.color) {
-            moves.push(currentPos);
-
-            if (currentPiece.symbol === 'K') {
-              if (currentPiece.color === 'white') {
-                this.whiteThreats[currentPiece.pos]; // need to add the array of positions leading to the king
-              } else {
-                this.blackThreats[currentPiece.pos]; // need to add the array of positions leading to the king
-              }
-            }
+            moves.push(currentPos); // if (currentPiece.symbol === 'K') {
+            //     if (currentPiece.color === 'white') {
+            //         this.whiteThreats["direct"][currentPiece.pos] = movesForTheKing; // add the array of positions leading to the king
+            //     } else {
+            //         this.blackThreats["direct"][currentPiece.pos] = movesForTheKing; // add the array of positions leading to the king
+            //     }
+            // }
           }
         }
       }
@@ -814,8 +828,6 @@ var Board = /*#__PURE__*/function () {
       var dirs = [];
 
       if (piece.color === 'white') {
-        dirs = [[-1, 1], [-1, -1]];
-
         if (!this.currentPieces[(piece.pos[0] - 1, piece.pos[1])]) {
           dirs.push([-1, 0]);
 
@@ -823,15 +835,29 @@ var Board = /*#__PURE__*/function () {
             dirs.push([-2, 0]);
           }
         }
-      } else {
-        dirs = [[1, 1], [1, -1]];
 
+        if (this.currentPieces[(piece.pos[0] - 1, piece.pos[1] - 1)]) {
+          dirs.push([-1, -1]);
+        }
+
+        if (this.currentPieces[(piece.pos[0] - 1, piece.pos[1] + 1)]) {
+          dirs.push([-1, 1]);
+        }
+      } else {
         if (!this.currentPieces[(piece.pos[0] + 1, piece.pos[1])]) {
           dirs.push([1, 0]);
 
           if (piece.pos[0] === 1 && !this.currentPieces[(piece.pos[0] + 2, piece.pos[1])]) {
             dirs.push([2, 0]);
           }
+        }
+
+        if (this.currentPieces[(piece.pos[0] + 1, piece.pos[1] - 1)]) {
+          dirs.push([1, -1]);
+        }
+
+        if (this.currentPieces[(piece.pos[0] + 1, piece.pos[1] + 1)]) {
+          dirs.push([1, 1]);
         }
       }
 
@@ -864,24 +890,107 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "potentialMoves",
     value: function potentialMoves(piece) {
+      var moves;
+
       switch (piece.symbol) {
         case 'P':
-          return this.pawnMoves(piece);
+          moves = this.pawnMoves(piece); // add enpausant and promotion
+
+          break;
 
         case 'R':
-          return this.rookMoves(piece);
+          moves = this.rookMoves(piece);
+          break;
 
         case 'N':
-          return this.knightMoves(piece);
+          moves = this.knightMoves(piece);
+          break;
 
         case 'B':
-          return this.bishopMoves(piece);
+          moves = this.bishopMoves(piece);
+          break;
 
         case 'Q':
-          return this.rookMoves(piece).concat(this.bishopMoves(piece));
+          moves = this.rookMoves(piece).concat(this.bishopMoves(piece));
+          break;
 
         case 'K':
-          return this.kingMoves(piece);
+          // add castling
+          moves = this.kingMoves(piece);
+
+          if (piece.color = 'white') {
+            this.whiteKing.moves = moves;
+          } else {
+            this.blackKing.moves = moves;
+          }
+
+          break;
+
+        default:
+          console.log('that piece doesn\'t exist');
+          return;
+      }
+
+      this.findThreatsOnMove(piece, moves);
+      return moves;
+    }
+  }, {
+    key: "removeImpossibleKingMoves",
+    value: function removeImpossibleKingMoves(king) {
+      switch (king.color) {
+        case 'white':
+          for (var i = 0; i < king.moves.length; i++) {
+            if (this.whiteThreats['indirect'][king.moves[i]]) {
+              king.moves.splice(i, 1);
+            }
+          }
+
+          return;
+
+        case 'black':
+          for (var _i = 0; _i < king.moves.length; _i++) {
+            if (this.blackThreats['indirect'][king.moves[_i]]) {
+              king.moves.splice(_i, 1);
+            }
+          }
+
+          return;
+
+        default:
+          return;
+      }
+    }
+  }, {
+    key: "findThreatsOnMove",
+    value: function findThreatsOnMove(piece, moves) {
+      switch (piece.color) {
+        case 'white':
+          this.whiteKing.moves = this.potentialMoves(this.whiteKing);
+          this.removeImpossibleKingMoves(this.whiteKing);
+
+          for (var i = 0; i < moves.length; i++) {
+            if (this.isIncluded(this.blackKing.moves, moves[i])) {
+              this.blackThreats['indirect'][piece.pos] ? this.blackThreats['indirect'][piece.pos].push(moves[i]) : [];
+              this.blackKing.moves.splice(this.blackKing.moves.indexOf(moves[i]), 1);
+            } else if (moves[i] === this.kingPositions[1]) {
+              this.blackThreats['direct'][piece.pos] = moves[i];
+            }
+          }
+
+          break;
+
+        case 'black':
+          this.blackKing.moves = this.potentialMoves(this.blackKing);
+          this.removeImpossibleKingMoves(this.blackKing);
+
+          for (var _i2 = 0; _i2 < moves.length; _i2++) {
+            if (this.isIncluded(this.whiteKing.moves, moves[_i2])) {
+              this.whiteThreats['indirect'][piece.pos] ? this.whiteThreats['indirect'][piece.pos].push(moves[_i2]) : [];
+              this.whiteKing.moves.splice(this.whiteKing.moves.indexOf(moves[_i2]), 1);
+            }
+          }
+
+          break;
 
         default:
           console.log('that piece doesn\'t exist');
@@ -902,11 +1011,10 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "validMove",
     value: function validMove(piece, pos) {
-      var moves = this.potentialMoves(piece);
-      console.log('potential moves');
-      console.log(moves);
-      console.log('destination pos');
-      console.log(pos);
+      var moves = this.potentialMoves(piece); // console.log('potential moves');
+      // console.log(moves);
+      // console.log('destination pos');
+      // console.log(pos);
 
       if (this.isIncluded(moves, pos)) {
         return true;
@@ -931,6 +1039,15 @@ var Board = /*#__PURE__*/function () {
         endTile.piece = piece;
         delete this.currentPieces[piece.pos];
         piece.pos = endTile.pos;
+
+        if (piece.symbol === 'K') {
+          if (piece.color === 'white') {
+            this.kingPositions[0] = piece.pos;
+          } else {
+            this.kingPositions[1] = piece.pos;
+          }
+        }
+
         this.currentPieces[piece.pos] = piece;
         moveTile.piece = null;
         return true;
@@ -940,8 +1057,43 @@ var Board = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "hasThreatSaves",
+    value: function hasThreatSaves(color) {}
+  }, {
     key: "checkmate",
-    value: function checkmate() {}
+    value: function checkmate(otherTurnCol) {
+      switch (otherTurnCol) {
+        case 'white':
+          if (this.whiteKing.moves === []) {
+            if (this.hasThreatSaves(otherTurnCol)) {
+              return false;
+            } else {
+              return true;
+            }
+          } else {
+            return false;
+          }
+
+          break;
+
+        case 'black':
+          if (this.blackKing.moves === []) {
+            if (this.hasThreatSaves(otherTurnCol)) {
+              return false;
+            } else {
+              return true;
+            }
+          } else {
+            return false;
+          }
+
+          break;
+
+        default:
+          console.log('invalid turn color');
+          return;
+      }
+    }
   }]);
 
   return Board;
@@ -965,11 +1117,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var mSTP = function mSTP(state) {
+var mSTP = function mSTP(state, ownProps) {
   return {
-    user: {
+    goal: {
       title: '',
-      body: ''
+      body: '',
+      user_id: "".concat(ownProps.match.params.userId)
     },
     formType: 'Create Goal',
     formClassName: 'create'
@@ -1135,7 +1288,7 @@ var GoalForm = /*#__PURE__*/function (_React$Component) {
     _classCallCheck(this, GoalForm);
 
     _this = _super.call(this, props);
-    _this.state = _this.props.user;
+    _this.state = _this.props.goal;
     _this.handleSubmit = _this.handleSubmit.bind(_assertThisInitialized(_this));
     return _this;
   }
@@ -1152,7 +1305,11 @@ var GoalForm = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "handleSubmit",
     value: function handleSubmit() {
-      this.props.action(this.state); // .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`)) // user show page
+      var _this3 = this;
+
+      this.props.action(this.state).then(function () {
+        return _this3.props.history.push("/users/".concat(_this3.props.match.params.userId));
+      }); // user show page
     }
   }, {
     key: "render",
@@ -1227,11 +1384,20 @@ var GoalIndex = /*#__PURE__*/function (_React$Component) {
   }
 
   _createClass(GoalIndex, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.props.fetchGoals();
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this = this;
+
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, this.props.goals.map(function (goal) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goal_index_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
-          goal: goal
+          key: goal.id,
+          goal: goal,
+          deleteGoal: _this.props.deleteGoal
         });
       }));
     }
@@ -1255,21 +1421,24 @@ var GoalIndex = /*#__PURE__*/function (_React$Component) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 /* harmony import */ var _goal_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./goal_index */ "./frontend/components/goals/goal_index.jsx");
-/* harmony import */ var _util_goal_api_util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../util/goal_api_util */ "./frontend/util/goal_api_util.js");
+/* harmony import */ var _actions_goal_actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../actions/goal_actions */ "./frontend/actions/goal_actions.js");
 
 
 
 
 var mSTP = function mSTP(state) {
   return {
-    goals: state.entities.goals
+    goals: Object.values(state.entities.goals)
   };
 };
 
 var mDTP = function mDTP(dispatch) {
   return {
     fetchGoals: function fetchGoals() {
-      return dispatch(Object(_util_goal_api_util__WEBPACK_IMPORTED_MODULE_2__["fetchGoals"])());
+      return dispatch(Object(_actions_goal_actions__WEBPACK_IMPORTED_MODULE_2__["fetchGoals"])());
+    },
+    deleteGoal: function deleteGoal(goalId) {
+      return dispatch(Object(_actions_goal_actions__WEBPACK_IMPORTED_MODULE_2__["deleteGoal"])(goalId));
     }
   };
 };
@@ -1327,7 +1496,13 @@ var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
   _createClass(GoalIndexItem, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.props.goal.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.props.goal.body));
+      var _this = this;
+
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.props.goal.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.props.goal.body), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+        onClick: function onClick() {
+          return _this.props.deleteGoal(_this.props.goal.id);
+        }
+      }, "Delete Goal"));
     }
   }]);
 
@@ -1579,11 +1754,17 @@ var SplashPage = /*#__PURE__*/function (_React$Component) {
   _createClass(SplashPage, [{
     key: "render",
     value: function render() {
+      var link = null;
+
+      if (this.props.currentUser) {
+        link = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+          to: "/users/".concat(this.props.currentUser.id)
+        }, "User Page");
+      }
+
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "splash-container"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-        to: "/users/".concat(this.props.currentUser.id)
-      }, "User Page")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, link), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
         to: "/games/new"
       }, "Play a Game")));
     }
@@ -1779,6 +1960,7 @@ var mDTP = function mDTP(dispatch) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1803,6 +1985,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
 var SignedOut = /*#__PURE__*/function (_React$Component) {
   _inherits(SignedOut, _React$Component);
 
@@ -1824,13 +2007,22 @@ var SignedOut = /*#__PURE__*/function (_React$Component) {
       this.props.logout();
     }
   }, {
+    key: "showPage",
+    value: function showPage() {
+      this.props.history.push("/users/".concat(this.props.currentUser.id));
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "user-auth-banner-links"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", null, "Welcome, ", "".concat(this.props.currentUser.username))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+        onClick: function onClick() {
+          return _this2.showPage();
+        }
+      }, "".concat(this.props.currentUser.username)))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
         onClick: function onClick() {
           return _this2.click();
         }
@@ -1841,7 +2033,7 @@ var SignedOut = /*#__PURE__*/function (_React$Component) {
   return SignedOut;
 }(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
 
-/* harmony default export */ __webpack_exports__["default"] = (SignedOut);
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["withRouter"])(SignedOut));
 
 /***/ }),
 
@@ -2207,6 +2399,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+/* harmony import */ var _goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../goals/goal_index_container */ "./frontend/components/goals/goal_index_container.jsx");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2232,6 +2425,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
 var UserShow = /*#__PURE__*/function (_React$Component) {
   _inherits(UserShow, _React$Component);
 
@@ -2252,10 +2446,12 @@ var UserShow = /*#__PURE__*/function (_React$Component) {
     key: "render",
     value: function render() {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", null, this.props.user.username), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", null, this.props.user.email), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", null, this.props.user.elo), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-        to: "/users/".concat(this.props.user.id, "/edit")
-      }, "Edit User Information"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
         to: "/game/new"
-      }, "Play a Game"));
+      }, "Play a Game"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+        to: "/users/".concat(this.props.user.id, "/goals/new")
+      }, "Create a new Goal"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+        to: "/users/".concat(this.props.user.id, "/edit")
+      }, "Edit User Information"));
     }
   }]);
 
@@ -2362,12 +2558,54 @@ document.addEventListener('DOMContentLoaded', function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var redux__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! redux */ "./node_modules/redux/es/redux.js");
 /* harmony import */ var _users_reducer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./users_reducer */ "./frontend/reducers/users_reducer.js");
+/* harmony import */ var _goals_reducer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./goals_reducer */ "./frontend/reducers/goals_reducer.js");
+
 
 
 var EntitiesReducer = Object(redux__WEBPACK_IMPORTED_MODULE_0__["combineReducers"])({
-  users: _users_reducer__WEBPACK_IMPORTED_MODULE_1__["default"]
+  users: _users_reducer__WEBPACK_IMPORTED_MODULE_1__["default"],
+  goals: _goals_reducer__WEBPACK_IMPORTED_MODULE_2__["default"]
 });
 /* harmony default export */ __webpack_exports__["default"] = (EntitiesReducer);
+
+/***/ }),
+
+/***/ "./frontend/reducers/goals_reducer.js":
+/*!********************************************!*\
+  !*** ./frontend/reducers/goals_reducer.js ***!
+  \********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _actions_goal_actions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../actions/goal_actions */ "./frontend/actions/goal_actions.js");
+
+
+var GoalsReducer = function GoalsReducer() {
+  var oldState = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+  Object.freeze(oldState);
+  var newState = Object.assign({}, oldState);
+
+  switch (action.type) {
+    case _actions_goal_actions__WEBPACK_IMPORTED_MODULE_0__["RECEIVE_GOALS"]:
+      return Object.assign({}, action.goals);
+
+    case _actions_goal_actions__WEBPACK_IMPORTED_MODULE_0__["RECEIVE_GOAL"]:
+      newState[action.goal.id] = action.goal;
+      return newState;
+
+    case _actions_goal_actions__WEBPACK_IMPORTED_MODULE_0__["REMOVE_GOAL"]:
+      delete newState[action.goalId];
+      return newState;
+
+    default:
+      return oldState;
+  }
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (GoalsReducer);
 
 /***/ }),
 
