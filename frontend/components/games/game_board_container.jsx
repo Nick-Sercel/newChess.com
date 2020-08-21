@@ -23,14 +23,14 @@ class Game extends React.Component {
         console.log(tile)
         console.log(this.currentTile);
         if (!(this.currentTile)) {
-            console.log('initial click');
+            // console.log('initial click');
             if (tile.piece && tile.piece.color === this.currentTurn) {
                 // set piece to be moved
                 this.currentTile = tile;
             } else {
                 console.log('invalid piece selected');
-                console.log(tile.piece.color);
-                console.log(this.currentTurn);
+                // console.log(tile.piece.color);
+                // console.log(this.currentTurn);
             }
         } else if (tile.piece) {
             if (tile.piece.color !== this.currentTurn) {
@@ -50,13 +50,14 @@ class Game extends React.Component {
         } else {
             // set place to move piece
             console.log('secondary click');
-            this.state.board.movePiece(this.currentTile, tile);
-            this.currentTile = null;
-            if (this.currentTurn === 'white') {
-                this.currentTurn = 'black';
-            } else {
-                this.currentTurn = 'white';
+            if (this.state.board.movePiece(this.currentTile, tile)) {
+                if (this.currentTurn === 'white') {
+                    this.currentTurn = 'black';
+                } else {
+                    this.currentTurn = 'white';
+                }
             }
+            this.currentTile = null;
         }
 
         this.setState({ board: this.state.board });

@@ -1,6 +1,5 @@
 import { connect } from 'react-redux';
-import UserAuthBanner from './user_auth_banner';
-import {login, logout} from '../../../actions/session_actions';
+import Splash from './splash_page';
 
 const mSTP = state => {
     let currentUser;
@@ -14,9 +13,4 @@ const mSTP = state => {
     })
 }
 
-const mDTP = dispatch => ({
-    login: (user) => dispatch(login(user)),
-    logout: () => dispatch(logout()),
-})
-
-export default connect(mSTP, mDTP)(UserAuthBanner);
+export default connect(mSTP)(Splash);

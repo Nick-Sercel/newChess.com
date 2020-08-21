@@ -7,10 +7,10 @@ class GameBoard extends React.Component {
     }
 
     render() {
-        let grid = this.props.board.grid;
+        let board = this.props.board.board;
         return (
             <div id='board-container'>
-                {grid.map(row => {
+                {board.map(row => {
                         return (
                             row.map(tile => {
                                 return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} /> )

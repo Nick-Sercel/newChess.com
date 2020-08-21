@@ -27,6 +27,8 @@ export class Board {
         this.whiteCaptures = [];
         this.blackCaptures = [];
         this.currentPieces = {};
+        this.whiteThreats = {}; // { piece.pos => [movePos' leading to king] }
+        this.blackThreats = {};
         this.generateBoard();
     }
 
@@ -56,8 +58,8 @@ export class Board {
                     } else {
                         piece.color = 'black';
                     }
+                    this.currentPieces[piece.pos] = piece;
                 }
-                this.currentPieces[piece.pos] = piece;
                 const tile = new Tile(this, [i, j], piece);
                 this.board[i].push(tile);
             }
@@ -71,130 +73,153 @@ export class Board {
         );
     }
 
-    pawnMoves(piece) {
-        const possibleMoves = [];
-        if (piece.color === 'white') {
-            let currentPos = [piece.pos[0] - 1, piece.pos[1]]
-            if (!(this.currentPieces[currentPos])) {
-                possibleMoves.push(currentPos)
-                currentPos = [piece.pos[0] - 2, piece.pos[1]];
-                if (piece.pos[0] === 6 && !(this.currentPieces[currentPos])) {
-                    possibleMoves.push(currentPos);
-                }
-            }
-            currentPos = [piece.pos[0] - 1, piece.pos[1] + 1]
-            let currentPiece = this.currentPieces[currentPos]
-            if (currentPiece && currentPiece.color !== piece.color) {
-                possibleMoves.push(currentPos);
-            }
-            currentPos = [piece.pos[0] - 1, piece.pos[1] - 1];
-            currentPiece = this.currentPieces[currentPos];
-            if (currentPiece && currentPiece.color !== piece.color) {
-                possibleMoves.push(currentPos);
-            }
-        } else {
-            let currentPos = [piece.pos[0] + 1, piece.pos[1]]
-            if (!(this.currentPieces[currentPos])) {
-                possibleMoves.push(currentPos)
-                currentPos = [piece.pos[0] + 2, piece.pos[1]];
-                if (piece.pos[0] === 6 && !(this.currentPieces[currentPos])) {
-                    possibleMoves.push(currentPos);
-                }
-            }
-            currentPos = [piece.pos[0] + 1, piece.pos[1] + 1]
-            let currentPiece = this.currentPieces[currentPos]
-            if (currentPiece && currentPiece.color !== piece.color) {
-                possibleMoves.push(currentPos);
-            }
-            currentPos = [piece.pos[0] + 1, piece.pos[1] - 1];
-            currentPiece = this.currentPieces[currentPos];
-            if (currentPiece && currentPiece.color !== piece.color) {
-                possibleMoves.push(currentPos);
-            }
-        }
-        return possibleMoves;
-    }
-
-    moveDir(piece, dir) {
-        let currentPos = [piece.pos[0] + dir[0], piece.pos[1] + dir[1]];
+    singleMoveDirs(piece, dirs) {
         const moves = [];
-        while (!(this.currentPieces[currentPos]) && this.onBoard(currentPos)) {
-            moves.push(currentPos);
-            currentPos[0] += dir[0];
-            currentPos[1] += dir[1];
-        }
-        if (this.onBoard(currentPos) && this.currentPieces[currentPos]) {
-            if (this.currentPieces[currentPos].color !== piece.color) {
-                moves.push(currentPos);
+        let movePos;
+        for (let i = 0; i < dirs.length; i++) {
+            movePos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
+            if (this.onBoard(movePos)) {
+                if (this.currentPieces[movePos] && this.currentPieces[movePos].color !== piece.color) {
+                    moves.push(movePos);
+                } else if (!(this.currentPieces[movePos])) {
+                    moves.push(movePos);
+                }
             }
         }
         return moves;
+    }
+
+    moveDirs(piece, dirs) {
+        const moves = [];
+        for (let i = 0; i < dirs.length; i++) {
+            let currentPos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
+            console.log(this.currentPieces[currentPos]);
+            while (!(this.currentPieces[currentPos]) && this.onBoard(currentPos)) {
+                const tempPush = currentPos.slice();
+                moves.push(tempPush);
+                currentPos[0] += dirs[i][0];
+                currentPos[1] += dirs[i][1];
+            }
+            if (this.onBoard(currentPos) && this.currentPieces[currentPos]) {
+                const currentPiece = this.currentPieces[currentPos];
+                if (currentPiece.color !== piece.color) {
+                    moves.push(currentPos);
+                    if (currentPiece.symbol === 'K') {
+                        if (currentPiece.color === 'white') {
+                            this.whiteThreats[currentPiece.pos]; // need to add the array of positions leading to the king
+                        } else {
+                            this.blackThreats[currentPiece.pos]; // need to add the array of positions leading to the king
+                        }
+                    }
+                }
+            }
+        }
+        return moves;
+    }
+
+    pawnMoves(piece) {
+        let dirs = [];
+        if (piece.color === 'white') {
+            dirs = [[-1, 1], [-1, -1]];
+            if (!(this.currentPieces[piece.pos[0] - 1, piece.pos[1]])) {
+                dirs.push([-1, 0]);
+                if (piece.pos[0] === 6 && !(this.currentPieces[piece.pos[0] - 2, piece.pos[1]])) {
+                    dirs.push([-2, 0]);
+                }
+            }
+        } else {
+            dirs = [[1, 1], [1, -1]];
+            if (!(this.currentPieces[piece.pos[0] + 1, piece.pos[1]])) {
+                dirs.push([1, 0]);
+                if (piece.pos[0] === 1 && !(this.currentPieces[piece.pos[0] + 2, piece.pos[1]])) {
+                    dirs.push([2, 0]);
+                }
+            }
+        }
+        return this.singleMoveDirs(piece, dirs);
     }
 
     rookMoves(piece) {
-        const moves = [];
-        moves.push(this.moveDir(piece, [1, 0]));
-        moves.push(this.moveDir(piece, [0, 1]));
-        moves.push(this.moveDir(piece, [-1, 0]));
-        moves.push(this.moveDir(piece, [0, -1]));
-        return moves;
+        const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+        return (this.moveDirs(piece, dirs));
     }
 
     bishopMoves(piece) {
-        const moves = [];
-        moves.push(this.moveDir(piece, [1, 1]));
-        moves.push(this.moveDir(piece, [-1, -1]));
-        moves.push(this.moveDir(piece, [1, -1]));
-        moves.push(this.moveDir(piece, [-1, 1]));
-        return moves;
+        const dirs = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
+        return (this.moveDirs(piece, dirs));
     }
 
     knightMoves(piece) {
-        
+        const moveDirs = [[2, 1], [1, 2], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]];
+        return this.singleMoveDirs(piece, moveDirs);
+    }
+
+    kingMoves(piece) {
+        const moveDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [0, 1], [-1, 0], [0, -1]];
+        return this.singleMoveDirs(piece, moveDirs);
     }
 
     potentialMoves(piece) {
-        const possibleMoves = [];
         switch (piece.symbol) {
             case 'P':
-                possibleMoves.push(this.pawnMoves(piece));
-                break;
+                return(this.pawnMoves(piece));
             case 'R':
-                possibleMoves.push(this.rookMoves(piece));
-                break;
+                return(this.rookMoves(piece));
             case 'N':
-                break;
+                return this.knightMoves(piece);
             case 'B':
-                possibleMoves.push(this.bishopMoves(piece));
-                break;
+                return(this.bishopMoves(piece));
             case 'Q':
-                possibleMoves.push(this.rookMoves(piece));
-                possibleMoves.push(this.bishopMoves(piece));
-                break;
+                return (this.rookMoves(piece).concat(this.bishopMoves(piece)));
             case 'K':
-                break;
+                return this.kingMoves(piece);
             default:
                 console.log('that piece doesn\'t exist');
                 return;
         }
     }
 
-    validMove(pos) {
-        
+    isIncluded(positions, pos) {
+        for (let i = 0; i < positions.length; i++) {
+            if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    validMove(piece, pos) {
+        const moves = this.potentialMoves(piece);
+        console.log('potential moves');
+        console.log(moves);
+        console.log('destination pos');
+        console.log(pos);
+        if (this.isIncluded(moves, pos)) {
+            return true;
+        }
         return false;
     }
 
     movePiece(moveTile, endTile) {
-        const piece = moveTile.piece;
-        if (endTile.piece) {
-            if (endTile.piece.color === 'black-tile') {
-                this.whiteCaptures.push(piece);
-            } else {
-                this.blackCaptures.push(piece);
+        if (this.validMove(moveTile.piece, endTile.pos)) {
+            const piece = moveTile.piece;
+            if (endTile.piece) {
+                if (endTile.piece.color === 'black-tile') {
+                    this.whiteCaptures.push(piece);
+                } else {
+                    this.blackCaptures.push(piece);
+                }
             }
+            endTile.piece = piece;
+            delete this.currentPieces[piece.pos];
+            piece.pos = endTile.pos;
+            this.currentPieces[piece.pos] = piece;
+            moveTile.piece = null;
+            return true;
+        } else {
+            console.log('Invalid move destination');
+            return false;
         }
-        endTile.piece = piece;
-        moveTile.piece = null;
     }
 
     checkmate() {

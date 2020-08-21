@@ -35,7 +35,7 @@ class Login extends React.Component {
                 </div>
                 <div className='form-element'>
                     <label>Password:</label>
-                    <input type='text' onChange={this.update('password')} />
+                    <input type='password' onChange={this.update('password')} />
                 </div>
                 <div className='form-element'>
                     <button onClick={this.handleSubmit}>{this.props.formType}</button>
