@@ -1,3 +1,43 @@
 // Place all the styles related to the goals controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+.goal-index-container {
+    width: 60%;
+    background-color: paleturquoise;
+    padding: 0;
+    margin: 0 auto;
+    font-weight: 300;
+}
+
+.goal-index-container li {
+    list-style: none;
+}
+
+.goal-index-container > li > p {
+    padding-top: 10px;
+    font-size: 40px;
+    color: black;
+    text-align: center;
+    text-decoration: underline;
+}
+
+.goal-item-container li {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    color: blue;
+}
+
+.goal-title {
+
+}
+
+.goal-body {
+
+}
+
+.goal-item-container li button {
+    text-decoration: none;
+    background-color: red;
+}

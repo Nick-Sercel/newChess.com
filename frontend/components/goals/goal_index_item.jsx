@@ -4,10 +4,10 @@ class GoalIndexItem extends React.Component {
 
     render() {
         return (
-            <div>
-                <p>{this.props.goal.title}</p>
-                <p>{this.props.goal.body}</p>
-                <button onClick={() => this.props.deleteGoal(this.props.goal.id)}>Delete Goal</button>
+            <div className='goal-item-container'>
+                <li><p className='goal-title'>{this.props.goal.title}</p></li>
+                <li><p className='goal-body'>{this.props.goal.body}</p></li>
+                <li><button onClick={() => this.props.deleteGoal(this.props.goal.id)}>Delete Goal</button></li >
             </div>
         )
     }
