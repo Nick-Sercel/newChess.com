@@ -27,8 +27,8 @@ export class Board {
         this.blackCaptures = [];
         this.currentPieces = {};
         this.kings = {};
-        this.kings['white'] = null;
-        this.kings['black'] = null
+        this.kings['white'] = {};
+        this.kings['black'] = {};
         this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {};
         this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {};
         this.kings['white']['saves'] = {}; this.kings['black']['saves'] = {};
@@ -58,6 +58,7 @@ export class Board {
                     }
                 }
                 if (piece) {
+                    piece.moves = [];
                     if (piece.pos[0] > 5) {
                         piece.color = 'white';
                         if (piece.symbol === 'K') {this.kings['white'] = piece;}
@@ -74,13 +75,10 @@ export class Board {
     }
 
     oppColor(color) {
-        switch (color) {
-            case 'white':
-                return 'black';
-            case 'black':
-                return 'white';
-            default:
-                console.log('idk what that color was man');
+        if (color === 'white') {
+            return 'black';
+        } else {
+            return 'white';
         }
     }
 
@@ -171,7 +169,7 @@ export class Board {
     }
 
     findThreatsAndRemove(piece, moves) {
-        otherColor = this.oppColor(piece.color);
+        const otherColor = this.oppColor(piece.color);
         for (let i = 0; i < moves.length; i++) {
             if (this.isIncluded(this.kings[otherColor].moves, moves[i])) {
                 this.kings[otherColor]['indirect'][piece.pos] ? this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : [moves[i]];
@@ -257,18 +255,23 @@ export class Board {
                 break;
             default:
                 console.log('that piece doesn\'t exist');
+                console.log(`that piece is: ${piece}`)
                 return;
         }
         piece.moves = moves;
-        if (piece.color === this.currentTurnColor) {
-            this.findThreatsAndRemove(piece, moves);
-        } else {
-            this.findSavesOnMove(piece, moves);         // does not exist yet
+        if (piece.symbol !== 'K') {
+            if (piece.color === this.currentTurnColor) {
+                this.findThreatsAndRemove(piece, moves);
+            } else {
+                this.findSavesOnMove(piece, moves);         // does not exist yet
+            }
         }
         return moves;
     }
 
     isIncluded(positions, pos) {
+        console.log(`positions to check: ${positions}`);
+        console.log(`pos checked: ${pos}`);
         for (let i = 0; i < positions.length; i++) {
             if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
                 return true;
@@ -288,7 +291,7 @@ export class Board {
 
     findAllMoves() {
         this.kings[this.currentTurnColor].moves = this.potentialMoves(this.kings[this.currentTurnColor]);
-        this.kings[this.oppColor(this.currentTurnColor)].moves = this.potentialMoves(this.oppColor(this.kings[this.currentTurnColor]));
+        this.kings[this.oppColor(this.currentTurnColor)].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]);
         this.findMovesForColor(this.currentTurnColor);
         this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
@@ -333,8 +336,12 @@ export class Board {
     }
 
     checkmate(otherTurnCol) {
-        if (this.kings[otherTurnCol].moves === [] || this.kings[otherColor]['saves']) {
-            return false;
+        if (this.kings[otherColor]['direct']) {
+            if (this.kings[otherTurnCol].moves === [] || this.kings[otherColor]['saves']) {
+                return false;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
