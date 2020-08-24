@@ -38,3 +38,5 @@ const App = () => (
 );
 
 export default App;
+
+// Heroku logs -t

@@ -8,6 +8,7 @@
     padding: 0;
     margin: 0 auto;
     font-weight: 300;
+    border: 5px solid black;
 }
 
 .goal-index-container li {
@@ -17,7 +18,6 @@
 .goal-index-container > li > p {
     padding-top: 10px;
     font-size: 40px;
-    color: black;
     text-align: center;
     text-decoration: underline;
 }

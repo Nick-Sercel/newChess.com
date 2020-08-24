@@ -1,1 +1,1 @@
-json.extract! goal, :id, :title, :body
+json.extract! goal, :id, :title, :body, :user_id

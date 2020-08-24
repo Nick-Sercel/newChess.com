@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 
 class GoalForm extends React.Component {
     constructor(props) {
@@ -37,4 +38,4 @@ class GoalForm extends React.Component {
     }
 }
 
-export default GoalForm;
+export default withRouter(GoalForm);

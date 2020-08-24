@@ -16,10 +16,15 @@ class Api::GoalsController < ApplicationController
         end
     end
 
+    def show
+        @goal = Goal.find_by(id: params[:id])
+        render :show
+    end
+
     def update
-        @goal = Goal.find_by(id: params[id])
+        @goal = Goal.find_by(id: params[:id])
         if @goal && @goal.user_id == current_user.id
-            @goal.update
+            @goal.update(goal_params)
             render :show
         else
             render :show

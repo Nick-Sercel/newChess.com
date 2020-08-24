@@ -170,16 +170,19 @@ export class Board {
         const otherColor = this.oppColor(piece.color);
         for (let i = 0; i < moves.length; i++) {
             if (this.isIncluded(this.kings[otherColor]['piece'].moves, moves[i])) {
-                this.kings[otherColor]['indirect'][piece.pos] ? this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : [moves[i]];
+                (this.kings[otherColor]['indirect'][piece.pos] instanceof Array) ?
+                    this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : this.kings[otherColor]['indirect'][piece.pos] = [moves[i]];
                 this.kings[otherColor]['piece'].moves.splice(this.kings[otherColor]['piece'].moves.indexOf(moves[i]), 1);
-            } else if (moves[i] === this.kings[otherColor]['piece'].pos) {
+                console.log(`indirect threat added: ${Object.keys(this.kings[otherColor]['indirect'])}`);
+            } else if (moves[i][0] === this.kings[otherColor]['piece'].pos[0] && moves[i][1] === this.kings[otherColor]['piece'].pos[1]) {
                 this.kings[otherColor]['direct'][piece.pos] = moves[i];
+                console.log(`direct threat added: ${Object.keys(this.kings[otherColor]['direct'])}`);
             }
         }
     }
 
     findMatchingThreat(primaryThreat, color) {  // primaryThreat should be a piece object reference
-        if (this.kings[color]['indirect'][primaryThreat.pos]) {
+        if (this.kings[color]['indirect'][primaryThreat.pos] !== undefined) {
             return this.kings[color]['indirect'][primaryThreat.pos][0]; // should only ever have one position => but it is in an array
         } else {
             return [-1, -1];
@@ -235,15 +238,15 @@ export class Board {
                 break;
             case 'R':
                 moves = (this.rookMoves(piece));
-                console.log(`rook moves: ${moves}`);
+                // console.log(`rook moves: ${moves}`);
                 break;
             case 'N':
                 moves = this.knightMoves(piece);
-                console.log(`knight moves: ${moves}`);
+                // console.log(`knight moves: ${moves}`);
                 break;
             case 'B':
                 moves = (this.bishopMoves(piece));
-                console.log(`bishop moves: ${moves}`);
+                // console.log(`bishop moves: ${moves}`);
                 break;
             case 'Q':
                 moves = (this.rookMoves(piece).concat(this.bishopMoves(piece)));
@@ -261,7 +264,7 @@ export class Board {
         }
         piece.moves = moves;
         if (piece.symbol !== 'K') {
-            if (piece.color === this.currentTurnColor) {
+            if (piece.color !== this.currentTurnColor) {
                 this.findThreatsAndRemove(piece, moves);
             } else {
                 this.findSavesOnMove(piece, moves);         // does not exist yet
@@ -271,8 +274,8 @@ export class Board {
     }
 
     isIncluded(positions, pos) {
-        // console.log(`positions to check: ${positions}`);
-        // console.log(`pos checked: ${pos}`);
+        console.log(`positions to check: ${positions}`);
+        console.log(`pos checked: ${pos}`);
         for (let i = 0; i < positions.length; i++) {
             if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
                 return true;
@@ -305,9 +308,12 @@ export class Board {
     }
 
     movePiece(moveTile, endTile) {
+        // console.log
+        this.potentialMoves(moveTile.piece);
         if (this.validMove(moveTile.piece, endTile.pos)) {
+            this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {}; this.kings['white']['saves'] = {}
+            this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {}; this.kings['black']['saves'] = {}
             const piece = moveTile.piece;
-            this.currentTurnColor = piece.color;
             if (endTile.piece) {
                 if (endTile.piece.color === 'black') {
                     this.whiteCaptures.push(piece);
@@ -315,7 +321,6 @@ export class Board {
                     this.blackCaptures.push(piece);
                 }
             }
-            this.findAllMoves(); // find all moves beginning with pieces of current turn player
             endTile.piece = piece;                  // add the piece to the moved to tile
             delete this.currentPieces[piece.pos];       // remove old piece pos from hash
             piece.pos = endTile.pos;                // move the piece's position
@@ -324,6 +329,8 @@ export class Board {
             }
             this.currentPieces[piece.pos] = piece;      // update hash piece location
             moveTile.piece = null;                  // remove the piece from its old tile
+            this.findAllMoves(); // find all moves beginning with pieces of current turn player
+            this.currentTurnColor = piece.color;
             return true;
         } else {
             console.log('Invalid move destination');
@@ -334,12 +341,16 @@ export class Board {
     checkmate(otherTurnCol) {
         // console.log(`non-object white king: ${this.kings['white']['direct']}`)
         // console.log(`non-object black king: ${this.kings['black']['direct']}`)
-        console.log(`other turn color: ${otherTurnCol}`);
+        // console.log(`other turn color: ${otherTurnCol}`);
         const dThreats = Object.keys(this.kings[otherTurnCol]['direct']);
         console.log(`dThreats: ${dThreats}`);
-        if (dThreats) {
-            if (this.kings[otherTurnCol]['piece'].moves === [] || this.kings[otherTurnCol]['saves']) {
-                return false;
+        if (dThreats.length !== 0) {
+            console.log('has dThreats');
+            console.log(`king escapes: ${this.kings[otherTurnCol]['piece'].moves}`);
+            const saves = Object.keys(this.kings[otherTurnCol]['saves']);
+            console.log(`piece saves: ${saves}`);
+            if (this.kings[otherTurnCol]['piece'].moves.length === 0 && saves.length === 0) {
+                return true;
             } else {
                 return false;
             }

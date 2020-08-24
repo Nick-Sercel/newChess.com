@@ -355,7 +355,7 @@ var App = function App() {
   }, "Return to Splash Page"));
 };
 
-/* harmony default export */ __webpack_exports__["default"] = (App);
+/* harmony default export */ __webpack_exports__["default"] = (App); // Heroku logs -t
 
 /***/ }),
 
@@ -914,10 +914,12 @@ var Board = /*#__PURE__*/function () {
 
       for (var i = 0; i < moves.length; i++) {
         if (this.isIncluded(this.kings[otherColor]['piece'].moves, moves[i])) {
-          this.kings[otherColor]['indirect'][piece.pos] ? this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : [moves[i]];
+          this.kings[otherColor]['indirect'][piece.pos] instanceof Array ? this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : this.kings[otherColor]['indirect'][piece.pos] = [moves[i]];
           this.kings[otherColor]['piece'].moves.splice(this.kings[otherColor]['piece'].moves.indexOf(moves[i]), 1);
-        } else if (moves[i] === this.kings[otherColor]['piece'].pos) {
+          console.log("indirect threat added: ".concat(Object.keys(this.kings[otherColor]['indirect'])));
+        } else if (moves[i][0] === this.kings[otherColor]['piece'].pos[0] && moves[i][1] === this.kings[otherColor]['piece'].pos[1]) {
           this.kings[otherColor]['direct'][piece.pos] = moves[i];
+          console.log("direct threat added: ".concat(Object.keys(this.kings[otherColor]['direct'])));
         }
       }
     }
@@ -925,7 +927,7 @@ var Board = /*#__PURE__*/function () {
     key: "findMatchingThreat",
     value: function findMatchingThreat(primaryThreat, color) {
       // primaryThreat should be a piece object reference
-      if (this.kings[color]['indirect'][primaryThreat.pos]) {
+      if (this.kings[color]['indirect'][primaryThreat.pos] !== undefined) {
         return this.kings[color]['indirect'][primaryThreat.pos][0]; // should only ever have one position => but it is in an array
       } else {
         return [-1, -1];
@@ -982,18 +984,18 @@ var Board = /*#__PURE__*/function () {
           break;
 
         case 'R':
-          moves = this.rookMoves(piece);
-          console.log("rook moves: ".concat(moves));
+          moves = this.rookMoves(piece); // console.log(`rook moves: ${moves}`);
+
           break;
 
         case 'N':
-          moves = this.knightMoves(piece);
-          console.log("knight moves: ".concat(moves));
+          moves = this.knightMoves(piece); // console.log(`knight moves: ${moves}`);
+
           break;
 
         case 'B':
-          moves = this.bishopMoves(piece);
-          console.log("bishop moves: ".concat(moves));
+          moves = this.bishopMoves(piece); // console.log(`bishop moves: ${moves}`);
+
           break;
 
         case 'Q':
@@ -1017,7 +1019,7 @@ var Board = /*#__PURE__*/function () {
       piece.moves = moves;
 
       if (piece.symbol !== 'K') {
-        if (piece.color === this.currentTurnColor) {
+        if (piece.color !== this.currentTurnColor) {
           this.findThreatsAndRemove(piece, moves);
         } else {
           this.findSavesOnMove(piece, moves); // does not exist yet
@@ -1029,8 +1031,9 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "isIncluded",
     value: function isIncluded(positions, pos) {
-      // console.log(`positions to check: ${positions}`);
-      // console.log(`pos checked: ${pos}`);
+      console.log("positions to check: ".concat(positions));
+      console.log("pos checked: ".concat(pos));
+
       for (var i = 0; i < positions.length; i++) {
         if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
           return true;
@@ -1070,9 +1073,17 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "movePiece",
     value: function movePiece(moveTile, endTile) {
+      // console.log
+      this.potentialMoves(moveTile.piece);
+
       if (this.validMove(moveTile.piece, endTile.pos)) {
+        this.kings['white']['direct'] = {};
+        this.kings['white']['indirect'] = {};
+        this.kings['white']['saves'] = {};
+        this.kings['black']['direct'] = {};
+        this.kings['black']['indirect'] = {};
+        this.kings['black']['saves'] = {};
         var piece = moveTile.piece;
-        this.currentTurnColor = piece.color;
 
         if (endTile.piece) {
           if (endTile.piece.color === 'black') {
@@ -1081,8 +1092,6 @@ var Board = /*#__PURE__*/function () {
             this.blackCaptures.push(piece);
           }
         }
-
-        this.findAllMoves(); // find all moves beginning with pieces of current turn player
 
         endTile.piece = piece; // add the piece to the moved to tile
 
@@ -1098,6 +1107,9 @@ var Board = /*#__PURE__*/function () {
 
         moveTile.piece = null; // remove the piece from its old tile
 
+        this.findAllMoves(); // find all moves beginning with pieces of current turn player
+
+        this.currentTurnColor = piece.color;
         return true;
       } else {
         console.log('Invalid move destination');
@@ -1109,13 +1121,18 @@ var Board = /*#__PURE__*/function () {
     value: function checkmate(otherTurnCol) {
       // console.log(`non-object white king: ${this.kings['white']['direct']}`)
       // console.log(`non-object black king: ${this.kings['black']['direct']}`)
-      console.log("other turn color: ".concat(otherTurnCol));
+      // console.log(`other turn color: ${otherTurnCol}`);
       var dThreats = Object.keys(this.kings[otherTurnCol]['direct']);
       console.log("dThreats: ".concat(dThreats));
 
-      if (dThreats) {
-        if (this.kings[otherTurnCol]['piece'].moves === [] || this.kings[otherTurnCol]['saves']) {
-          return false;
+      if (dThreats.length !== 0) {
+        console.log('has dThreats');
+        console.log("king escapes: ".concat(this.kings[otherTurnCol]['piece'].moves));
+        var saves = Object.keys(this.kings[otherTurnCol]['saves']);
+        console.log("piece saves: ".concat(saves));
+
+        if (this.kings[otherTurnCol]['piece'].moves.length === 0 && saves.length === 0) {
+          return true;
         } else {
           return false;
         }
@@ -1280,6 +1297,7 @@ var mDTP = function mDTP(dispatch) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -1303,6 +1321,7 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
 
 
 
@@ -1360,7 +1379,7 @@ var GoalForm = /*#__PURE__*/function (_React$Component) {
   return GoalForm;
 }(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
 
-/* harmony default export */ __webpack_exports__["default"] = (GoalForm);
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["withRouter"])(GoalForm));
 
 /***/ }),
 
@@ -1489,6 +1508,7 @@ var mDTP = function mDTP(dispatch) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1513,6 +1533,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
 var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
   _inherits(GoalIndexItem, _React$Component);
 
@@ -1525,6 +1546,11 @@ var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
   }
 
   _createClass(GoalIndexItem, [{
+    key: "editGoal",
+    value: function editGoal() {
+      this.props.history.push("/users/".concat(this.props.goal.user_id, "/goals/").concat(this.props.goal.id, "/edit"));
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this = this;
@@ -1537,6 +1563,10 @@ var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
         className: "goal-body"
       }, this.props.goal.body)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
         onClick: function onClick() {
+          return _this.editGoal();
+        }
+      }, "Edit Goal")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+        onClick: function onClick() {
           return _this.props.deleteGoal(_this.props.goal.id);
         }
       }, "Delete Goal")));
@@ -1546,7 +1576,7 @@ var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
   return GoalIndexItem;
 }(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
 
-/* harmony default export */ __webpack_exports__["default"] = (GoalIndexItem);
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["withRouter"])(GoalIndexItem));
 
 /***/ }),
 
