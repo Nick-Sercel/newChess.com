@@ -43,6 +43,9 @@ class Game extends React.Component {
                 } else {
                     this.currentTurn = 'white';
                 }
+                if (this.state.board.checkmate(this.currentTurn)) {
+                    console.log('checkmate')
+                }
             } else {
                 console.log('You cannot capture your own piece!')
                 this.currentTile = null;
@@ -56,6 +59,9 @@ class Game extends React.Component {
                 } else {
                     this.currentTurn = 'white';
                 }
+            }
+            if (this.state.board.checkmate(this.currentTurn)) {
+                console.log('checkmate')
             }
             this.currentTile = null;
         }

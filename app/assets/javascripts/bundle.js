@@ -298,7 +298,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _users_edit_user_form_container__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./users/edit_user_form_container */ "./frontend/components/users/edit_user_form_container.jsx");
 /* harmony import */ var _users_create_user_form_container__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./users/create_user_form_container */ "./frontend/components/users/create_user_form_container.jsx");
 /* harmony import */ var _session_login_container__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./session/login_container */ "./frontend/components/session/login_container.jsx");
-/* harmony import */ var _games_game_board_container__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./games/game_board_container */ "./frontend/components/games/game_board_container.jsx");
+/* harmony import */ var _games_game_board_game_board_container__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./games/game_board/game_board_container */ "./frontend/components/games/game_board/game_board_container.jsx");
 /* harmony import */ var _goals_create_goal_container__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./goals/create_goal_container */ "./frontend/components/goals/create_goal_container.jsx");
 /* harmony import */ var _goals_edit_goal_container__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./goals/edit_goal_container */ "./frontend/components/goals/edit_goal_container.jsx");
 /* harmony import */ var _goals_goal_index_container__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./goals/goal_index_container */ "./frontend/components/goals/goal_index_container.jsx");
@@ -331,7 +331,7 @@ var App = function App() {
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Route"], {
     exact: true,
     path: "/game/new",
-    component: _games_game_board_container__WEBPACK_IMPORTED_MODULE_7__["default"]
+    component: _games_game_board_game_board_container__WEBPACK_IMPORTED_MODULE_7__["default"]
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_util_route_util__WEBPACK_IMPORTED_MODULE_2__["AuthRoute"], {
     path: "/users/:userId/goals/new",
     component: _goals_create_goal_container__WEBPACK_IMPORTED_MODULE_8__["default"]
@@ -359,14 +359,774 @@ var App = function App() {
 
 /***/ }),
 
-/***/ "./frontend/components/games/game_board_container.jsx":
+/***/ "./frontend/components/games/game_board/game_board.jsx":
+/*!*************************************************************!*\
+  !*** ./frontend/components/games/game_board/game_board.jsx ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _game_tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game_tile */ "./frontend/components/games/game_board/game_tile.jsx");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+
+var GameBoard = /*#__PURE__*/function (_React$Component) {
+  _inherits(GameBoard, _React$Component);
+
+  var _super = _createSuper(GameBoard);
+
+  function GameBoard(props) {
+    _classCallCheck(this, GameBoard);
+
+    return _super.call(this, props);
+  }
+
+  _createClass(GameBoard, [{
+    key: "render",
+    value: function render() {
+      var _this = this;
+
+      var board = this.props.board.board;
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        id: "board-container"
+      }, board.map(function (row) {
+        return row.map(function (tile) {
+          return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_tile__WEBPACK_IMPORTED_MODULE_1__["default"], {
+            key: tile.pos[0] * 8 + tile.pos[1],
+            tile: tile,
+            updateGame: _this.props.updateGame
+          });
+        });
+      }));
+    }
+  }]);
+
+  return GameBoard;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (GameBoard);
+
+/***/ }),
+
+/***/ "./frontend/components/games/game_board/game_board_container.jsx":
+/*!***********************************************************************!*\
+  !*** ./frontend/components/games/game_board/game_board_container.jsx ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _game_board__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game_board */ "./frontend/components/games/game_board/game_board.jsx");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils */ "./frontend/components/games/game_board/utils.js");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+
+
+var Game = /*#__PURE__*/function (_React$Component) {
+  _inherits(Game, _React$Component);
+
+  var _super = _createSuper(Game);
+
+  function Game(props) {
+    var _this;
+
+    _classCallCheck(this, Game);
+
+    _this = _super.call(this, props);
+    var board = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"]();
+    _this.state = {
+      board: board
+    };
+    _this.restartGame = _this.restartGame.bind(_assertThisInitialized(_this));
+    _this.updateGame = _this.updateGame.bind(_assertThisInitialized(_this));
+    _this.currentTile = null;
+    _this.currentTurn = 'white';
+    return _this;
+  }
+
+  _createClass(Game, [{
+    key: "restartGame",
+    value: function restartGame() {
+      var board = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"]();
+      this.setState({
+        board: board
+      });
+    }
+  }, {
+    key: "updateGame",
+    value: function updateGame(tile) {
+      // game logic
+      console.log(tile);
+      console.log(this.currentTile);
+
+      if (!this.currentTile) {
+        // console.log('initial click');
+        if (tile.piece && tile.piece.color === this.currentTurn) {
+          // set piece to be moved
+          this.currentTile = tile;
+        } else {
+          console.log('invalid piece selected'); // console.log(tile.piece.color);
+          // console.log(this.currentTurn);
+        }
+      } else if (tile.piece) {
+        if (tile.piece.color !== this.currentTurn) {
+          // set place to move piece
+          console.log('secondary click');
+          this.state.board.movePiece(this.currentTile, tile);
+          this.currentTile = null;
+
+          if (this.currentTurn === 'white') {
+            this.currentTurn = 'black';
+          } else {
+            this.currentTurn = 'white';
+          }
+
+          if (this.state.board.checkmate(this.currentTurn)) {
+            console.log('checkmate');
+          }
+        } else {
+          console.log('You cannot capture your own piece!');
+          this.currentTile = null;
+        }
+      } else {
+        // set place to move piece
+        console.log('secondary click');
+
+        if (this.state.board.movePiece(this.currentTile, tile)) {
+          if (this.currentTurn === 'white') {
+            this.currentTurn = 'black';
+          } else {
+            this.currentTurn = 'white';
+          }
+        }
+
+        if (this.state.board.checkmate(this.currentTurn)) {
+          console.log('checkmate');
+        }
+
+        this.currentTile = null;
+      }
+
+      this.setState({
+        board: this.state.board
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_game_board__WEBPACK_IMPORTED_MODULE_0__["default"], {
+        board: this.state.board,
+        updateGame: this.updateGame
+      }));
+    }
+  }]);
+
+  return Game;
+}(react__WEBPACK_IMPORTED_MODULE_1___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (Game);
+
+/***/ }),
+
+/***/ "./frontend/components/games/game_board/game_tile.jsx":
 /*!************************************************************!*\
-  !*** ./frontend/components/games/game_board_container.jsx ***!
+  !*** ./frontend/components/games/game_board/game_tile.jsx ***!
   \************************************************************/
 /*! exports provided: default */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/home/test/Full-Stack/newChess/frontend/components/games/game_board_container.jsx'");
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+var Tile = /*#__PURE__*/function (_React$Component) {
+  _inherits(Tile, _React$Component);
+
+  var _super = _createSuper(Tile);
+
+  function Tile(props) {
+    var _this;
+
+    _classCallCheck(this, Tile);
+
+    _this = _super.call(this, props);
+    _this.handleClick = _this.handleClick.bind(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  _createClass(Tile, [{
+    key: "handleClick",
+    value: function handleClick() {
+      this.props.updateGame(this.props.tile);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var piece = this.props.tile.piece;
+      var symbol = null;
+
+      if (piece) {
+        symbol = piece.symbol;
+      }
+
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "board-element ".concat(this.props.tile.color),
+        onClick: this.handleClick
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+        className: "piece-type"
+      }, symbol));
+    }
+  }]);
+
+  return Tile;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (Tile);
+
+/***/ }),
+
+/***/ "./frontend/components/games/game_board/utils.js":
+/*!*******************************************************!*\
+  !*** ./frontend/components/games/game_board/utils.js ***!
+  \*******************************************************/
+/*! exports provided: Tile, Piece, Board */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Tile", function() { return Tile; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Piece", function() { return Piece; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Board", function() { return Board; });
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Tile = function Tile(board, pos) {
+  var piece = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+  _classCallCheck(this, Tile);
+
+  this.board = board;
+  this.pos = pos;
+  this.piece = piece;
+
+  if ((pos[0] + pos[1]) % 2 === 0) {
+    this.color = "black-tile";
+  } else {
+    this.color = "white-tile";
+  }
+};
+var Piece = function Piece(pos, symbol) {
+  var color = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+  _classCallCheck(this, Piece);
+
+  this.pos = pos;
+  this.symbol = symbol;
+  this.color = color;
+  this.moves = [];
+};
+var Board = /*#__PURE__*/function () {
+  function Board() {
+    _classCallCheck(this, Board);
+
+    this.board = [];
+    this.whiteCaptures = [];
+    this.blackCaptures = [];
+    this.currentPieces = {};
+    this.kings = {};
+    this.kings['white'] = {
+      'piece': null,
+      'direct': {},
+      'indirect': {},
+      'saves': {}
+    };
+    this.kings['black'] = {
+      'piece': null,
+      'direct': {},
+      'indirect': {},
+      'saves': {}
+    }; // this.kings['white']['direct'] = { 'init': 'init' }; this.kings['white']['indirect'] = { 'init': 'init'};
+    // this.kings['black']['direct'] = { 'init': 'init' }; this.kings['black']['indirect'] = { 'init': 'init'};
+    // this.kings['white']['saves'] = { 'init': 'init' }; this.kings['black']['saves'] = { 'init': 'init'};
+    // { indirect => {piece.pos => [movePos' leading to king] }  direct => {piece.pos => [movePos' leading to king] } }
+
+    this.currentTurnColor = 'white';
+    this.generateBoard();
+  }
+
+  _createClass(Board, [{
+    key: "generateBoard",
+    value: function generateBoard() {
+      for (var i = 0; i < 8; i++) {
+        this.board.push([]);
+
+        for (var j = 0; j < 8; j++) {
+          var piece = null;
+
+          if (i === 1 || i === 6) {
+            piece = new Piece([i, j], 'P');
+          } else if (i === 0 || i === 7) {
+            if (j === 0 || j === 7) {
+              piece = new Piece([i, j], 'R');
+            } else if (j === 1 || j === 6) {
+              piece = new Piece([i, j], 'N');
+            } else if (j === 2 || j === 5) {
+              piece = new Piece([i, j], 'B');
+            } else if (j === 3) {
+              piece = new Piece([i, j], 'K');
+            } else {
+              piece = new Piece([i, j], 'Q');
+            }
+          }
+
+          if (piece) {
+            piece.moves = [];
+
+            if (piece.pos[0] > 5) {
+              piece.color = 'white';
+
+              if (piece.symbol === 'K') {
+                this.kings['white']['piece'] = piece;
+              }
+            } else {
+              piece.color = 'black';
+
+              if (piece.symbol === 'K') {
+                this.kings['black']['piece'] = piece;
+              }
+            }
+
+            this.currentPieces[piece.pos] = piece;
+          }
+
+          var tile = new Tile(this, [i, j], piece);
+          this.board[i].push(tile);
+        }
+      }
+    }
+  }, {
+    key: "oppColor",
+    value: function oppColor(color) {
+      if (color === 'white') {
+        return 'black';
+      } else {
+        return 'white';
+      }
+    }
+  }, {
+    key: "onBoard",
+    value: function onBoard(pos) {
+      return pos[0] >= 0 && pos[0] < 8 && pos[1] >= 0 && pos[1] < 8;
+    }
+  }, {
+    key: "singleMoveDirs",
+    value: function singleMoveDirs(piece, dirs) {
+      var moves = [];
+      var movePos;
+
+      for (var i = 0; i < dirs.length; i++) {
+        movePos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
+
+        if (this.onBoard(movePos)) {
+          if (this.currentPieces[movePos] && this.currentPieces[movePos].color !== piece.color) {
+            moves.push(movePos);
+          } else if (!this.currentPieces[movePos]) {
+            moves.push(movePos);
+          }
+        }
+      }
+
+      return moves;
+    }
+  }, {
+    key: "moveDirs",
+    value: function moveDirs(piece, dirs) {
+      var moves = [];
+
+      for (var i = 0; i < dirs.length; i++) {
+        var currentPos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]]; // console.log(this.currentPieces[currentPos]);
+
+        while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
+          var tempPush = currentPos.slice();
+          moves.push(tempPush);
+          currentPos[0] += dirs[i][0];
+          currentPos[1] += dirs[i][1];
+        }
+
+        if (this.onBoard(currentPos) && this.currentPieces[currentPos]) {
+          var currentPiece = this.currentPieces[currentPos];
+
+          if (currentPiece.color !== piece.color) {
+            moves.push(currentPos);
+          }
+        }
+      }
+
+      return moves;
+    }
+  }, {
+    key: "pawnMoves",
+    value: function pawnMoves(piece) {
+      var dirs = [];
+
+      if (piece.color === 'white') {
+        if (!this.currentPieces[(piece.pos[0] - 1, piece.pos[1])]) {
+          dirs.push([-1, 0]);
+
+          if (piece.pos[0] === 6 && !this.currentPieces[(piece.pos[0] - 2, piece.pos[1])]) {
+            dirs.push([-2, 0]);
+          }
+        }
+
+        if (this.currentPieces[(piece.pos[0] - 1, piece.pos[1] - 1)]) {
+          dirs.push([-1, -1]);
+        }
+
+        if (this.currentPieces[(piece.pos[0] - 1, piece.pos[1] + 1)]) {
+          dirs.push([-1, 1]);
+        }
+      } else {
+        if (!this.currentPieces[(piece.pos[0] + 1, piece.pos[1])]) {
+          dirs.push([1, 0]);
+
+          if (piece.pos[0] === 1 && !this.currentPieces[(piece.pos[0] + 2, piece.pos[1])]) {
+            dirs.push([2, 0]);
+          }
+        }
+
+        if (this.currentPieces[(piece.pos[0] + 1, piece.pos[1] - 1)]) {
+          dirs.push([1, -1]);
+        }
+
+        if (this.currentPieces[(piece.pos[0] + 1, piece.pos[1] + 1)]) {
+          dirs.push([1, 1]);
+        }
+      }
+
+      return this.singleMoveDirs(piece, dirs);
+    }
+  }, {
+    key: "rookMoves",
+    value: function rookMoves(piece) {
+      var dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+      return this.moveDirs(piece, dirs);
+    }
+  }, {
+    key: "bishopMoves",
+    value: function bishopMoves(piece) {
+      var dirs = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
+      return this.moveDirs(piece, dirs);
+    }
+  }, {
+    key: "knightMoves",
+    value: function knightMoves(piece) {
+      var moveDirs = [[2, 1], [1, 2], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]];
+      return this.singleMoveDirs(piece, moveDirs);
+    }
+  }, {
+    key: "kingMoves",
+    value: function kingMoves(piece) {
+      var moveDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [0, 1], [-1, 0], [0, -1]];
+      return this.singleMoveDirs(piece, moveDirs);
+    }
+  }, {
+    key: "findThreatsAndRemove",
+    value: function findThreatsAndRemove(piece, moves) {
+      var otherColor = this.oppColor(piece.color);
+
+      for (var i = 0; i < moves.length; i++) {
+        if (this.isIncluded(this.kings[otherColor]['piece'].moves, moves[i])) {
+          this.kings[otherColor]['indirect'][piece.pos] ? this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : [moves[i]];
+          this.kings[otherColor]['piece'].moves.splice(this.kings[otherColor]['piece'].moves.indexOf(moves[i]), 1);
+        } else if (moves[i] === this.kings[otherColor]['piece'].pos) {
+          this.kings[otherColor]['direct'][piece.pos] = moves[i];
+        }
+      }
+    }
+  }, {
+    key: "findMatchingThreat",
+    value: function findMatchingThreat(primaryThreat, color) {
+      // primaryThreat should be a piece object reference
+      if (this.kings[color]['indirect'][primaryThreat.pos]) {
+        return this.kings[color]['indirect'][primaryThreat.pos][0]; // should only ever have one position => but it is in an array
+      } else {
+        return [-1, -1];
+      }
+    }
+  }, {
+    key: "adjacent",
+    value: function adjacent(piece1, piece2) {
+      var pos1 = piece1.pos;
+      var pos2 = piece2.pos;
+
+      if (pos1[0] + 1 === pos2[0] && pos1[1] === pos2[1] || pos1[0] - 1 === pos2[0] && pos1[1] === pos2[1] || pos1[0] + 1 === pos2[0] && pos1[1] + 1 === pos2[1] || pos1[0] + 1 === pos2[0] && pos1[1] - 1 === pos2[1] || pos1[0] - 1 === pos2[0] && pos1[1] + 1 === pos2[1] || pos1[0] - 1 === pos2[0] && pos1[1] - 1 === pos2[1] || pos1[0] === pos2[0] && pos1[1] + 1 === pos2[1] || pos1[0] === pos2[0] && pos1[1] - 1 === pos2[1]) {
+        return true;
+      }
+
+      return false;
+    }
+  }, {
+    key: "findSavesOnMove",
+    value: function findSavesOnMove(piece, moves) {
+      if (this.kings[piece.color]['direct']) {
+        var threatLocations = Object.keys(this.kings[piece.color]['direct']);
+        var threatPieces = [];
+
+        for (var i = 0; i < threatLocations.length; i++) {
+          threatPieces.push(this.currentPieces[threatLocations[i]]); // take the [pos[0], pos[1]] from the keys and find their objects
+        }
+
+        for (var _i = 0; _i < threatPieces.length; _i++) {
+          for (var j = 0; j < moves.length; j++) {
+            if (moves[j] === threatPieces[_i].pos) {
+              this.kings[piece.color]['saves'][piece.pos] = moves[j];
+            } else if (threatPieces[j].symbol !== 'N' && threatPieces[j].symbol !== 'P' && !this.adjacent(threatPieces[j], this.kings[piece.color]['piece'])) {
+              var blockPos = this.findMatchingThreat(threatPieces[j]);
+
+              if (moves[j] === blockPos) {
+                this.kings[piece.color]['saves'][piece.pos] = moves[j];
+              }
+            }
+          }
+        }
+      }
+    }
+  }, {
+    key: "potentialMoves",
+    value: function potentialMoves(piece) {
+      var moves;
+
+      switch (piece.symbol) {
+        case 'P':
+          moves = this.pawnMoves(piece); // add enpausant and promotion
+
+          console.log("pawn moves: ".concat(moves));
+          break;
+
+        case 'R':
+          moves = this.rookMoves(piece);
+          console.log("rook moves: ".concat(moves));
+          break;
+
+        case 'N':
+          moves = this.knightMoves(piece);
+          console.log("knight moves: ".concat(moves));
+          break;
+
+        case 'B':
+          moves = this.bishopMoves(piece);
+          console.log("bishop moves: ".concat(moves));
+          break;
+
+        case 'Q':
+          moves = this.rookMoves(piece).concat(this.bishopMoves(piece));
+          console.log("queen moves: ".concat(moves));
+          break;
+
+        case 'K':
+          // add castling and restrictions on moving near enemy kings
+          moves = this.kingMoves(piece);
+          console.log("king moves: ".concat(moves)); // this.kings[piece.color].moves = moves; // done in call statement
+
+          break;
+
+        default:
+          console.log('that piece doesn\'t exist');
+          console.log("that piece is: ".concat(piece));
+          return;
+      }
+
+      piece.moves = moves;
+
+      if (piece.symbol !== 'K') {
+        if (piece.color === this.currentTurnColor) {
+          this.findThreatsAndRemove(piece, moves);
+        } else {
+          this.findSavesOnMove(piece, moves); // does not exist yet
+        }
+      }
+
+      return moves;
+    }
+  }, {
+    key: "isIncluded",
+    value: function isIncluded(positions, pos) {
+      // console.log(`positions to check: ${positions}`);
+      // console.log(`pos checked: ${pos}`);
+      for (var i = 0; i < positions.length; i++) {
+        if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+  }, {
+    key: "findMovesForColor",
+    value: function findMovesForColor(color) {
+      var pieces = Object.values(this.currentPieces);
+
+      for (var i = 0; i < pieces.length; i++) {
+        if (pieces[i].color === color && pieces[i].symbol !== 'K') {
+          this.potentialMoves(pieces[i]);
+        }
+      }
+    }
+  }, {
+    key: "findAllMoves",
+    value: function findAllMoves() {
+      this.kings[this.currentTurnColor]['piece'].moves = this.potentialMoves(this.kings[this.currentTurnColor]['piece']);
+      this.kings[this.oppColor(this.currentTurnColor)]['piece'].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]['piece']);
+      this.findMovesForColor(this.currentTurnColor);
+      this.findMovesForColor(this.oppColor(this.currentTurnColor));
+    }
+  }, {
+    key: "validMove",
+    value: function validMove(piece, pos) {
+      if (this.isIncluded(piece.moves, pos)) {
+        return true;
+      }
+
+      return false;
+    }
+  }, {
+    key: "movePiece",
+    value: function movePiece(moveTile, endTile) {
+      if (this.validMove(moveTile.piece, endTile.pos)) {
+        var piece = moveTile.piece;
+        this.currentTurnColor = piece.color;
+
+        if (endTile.piece) {
+          if (endTile.piece.color === 'black') {
+            this.whiteCaptures.push(piece);
+          } else {
+            this.blackCaptures.push(piece);
+          }
+        }
+
+        this.findAllMoves(); // find all moves beginning with pieces of current turn player
+
+        endTile.piece = piece; // add the piece to the moved to tile
+
+        delete this.currentPieces[piece.pos]; // remove old piece pos from hash
+
+        piece.pos = endTile.pos; // move the piece's position
+
+        if (piece.symbol === 'K') {
+          this.kings[piece.color]['piece'].pos = piece.pos;
+        }
+
+        this.currentPieces[piece.pos] = piece; // update hash piece location
+
+        moveTile.piece = null; // remove the piece from its old tile
+
+        return true;
+      } else {
+        console.log('Invalid move destination');
+        return false;
+      }
+    }
+  }, {
+    key: "checkmate",
+    value: function checkmate(otherTurnCol) {
+      // console.log(`non-object white king: ${this.kings['white']['direct']}`)
+      // console.log(`non-object black king: ${this.kings['black']['direct']}`)
+      console.log("other turn color: ".concat(otherTurnCol));
+      var dThreats = Object.keys(this.kings[otherTurnCol]['direct']);
+      console.log("dThreats: ".concat(dThreats));
+
+      if (dThreats) {
+        if (this.kings[otherTurnCol]['piece'].moves === [] || this.kings[otherTurnCol]['saves']) {
+          return false;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+  }]);
+
+  return Board;
+}();
 
 /***/ }),
 

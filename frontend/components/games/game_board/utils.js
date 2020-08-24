@@ -27,11 +27,11 @@ export class Board {
         this.blackCaptures = [];
         this.currentPieces = {};
         this.kings = {};
-        this.kings['white'] = {};
-        this.kings['black'] = {};
-        this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {};
-        this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {};
-        this.kings['white']['saves'] = {}; this.kings['black']['saves'] = {};
+        this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
+        this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
+        // this.kings['white']['direct'] = { 'init': 'init' }; this.kings['white']['indirect'] = { 'init': 'init'};
+        // this.kings['black']['direct'] = { 'init': 'init' }; this.kings['black']['indirect'] = { 'init': 'init'};
+        // this.kings['white']['saves'] = { 'init': 'init' }; this.kings['black']['saves'] = { 'init': 'init'};
         // { indirect => {piece.pos => [movePos' leading to king] }  direct => {piece.pos => [movePos' leading to king] } }
         this.currentTurnColor = 'white';
         this.generateBoard();
@@ -61,10 +61,10 @@ export class Board {
                     piece.moves = [];
                     if (piece.pos[0] > 5) {
                         piece.color = 'white';
-                        if (piece.symbol === 'K') {this.kings['white'] = piece;}
+                        if (piece.symbol === 'K') {this.kings['white']['piece'] = piece;}
                     } else {
                         piece.color = 'black';
-                        if (piece.symbol === 'K') { this.kings['black'] = piece; }
+                        if (piece.symbol === 'K') { this.kings['black']['piece'] = piece; }
                     }
                     this.currentPieces[piece.pos] = piece;
                 }
@@ -109,15 +109,13 @@ export class Board {
         const moves = [];
         for (let i = 0; i < dirs.length; i++) {
             let currentPos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
-            console.log(this.currentPieces[currentPos]);
-            const movesForTheKing = [];
+            // console.log(this.currentPieces[currentPos]);
             while (!(this.currentPieces[currentPos]) && this.onBoard(currentPos)) {
                 const tempPush = currentPos.slice();
-                movesForTheKing.push(tempPush);
+                moves.push(tempPush);
                 currentPos[0] += dirs[i][0];
                 currentPos[1] += dirs[i][1];
             }
-            moves.push(movesForTheKing);
             if (this.onBoard(currentPos) && this.currentPieces[currentPos]) {
                 const currentPiece = this.currentPieces[currentPos];
                 if (currentPiece.color !== piece.color) {
@@ -171,13 +169,10 @@ export class Board {
     findThreatsAndRemove(piece, moves) {
         const otherColor = this.oppColor(piece.color);
         for (let i = 0; i < moves.length; i++) {
-            if (this.isIncluded(this.kings[otherColor].moves, moves[i])) {
+            if (this.isIncluded(this.kings[otherColor]['piece'].moves, moves[i])) {
                 this.kings[otherColor]['indirect'][piece.pos] ? this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : [moves[i]];
-                // if (!(this.kings[otherColor]['indirect'][piece.pos]['pos'])) {
-                //     this.kings[otherColor]['indirect'][piece.pos]['pos'] = piece.pos;
-                // }
-                this.kings[otherColor].moves.splice(this.kings[otherColor].moves.indexOf(moves[i]), 1);
-            } else if (moves[i] === this.kings[otherColor].pos) {
+                this.kings[otherColor]['piece'].moves.splice(this.kings[otherColor]['piece'].moves.indexOf(moves[i]), 1);
+            } else if (moves[i] === this.kings[otherColor]['piece'].pos) {
                 this.kings[otherColor]['direct'][piece.pos] = moves[i];
             }
         }
@@ -185,7 +180,7 @@ export class Board {
 
     findMatchingThreat(primaryThreat, color) {  // primaryThreat should be a piece object reference
         if (this.kings[color]['indirect'][primaryThreat.pos]) {
-            return this.kings[color]['indirect'][primaryThreat.pos][0];  // enemy rook/queen adjacent to king ????
+            return this.kings[color]['indirect'][primaryThreat.pos][0]; // should only ever have one position => but it is in an array
         } else {
             return [-1, -1];
         }
@@ -219,7 +214,7 @@ export class Board {
                 for (let j = 0; j < moves.length; j++) {
                     if (moves[j] === threatPieces[i].pos) {
                         this.kings[piece.color]['saves'][piece.pos] = moves[j];
-                    } else if (threatPieces[j].symbol !== 'N' && threatPieces[j].symbol !== 'P' && !(this.adjacent(threatPieces[j], this.kings[piece.color]))) {
+                    } else if (threatPieces[j].symbol !== 'N' && threatPieces[j].symbol !== 'P' && !(this.adjacent(threatPieces[j], this.kings[piece.color]['piece']))) {
                         const blockPos = this.findMatchingThreat(threatPieces[j]);
                         if (moves[j] === blockPos) {
                             this.kings[piece.color]['saves'][piece.pos] = moves[j];
@@ -236,21 +231,27 @@ export class Board {
         switch (piece.symbol) {
             case 'P':
                 moves = (this.pawnMoves(piece)); // add enpausant and promotion
+                console.log(`pawn moves: ${moves}`);
                 break;
             case 'R':
                 moves = (this.rookMoves(piece));
+                console.log(`rook moves: ${moves}`);
                 break;
             case 'N':
                 moves = this.knightMoves(piece);
+                console.log(`knight moves: ${moves}`);
                 break;
             case 'B':
                 moves = (this.bishopMoves(piece));
+                console.log(`bishop moves: ${moves}`);
                 break;
             case 'Q':
                 moves = (this.rookMoves(piece).concat(this.bishopMoves(piece)));
+                console.log(`queen moves: ${moves}`);
                 break;
             case 'K': // add castling and restrictions on moving near enemy kings
                 moves = this.kingMoves(piece)
+                console.log(`king moves: ${moves}`);
                 // this.kings[piece.color].moves = moves; // done in call statement
                 break;
             default:
@@ -270,8 +271,8 @@ export class Board {
     }
 
     isIncluded(positions, pos) {
-        console.log(`positions to check: ${positions}`);
-        console.log(`pos checked: ${pos}`);
+        // console.log(`positions to check: ${positions}`);
+        // console.log(`pos checked: ${pos}`);
         for (let i = 0; i < positions.length; i++) {
             if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
                 return true;
@@ -290,19 +291,14 @@ export class Board {
     }
 
     findAllMoves() {
-        this.kings[this.currentTurnColor].moves = this.potentialMoves(this.kings[this.currentTurnColor]);
-        this.kings[this.oppColor(this.currentTurnColor)].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]);
+        this.kings[this.currentTurnColor]['piece'].moves = this.potentialMoves(this.kings[this.currentTurnColor]['piece']);
+        this.kings[this.oppColor(this.currentTurnColor)]['piece'].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]['piece']);
         this.findMovesForColor(this.currentTurnColor);
         this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
 
     validMove(piece, pos) {
-        const moves = this.potentialMoves(piece);
-        // console.log('potential moves');
-        // console.log(moves);
-        // console.log('destination pos');
-        // console.log(pos);
-        if (this.isIncluded(moves, pos)) {
+        if (this.isIncluded(piece.moves, pos)) {
             return true;
         }
         return false;
@@ -324,7 +320,7 @@ export class Board {
             delete this.currentPieces[piece.pos];       // remove old piece pos from hash
             piece.pos = endTile.pos;                // move the piece's position
             if (piece.symbol === 'K') {
-                this.kings[piece.color].pos = piece.pos
+                this.kings[piece.color]['piece'].pos = piece.pos
             }
             this.currentPieces[piece.pos] = piece;      // update hash piece location
             moveTile.piece = null;                  // remove the piece from its old tile
@@ -336,8 +332,13 @@ export class Board {
     }
 
     checkmate(otherTurnCol) {
-        if (this.kings[otherColor]['direct']) {
-            if (this.kings[otherTurnCol].moves === [] || this.kings[otherColor]['saves']) {
+        // console.log(`non-object white king: ${this.kings['white']['direct']}`)
+        // console.log(`non-object black king: ${this.kings['black']['direct']}`)
+        console.log(`other turn color: ${otherTurnCol}`);
+        const dThreats = Object.keys(this.kings[otherTurnCol]['direct']);
+        console.log(`dThreats: ${dThreats}`);
+        if (dThreats) {
+            if (this.kings[otherTurnCol]['piece'].moves === [] || this.kings[otherTurnCol]['saves']) {
                 return false;
             } else {
                 return false;

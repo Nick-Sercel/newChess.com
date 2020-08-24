@@ -9,7 +9,7 @@ import EditUserFormContainer from './users/edit_user_form_container';
 import CreateUserFormContainer from './users/create_user_form_container';
 import LoginFormContainer from './session/login_container';
 
-import GameBoardContainer from './games/game_board_container';
+import GameBoardContainer from './games/game_board/game_board_container';
 
 import CreateGoalContainer from './goals/create_goal_container';
 import EditGoalContainer from './goals/edit_goal_container';
