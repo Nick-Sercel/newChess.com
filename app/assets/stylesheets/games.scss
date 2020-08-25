@@ -2,6 +2,7 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
+// Board
 
 #board-container {
     display: flex;
@@ -33,3 +34,39 @@
  .white-tile {
     background-color: white;
  }
+
+
+ // Display Games
+
+.game-index-container {
+    
+    min-width: 40%;
+    background-color: rgba(42, 42, 42, 1);
+    padding: 0;
+    margin: 0 auto;
+    font-weight: 300;
+    border: 5px solid black;
+}
+
+.game-index-container li {
+    list-style: none;
+}
+
+
+.game-item-container li {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+}
+
+.game-index-container > li > p {
+    padding: none;
+    font-size: 40px;
+    text-align: center;
+    text-decoration: underline;
+}
+
+.game-item-container li button {
+    text-decoration: none;
+    background-color: red;
+}

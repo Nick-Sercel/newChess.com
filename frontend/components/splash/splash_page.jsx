@@ -1,16 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import GoalIndexContainer from '../goals/goal_index_container';
+import GameIndexContainer from '../games/game_index/game_index_container';
 
 class SplashPage extends React.Component {
 
     render () {
-        let link = null;
+        let loggedInContent = null;
         if (this.props.currentUser) {
-            link = <Link to={`/users/${this.props.currentUser.id}`}>User Page</Link>
+            loggedInContent = <div className='splash-indexes-container'>
+                                <GameIndexContainer />
+                                <GoalIndexContainer />
+                              </div>;
         }
         return (
-            <div className='splash-container'>
-                <li>{link}</li>
+            <div>
+                {loggedInContent}
                 <li><Link to='/games/new'>Play a Game</Link></li>
             </div>
         )

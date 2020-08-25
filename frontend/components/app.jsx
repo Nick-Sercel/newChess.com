@@ -33,7 +33,7 @@ const App = () => (
             <AuthRoute path="/users/:userId" component={UserShowContainer} />
             <Route path="/" component={SplashContainer} />
         </Switch>
-        <Link to='/'>Return to Splash Page</Link>
+        <Link to='/'>Return to Home Page</Link>
     </div>
 );
 

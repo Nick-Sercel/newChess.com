@@ -2,11 +2,11 @@ import { connect } from 'react-redux';
 import GoalForm from './goal_form';
 import { createGoal } from '../../actions/goal_actions';
 
-const mSTP = (state, ownProps) => ({
+const mSTP = (state) => ({
     goal: {
         title: '',
         body: '',
-        user_id: `${ownProps.match.params.userId}`,
+        user_id: `${state.session.id}`,
     },
     formType: 'Create Goal',
     formClassName: 'create',

@@ -1,0 +1,1 @@
+json.extract! game, :id, :central_user_id, :foreign_user_id, :winner_id, :moves_list

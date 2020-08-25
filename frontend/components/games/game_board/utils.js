@@ -250,7 +250,7 @@ export class Board {
                 break;
             case 'Q':
                 moves = (this.rookMoves(piece).concat(this.bishopMoves(piece)));
-                console.log(`queen moves: ${moves}`);
+                // console.log(`queen moves: ${moves}`);
                 break;
             case 'K': // add castling and restrictions on moving near enemy kings
                 moves = this.kingMoves(piece)
@@ -274,8 +274,8 @@ export class Board {
     }
 
     isIncluded(positions, pos) {
-        console.log(`positions to check: ${positions}`);
-        console.log(`pos checked: ${pos}`);
+        // console.log(`positions to check: ${positions}`);
+        // console.log(`pos checked: ${pos}`);
         for (let i = 0; i < positions.length; i++) {
             if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
                 return true;

@@ -3,8 +3,9 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
 .goal-index-container {
-    width: 60%;
-    background-color: #2b2a28;
+    
+    min-width: 40%;
+    background-color: rgba(42, 42, 42, 1);
     padding: 0;
     margin: 0 auto;
     font-weight: 300;
@@ -15,26 +16,26 @@
     list-style: none;
 }
 
-.goal-index-container > li > p {
-    padding-top: 10px;
-    font-size: 40px;
-    text-align: center;
-    text-decoration: underline;
-}
 
 .goal-item-container li {
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 10px;
-    color: blue;
 }
 
+.goal-index-container > li > p {
+    padding: none;
+    font-size: 40px;
+    text-align: center;
+    text-decoration: underline;
+}
 .goal-title {
-
+    padding-left: 30px;
+    font-size: 20px;
 }
 
 .goal-body {
-
+    font-size: 15px;
 }
 
 .goal-item-container li button {
