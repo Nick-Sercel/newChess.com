@@ -30,6 +30,7 @@ const App = () => (
             <AuthRoute path='/users/:userId/goals/:goalId/edit' component={EditGoalContainer} />
             <AuthRoute path='/users/:userId/goals/:goalId' component={GoalIndexContainer} />
             <AuthRoute path="/users/:userId/edit" component={EditUserFormContainer} />
+            <Route path="/users/:userId/external" component={UserShowContainer} />
             <AuthRoute path="/users/:userId" component={UserShowContainer} />
             <Route path="/" component={SplashContainer} />
         </Switch>
@@ -40,3 +41,13 @@ const App = () => (
 export default App;
 
 // Heroku logs -t
+
+// Questions:
+
+//   click() {
+        // this.props.logout();
+        // this.props.history.push('/');
+//  } 
+//  how do i stop this from rendering splash for signed in after clicking logout in another page
+
+// why does jbuilder not recognize json

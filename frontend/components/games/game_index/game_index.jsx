@@ -8,7 +8,7 @@ class GameIndex extends React.Component {
 
     render() {
         return (
-            <div className='game-index-container'>
+            <div className='index-container'>
                 <li><p>Games</p></li>
                 {
                     this.props.games.map(game => <GameIndexItem game={game} fetchUser={this.props.fetchUser} />)

@@ -16,3 +16,5 @@ User.create!(id: 2, username: 'Twilight Dave', email: 'allSkill@gmail.com', elo:
 Goal.create(id: 1, title: 'Learn the pieces', body: 'Figure out what each piece does and how to use them', user_id: 1)
 
 Game.create(id: 1, central_user_id: 1, foreign_user_id: 2, winner_id: 2, moves_list: 'e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7')
+
+Friend.create(id: 1, central_user_id: 1, foreign_user_id: 2, accepted: true)

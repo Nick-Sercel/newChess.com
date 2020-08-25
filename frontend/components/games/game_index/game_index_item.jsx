@@ -20,7 +20,7 @@ class GameIndexItem extends React.Component {
 
     render() {
         return (
-            <div className='game-item-container'>
+            <div className='item-container'>
                 <li><p>{this.centralUser.username}</p></li>
                 <li><p>{this.foreignUser.username}</p></li>
                 <li><p>{this.winner.username}</p></li>

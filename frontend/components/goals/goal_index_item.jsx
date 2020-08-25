@@ -8,7 +8,7 @@ class GoalIndexItem extends React.Component {
 
     render() {
         return (
-            <div className='goal-item-container'>
+            <div className='item-container'>
                 <li><p className='goal-title'>{this.props.goal.title}</p></li>
                 <li><p className='goal-body'>{this.props.goal.body}</p></li>
                 <li><button onClick={() => this.editGoal()}>Edit Goal</button></li >

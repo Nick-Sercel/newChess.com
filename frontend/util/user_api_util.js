@@ -6,6 +6,13 @@ export const fetchUser = (userId) => {
     })
 }
 
+export const fetchUserSessionless = (userId) => {
+    return $.ajax({
+        method: 'GET',
+        url: `/api/users/${userId}`,
+    })
+}
+
 export const createUser = (user) => {
     return $.ajax ({
         method: 'POST',

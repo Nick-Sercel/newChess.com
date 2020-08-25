@@ -8,7 +8,7 @@ class GoalIndex extends React.Component {
 
     render() {
         return (
-            <div className='goal-index-container'>
+            <div className='index-container'>
                 <li><p>Goals</p></li>
                 {this.props.goals.map(goal => <GoalIndexItem key={goal.id} goal={goal} deleteGoal={this.props.deleteGoal} />)}
             </div>

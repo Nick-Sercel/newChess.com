@@ -22,6 +22,6 @@ class Api::GamesController < ApplicationController
 
     private
     def game_params
-        self.params.require(:game).permit(:title, :body, :user_id)
+        self.params.require(:game).permit(:central_user_id, :foreign_user_id, :winner_id, :moves_list)
     end
 end

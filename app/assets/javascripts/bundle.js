@@ -86,6 +86,80 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./frontend/actions/friend_actions.js":
+/*!********************************************!*\
+  !*** ./frontend/actions/friend_actions.js ***!
+  \********************************************/
+/*! exports provided: RECEIVE_FRIENDS, RECEIVE_FRIEND, REMOVE_FRIEND, fetchFriends, fetchFriend, createFriend, deleteFriend */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RECEIVE_FRIENDS", function() { return RECEIVE_FRIENDS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RECEIVE_FRIEND", function() { return RECEIVE_FRIEND; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "REMOVE_FRIEND", function() { return REMOVE_FRIEND; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriends", function() { return fetchFriends; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriend", function() { return fetchFriend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createFriend", function() { return createFriend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteFriend", function() { return deleteFriend; });
+/* harmony import */ var _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/friend_api_util */ "./frontend/util/friend_api_util.js");
+
+var RECEIVE_FRIENDS = 'RECEIVE_FRIENDS';
+var RECEIVE_FRIEND = 'RECEIVE_FRIEND';
+var REMOVE_FRIEND = 'REMOVE_FRIEND';
+
+var receiveFriends = function receiveFriends(friends) {
+  return {
+    type: RECEIVE_FRIENDS,
+    friends: friends
+  };
+};
+
+var receiveFriend = function receiveFriend(friend) {
+  return {
+    type: RECEIVE_FRIEND,
+    friend: friend
+  };
+};
+
+var removeFriend = function removeFriend(friendId) {
+  return {
+    type: REMOVE_FRIEND,
+    friendId: friendId
+  };
+};
+
+var fetchFriends = function fetchFriends() {
+  return function (dispatch) {
+    return _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__["fetchFriends"]().then(function (friends) {
+      return dispatch(receiveFriends(friends));
+    });
+  };
+};
+var fetchFriend = function fetchFriend(friendId) {
+  return function (dispatch) {
+    return _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__["fetchFriend"](friendId).then(function (friend) {
+      return dispatch(receiveFriend(friend));
+    });
+  };
+};
+var createFriend = function createFriend(friend) {
+  return function (dispatch) {
+    return _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__["createFriend"](friend).then(function (friend) {
+      return dispatch(receiveFriend(friend));
+    });
+  };
+};
+var deleteFriend = function deleteFriend(friendId) {
+  return function (dispatch) {
+    return _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__["deleteFriend"](friendId).then(function () {
+      return dispatch(removeFriend(friendId));
+    });
+  };
+};
+
+/***/ }),
+
 /***/ "./frontend/actions/game_actions.js":
 /*!******************************************!*\
   !*** ./frontend/actions/game_actions.js ***!
@@ -277,25 +351,35 @@ var logout = function logout() {
 /*!******************************************!*\
   !*** ./frontend/actions/user_actions.js ***!
   \******************************************/
-/*! exports provided: RECEIVE_USER, REMOVE_USER, fetchUser, createUser, updateUser, deleteUser */
+/*! exports provided: RECEIVE_USER, RECEIVE_USER_SESSIONLESS, REMOVE_USER, fetchUser, fetchUserSessionless, createUser, updateUser, deleteUser */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RECEIVE_USER", function() { return RECEIVE_USER; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RECEIVE_USER_SESSIONLESS", function() { return RECEIVE_USER_SESSIONLESS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "REMOVE_USER", function() { return REMOVE_USER; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchUser", function() { return fetchUser; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchUserSessionless", function() { return fetchUserSessionless; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createUser", function() { return createUser; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "updateUser", function() { return updateUser; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteUser", function() { return deleteUser; });
 /* harmony import */ var _util_user_api_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/user_api_util */ "./frontend/util/user_api_util.js");
 
 var RECEIVE_USER = 'RECEIVE_USER';
+var RECEIVE_USER_SESSIONLESS = 'RECEIVE_USER_SESSIONLESS';
 var REMOVE_USER = 'REMOVE_USER';
 
 var receiveUser = function receiveUser(user) {
   return {
     type: RECEIVE_USER,
+    user: user
+  };
+};
+
+var receiveUserSessionless = function receiveUserSessionless(user) {
+  return {
+    type: RECEIVE_USER_SESSIONLESS,
     user: user
   };
 };
@@ -311,6 +395,13 @@ var fetchUser = function fetchUser(userId) {
   return function (dispatch) {
     return _util_user_api_util__WEBPACK_IMPORTED_MODULE_0__["fetchUser"](userId).then(function (user) {
       return dispatch(receiveUser(user));
+    });
+  };
+};
+var fetchUserSessionless = function fetchUserSessionless(userId) {
+  return function (dispatch) {
+    return _util_user_api_util__WEBPACK_IMPORTED_MODULE_0__["fetchUserSessionless"](userId).then(function (user) {
+      return dispatch(receiveUserSessionless(user));
     });
   };
 };
@@ -401,6 +492,9 @@ var App = function App() {
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_util_route_util__WEBPACK_IMPORTED_MODULE_2__["AuthRoute"], {
     path: "/users/:userId/edit",
     component: _users_edit_user_form_container__WEBPACK_IMPORTED_MODULE_4__["default"]
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Route"], {
+    path: "/users/:userId/external",
+    component: _users_user_show_container__WEBPACK_IMPORTED_MODULE_3__["default"]
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_util_route_util__WEBPACK_IMPORTED_MODULE_2__["AuthRoute"], {
     path: "/users/:userId",
     component: _users_user_show_container__WEBPACK_IMPORTED_MODULE_3__["default"]
@@ -413,6 +507,211 @@ var App = function App() {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (App); // Heroku logs -t
+// Questions:
+//   click() {
+// this.props.logout();
+// this.props.history.push('/');
+//  } 
+//  how do i stop this from rendering splash for signed in after clicking logout in another page
+// why does jbuilder not recognize json
+
+/***/ }),
+
+/***/ "./frontend/components/friends/friends_list.jsx":
+/*!******************************************************!*\
+  !*** ./frontend/components/friends/friends_list.jsx ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _friends_list_item__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./friends_list_item */ "./frontend/components/friends/friends_list_item.jsx");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+
+var FriendIndex = /*#__PURE__*/function (_React$Component) {
+  _inherits(FriendIndex, _React$Component);
+
+  var _super = _createSuper(FriendIndex);
+
+  function FriendIndex() {
+    _classCallCheck(this, FriendIndex);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(FriendIndex, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.props.fetchFriends();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this = this;
+
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: 'index-container friend-index-container'
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Friends")), this.props.friends.map(function (friend) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_friends_list_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
+          friend: friend,
+          fetchUser: _this.props.fetchUser,
+          deleteFriend: _this.props.deleteFriend
+        });
+      }));
+    }
+  }]);
+
+  return FriendIndex;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (FriendIndex);
+
+/***/ }),
+
+/***/ "./frontend/components/friends/friends_list_container.jsx":
+/*!****************************************************************!*\
+  !*** ./frontend/components/friends/friends_list_container.jsx ***!
+  \****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _friends_list__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./friends_list */ "./frontend/components/friends/friends_list.jsx");
+/* harmony import */ var _actions_friend_actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../actions/friend_actions */ "./frontend/actions/friend_actions.js");
+/* harmony import */ var _actions_user_actions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../actions/user_actions */ "./frontend/actions/user_actions.js");
+
+
+
+
+
+var mSTP = function mSTP(state) {
+  return {
+    friends: Object.values(state.entities.friends)
+  };
+};
+
+var mDTP = function mDTP(dispatch) {
+  return {
+    fetchFriends: function fetchFriends() {
+      return dispatch(Object(_actions_friend_actions__WEBPACK_IMPORTED_MODULE_2__["fetchFriends"])());
+    },
+    deleteFriend: function deleteFriend(friendId) {
+      return dispatch(Object(_actions_friend_actions__WEBPACK_IMPORTED_MODULE_2__["deleteFriend"])(friendId));
+    },
+    fetchUser: function fetchUser(userId) {
+      return dispatch(Object(_actions_user_actions__WEBPACK_IMPORTED_MODULE_3__["fetchUser"])(userId));
+    }
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_redux__WEBPACK_IMPORTED_MODULE_0__["connect"])(mSTP, mDTP)(_friends_list__WEBPACK_IMPORTED_MODULE_1__["default"]));
+
+/***/ }),
+
+/***/ "./frontend/components/friends/friends_list_item.jsx":
+/*!***********************************************************!*\
+  !*** ./frontend/components/friends/friends_list_item.jsx ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+var FriendIndexItem = /*#__PURE__*/function (_React$Component) {
+  _inherits(FriendIndexItem, _React$Component);
+
+  var _super = _createSuper(FriendIndexItem);
+
+  function FriendIndexItem(props) {
+    var _this;
+
+    _classCallCheck(this, FriendIndexItem);
+
+    _this = _super.call(this, props);
+    _this.centralUser;
+    _this.foreignUser;
+    return _this;
+  }
+
+  _createClass(FriendIndexItem, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.centralUser = this.props.fetchUser(this.props.friend.central_user_id);
+      this.foreignUser = this.props.fetchUser(this.props.friend.foreign_user_id);
+      this.props.friend.accepted ? statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Pending"));
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var centralUserDisp;
+      this.centralUser ? centralUserDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.centralUser.username)) : centralUserDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+      var foreignUserDisp;
+      this.foreignUser ? foreignUserDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.foreignUser.username)) : foreignUserDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+      var statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: 'item-container friend-item-container'
+      }, centralUserDisp, foreignUserDisp, statusDisp);
+    }
+  }]);
+
+  return FriendIndexItem;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (FriendIndexItem);
 
 /***/ }),
 
@@ -1262,7 +1561,7 @@ var GameIndex = /*#__PURE__*/function (_React$Component) {
       var _this = this;
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        className: "game-index-container"
+        className: "index-container"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Games")), this.props.games.map(function (game) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_index_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
           game: game,
@@ -1386,7 +1685,7 @@ var GameIndexItem = /*#__PURE__*/function (_React$Component) {
     key: "render",
     value: function render() {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        className: "game-item-container"
+        className: "item-container"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.centralUser.username)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.foreignUser.username)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.winner.username)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.props.game.moves_list)));
     }
   }]);
@@ -1693,7 +1992,7 @@ var GoalIndex = /*#__PURE__*/function (_React$Component) {
       var _this = this;
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        className: "goal-index-container"
+        className: "index-container"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Goals")), this.props.goals.map(function (goal) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goal_index_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
           key: goal.id,
@@ -1807,7 +2106,7 @@ var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
       var _this = this;
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        className: "goal-item-container"
+        className: "item-container"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
         className: "goal-title"
       }, this.props.goal.title)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
@@ -2035,6 +2334,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 /* harmony import */ var _goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../goals/goal_index_container */ "./frontend/components/goals/goal_index_container.jsx");
 /* harmony import */ var _games_game_index_game_index_container__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../games/game_index/game_index_container */ "./frontend/components/games/game_index/game_index_container.jsx");
+/* harmony import */ var _friends_friends_list_container__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../friends/friends_list_container */ "./frontend/components/friends/friends_list_container.jsx");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2062,6 +2362,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
 var SplashPage = /*#__PURE__*/function (_React$Component) {
   _inherits(SplashPage, _React$Component);
 
@@ -2081,7 +2382,7 @@ var SplashPage = /*#__PURE__*/function (_React$Component) {
       if (this.props.currentUser) {
         loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "splash-indexes-container"
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_games_game_index_game_index_container__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__["default"], null));
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_games_game_index_game_index_container__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_friends_friends_list_container__WEBPACK_IMPORTED_MODULE_4__["default"], null));
       }
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, loggedInContent, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
@@ -2750,25 +3051,51 @@ var UserShow = /*#__PURE__*/function (_React$Component) {
 
   var _super = _createSuper(UserShow);
 
-  function UserShow() {
+  function UserShow(props) {
     _classCallCheck(this, UserShow);
 
-    return _super.apply(this, arguments);
+    return _super.call(this, props);
   }
 
   _createClass(UserShow, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      this.props.fetchUser(this.props.match.params.userId);
+      if (this.props.user) {
+        console.log("sessionId: ".concat(this.props.currentUserId));
+        console.log("userId: ".concat(this.props.user.id));
+      }
+
+      if (!this.props.user || this.props.currentUserId !== this.props.user.id) {
+        this.props.fetchUserSessionless(this.props.match.params.userId);
+      } else {
+        this.props.fetchUser(this.props.match.params.userId);
+      }
     }
   }, {
     key: "render",
     value: function render() {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", null, this.props.user.username), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", null, this.props.user.email), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", null, this.props.user.elo), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-        to: "/game/new"
-      }, "Play a Game"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-        to: "/users/".concat(this.props.user.id, "/edit")
-      }, "Edit User Information"));
+      if (!this.props.user) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+      }
+
+      var loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+      var email = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+      var loggedOutContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+
+      if (this.props.currentUserId === this.props.user.id) {
+        loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+          to: "/game/new"
+        }, "Play a Game"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+          to: "/users/".concat(this.props.user.id, "/edit")
+        }, "Edit User Information"));
+        email = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", null, this.props.user.email);
+      } else {
+        loggedOutContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+          to: "/"
+        }, "Return to Home Page");
+      }
+
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", null, this.props.user.username), email, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", null, this.props.user.elo), loggedInContent, loggedOutContent);
     }
   }]);
 
@@ -2796,8 +3123,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var mSTP = function mSTP(state, ownProps) {
+  var currentUserId;
+
+  if (state.session) {
+    currentUserId = state.session.id;
+  }
+
   return {
-    user: state.entities.users[ownProps.match.params.userId]
+    user: state.entities.users[ownProps.match.params.userId],
+    currentUserId: currentUserId
   };
 };
 
@@ -2805,6 +3139,9 @@ var mDTP = function mDTP(dispatch) {
   return {
     fetchUser: function fetchUser(userId) {
       return dispatch(Object(_actions_user_actions__WEBPACK_IMPORTED_MODULE_2__["fetchUser"])(userId));
+    },
+    fetchUserSessionless: function fetchUserSessionless(userId) {
+      return dispatch(Object(_actions_user_actions__WEBPACK_IMPORTED_MODULE_2__["fetchUserSessionless"])(userId));
     }
   };
 };
@@ -2877,6 +3214,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _users_reducer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./users_reducer */ "./frontend/reducers/users_reducer.js");
 /* harmony import */ var _goals_reducer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./goals_reducer */ "./frontend/reducers/goals_reducer.js");
 /* harmony import */ var _games_reducer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./games_reducer */ "./frontend/reducers/games_reducer.js");
+/* harmony import */ var _friends_reducer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./friends_reducer */ "./frontend/reducers/friends_reducer.js");
+
 
 
 
@@ -2884,9 +3223,49 @@ __webpack_require__.r(__webpack_exports__);
 var EntitiesReducer = Object(redux__WEBPACK_IMPORTED_MODULE_0__["combineReducers"])({
   users: _users_reducer__WEBPACK_IMPORTED_MODULE_1__["default"],
   goals: _goals_reducer__WEBPACK_IMPORTED_MODULE_2__["default"],
-  games: _games_reducer__WEBPACK_IMPORTED_MODULE_3__["default"]
+  games: _games_reducer__WEBPACK_IMPORTED_MODULE_3__["default"],
+  friends: _friends_reducer__WEBPACK_IMPORTED_MODULE_4__["default"]
 });
 /* harmony default export */ __webpack_exports__["default"] = (EntitiesReducer);
+
+/***/ }),
+
+/***/ "./frontend/reducers/friends_reducer.js":
+/*!**********************************************!*\
+  !*** ./frontend/reducers/friends_reducer.js ***!
+  \**********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _actions_friend_actions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../actions/friend_actions */ "./frontend/actions/friend_actions.js");
+
+
+var FriendsReducer = function FriendsReducer() {
+  var oldState = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+  Object.freeze(oldState);
+  var newState = Object.assign({}, oldState);
+
+  switch (action.type) {
+    case _actions_friend_actions__WEBPACK_IMPORTED_MODULE_0__["RECEIVE_FRIENDS"]:
+      return Object.assign({}, action.friends);
+
+    case _actions_friend_actions__WEBPACK_IMPORTED_MODULE_0__["RECEIVE_FRIEND"]:
+      newState[action.friend.id] = action.friend;
+      return newState;
+
+    case _actions_friend_actions__WEBPACK_IMPORTED_MODULE_0__["REMOVE_FRIEND"]:
+      delete newState[action.friendId];
+      return newState;
+
+    default:
+      return oldState;
+  }
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (FriendsReducer);
 
 /***/ }),
 
@@ -3048,6 +3427,10 @@ var UsersReducer = function UsersReducer() {
       newState[action.user.id] = action.user;
       return newState;
 
+    case _actions_user_actions__WEBPACK_IMPORTED_MODULE_0__["RECEIVE_USER_SESSIONLESS"]:
+      newState[action.user.id] = action.user;
+      return newState;
+
     case _actions_user_actions__WEBPACK_IMPORTED_MODULE_0__["REMOVE_USER"]:
       delete newState[action.userId];
       return newState;
@@ -3083,6 +3466,49 @@ var configureStore = function configureStore() {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (configureStore);
+
+/***/ }),
+
+/***/ "./frontend/util/friend_api_util.js":
+/*!******************************************!*\
+  !*** ./frontend/util/friend_api_util.js ***!
+  \******************************************/
+/*! exports provided: fetchFriends, fetchFriend, createFriend, deleteFriend */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriends", function() { return fetchFriends; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriend", function() { return fetchFriend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createFriend", function() { return createFriend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteFriend", function() { return deleteFriend; });
+var fetchFriends = function fetchFriends() {
+  return $.ajax({
+    method: 'GET',
+    url: '/api/friends'
+  });
+};
+var fetchFriend = function fetchFriend(friendId) {
+  return $.ajax({
+    method: 'GET',
+    url: "/api/friends/".concat(friendId)
+  });
+};
+var createFriend = function createFriend(friend) {
+  return $.ajax({
+    method: 'POST',
+    url: '/api/friends',
+    data: {
+      friend: friend
+    }
+  });
+};
+var deleteFriend = function deleteFriend(friendId) {
+  return $.ajax({
+    method: 'DELETE',
+    url: "/api/friends/".concat(friendId)
+  });
+};
 
 /***/ }),
 
@@ -3286,16 +3712,23 @@ var deleteSession = function deleteSession() {
 /*!****************************************!*\
   !*** ./frontend/util/user_api_util.js ***!
   \****************************************/
-/*! exports provided: fetchUser, createUser, updateUser, deleteUser */
+/*! exports provided: fetchUser, fetchUserSessionless, createUser, updateUser, deleteUser */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchUser", function() { return fetchUser; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchUserSessionless", function() { return fetchUserSessionless; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createUser", function() { return createUser; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "updateUser", function() { return updateUser; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteUser", function() { return deleteUser; });
 var fetchUser = function fetchUser(userId) {
+  return $.ajax({
+    method: 'GET',
+    url: "/api/users/".concat(userId)
+  });
+};
+var fetchUserSessionless = function fetchUserSessionless(userId) {
   return $.ajax({
     method: 'GET',
     url: "/api/users/".concat(userId)
