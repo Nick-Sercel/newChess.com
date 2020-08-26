@@ -19,7 +19,7 @@
    background: rgba(32, 32, 32, 1);
  }
 
- li, p, h1, h2, h3, a {
+ li, p, h1, h2, h3, a, label {
    color: white;
  }
 
@@ -36,18 +36,18 @@
 
  .index-container {
     
-    min-width: 35%;
+    min-width: 30%;
     background-color: rgba(48, 48, 48, 1);
     padding: 0;
     margin: 0 auto;
     font-weight: 300;
     border: 5px solid black;
+    max-width: 40%;
 }
 
 .index-container li {
     list-style: none;
 }
-
 
 .item-container li {
     padding-top: 5px;
@@ -67,8 +67,13 @@
     background-color: red;
 }
 
+.item-container li p, .item-container li {
+   max-width: 97%;
+   word-wrap: break-word;
+}
+
 .friend-index-container {
-    min-width: 15%;
+    min-width: 20%;
 }
 
 .friend-item-container {

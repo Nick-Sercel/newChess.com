@@ -18,7 +18,7 @@ class SplashPage extends React.Component {
         return (
             <div>
                 {loggedInContent}
-                <li><Link to='/games/new'>Play a Game</Link></li>
+                <li><Link to='/game/new'>Play a Game</Link></li>
             </div>
         )
     }

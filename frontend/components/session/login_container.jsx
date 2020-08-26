@@ -11,6 +11,7 @@ const mSTP = state => ({
     },
     formType: 'Login!',
     formClassName: 'login',
+    sessionId: state.session.id,
 })
 
 const mDTP = dispatch => ({

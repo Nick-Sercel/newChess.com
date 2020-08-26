@@ -2,13 +2,13 @@ class Api::GamesController < ApplicationController
     before_action :require_logged_in
 
     def index
-        @games = Game.all
+        @games = current_user.games_begun + current_user.games_joined
         render :index
     end
 
     def create
         @game = Game.new(game_params)
-        if @game.save!
+        if @game.save!  # needs removiing eventually
             render :show
         else
             render json: @game.errors.full_messages, status: 422

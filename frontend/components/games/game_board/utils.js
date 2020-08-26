@@ -34,6 +34,7 @@ export class Board {
         // this.kings['white']['saves'] = { 'init': 'init' }; this.kings['black']['saves'] = { 'init': 'init'};
         // { indirect => {piece.pos => [movePos' leading to king] }  direct => {piece.pos => [movePos' leading to king] } }
         this.currentTurnColor = 'white';
+        this.moves = "";
         this.generateBoard();
     }
 
@@ -130,20 +131,20 @@ export class Board {
         const dirs = [];
         if (piece.color === 'white') {
             if (!(this.currentPieces[piece.pos[0] - 1, piece.pos[1]])) {
-                dirs.push([-1, 0]);
-                if (piece.pos[0] === 6 && !(this.currentPieces[piece.pos[0] - 2, piece.pos[1]])) {dirs.push([-2, 0])}
+                dirs.push([piece.pos[0] - 1, piece.pos[1]]);
+                if (piece.pos[0] === 6 && !(this.currentPieces[piece.pos[0] - 2, piece.pos[1]])) { dirs.push([piece.pos[0] - 2, piece.pos[1]])}
             }
-            if (this.currentPieces[piece.pos[0] - 1, piece.pos[1] - 1]) {dirs.push([-1, -1])}
-            if (this.currentPieces[piece.pos[0] - 1, piece.pos[1] + 1]) { dirs.push([-1, 1]) }
+            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && this.currentPieces[piece.pos[0] - 1, piece.pos[1] - 1]) { dirs.push([piece.pos[0] - 1, piece.pos[1] - 1]) }
+            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && this.currentPieces[piece.pos[0] - 1, piece.pos[1] + 1]) { dirs.push([piece.pos[0] - 1, piece.pos[1] + 1]) }
         } else {
             if (!(this.currentPieces[piece.pos[0] + 1, piece.pos[1]])) {
-                dirs.push([1, 0]);
-                if (piece.pos[0] === 1 && !(this.currentPieces[piece.pos[0] + 2, piece.pos[1]])) {dirs.push([2, 0])}
+                dirs.push([piece.pos[0] + 1, piece.pos[1]]);
+                if (piece.pos[0] === 1 && !(this.currentPieces[piece.pos[0] + 2, piece.pos[1]])) { dirs.push([piece.pos[0] + 2, piece.pos[1]])}
             }
-            if (this.currentPieces[piece.pos[0] + 1, piece.pos[1] - 1]) { dirs.push([1, -1]) }
-            if (this.currentPieces[piece.pos[0] + 1, piece.pos[1] + 1]) { dirs.push([1, 1]) }
+            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[piece.pos[0] + 1, piece.pos[1] - 1]) { dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]) }
+            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[piece.pos[0] + 1, piece.pos[1] + 1]) { dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]) }
         }
-        return this.singleMoveDirs(piece, dirs);
+        return dirs;
     }
 
     rookMoves(piece) {
@@ -229,11 +230,11 @@ export class Board {
         }
     }
 
-    potentialMoves(piece) {
+    potentialMoves(piece, usedToMark = false) {
         let moves;
         switch (piece.symbol) {
             case 'P':
-                moves = (this.pawnMoves(piece)); // add enpausant and promotion
+                moves = (this.pawnMoves(piece)); // add enpausant and test promotion
                 console.log(`pawn moves: ${moves}`);
                 break;
             case 'R':
@@ -263,11 +264,13 @@ export class Board {
                 return;
         }
         piece.moves = moves;
-        if (piece.symbol !== 'K') {
-            if (piece.color !== this.currentTurnColor) {
-                this.findThreatsAndRemove(piece, moves);
-            } else {
-                this.findSavesOnMove(piece, moves);         // does not exist yet
+        if (!usedToMark) {
+            if (piece.symbol !== 'K') {
+                if (piece.color !== this.currentTurnColor) {
+                    this.findThreatsAndRemove(piece, moves);
+                } else {
+                    this.findSavesOnMove(piece, moves);         // does not exist yet
+                }
             }
         }
         return moves;
@@ -307,19 +310,70 @@ export class Board {
         return false;
     }
 
+    stringifyPos(pos) {
+        let returnStr = '';
+        switch (pos[1]) {
+            case 0:
+                returnStr += 'a';
+                break;
+            case 1:
+                returnStr += 'b';
+                break;
+            case 2:
+                returnStr += 'c';
+                break;
+            case 3:
+                returnStr += 'd';
+                break;
+            case 4:
+                returnStr += 'e';
+                break;
+            case 5:
+                returnStr += 'f';
+                break;
+            case 6:
+                returnStr += 'g';
+                break;
+            case 7:
+                returnStr += 'h';
+                break;
+        }
+        returnStr += String(pos[0] + 1);
+        return returnStr;
+    }
+
+    addToMovesList(piece, endTile, capture = null) {
+        if (piece.symbol !== 'P') { this.moves += piece.symbol; }
+        if (capture) { this.moves += 'x'; }
+        this.moves += this.stringifyPos(endTile.pos);
+        this.moves += " ";
+        console.log(this.moves);
+    }
+
+    promotePawn(tile) {
+        let queen = new Piece(tile.pos, 'Q', tile.piece.color); // auto queen for now
+        this.currentPieces[tile.pos] = queen;
+        tile.piece = queen;
+        this.potentialMoves(queen);
+    }
+
     movePiece(moveTile, endTile) {
         // console.log
         this.potentialMoves(moveTile.piece);
         if (this.validMove(moveTile.piece, endTile.pos)) {
             this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {}; this.kings['white']['saves'] = {}
             this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {}; this.kings['black']['saves'] = {}
+            
             const piece = moveTile.piece;
             if (endTile.piece) {
                 if (endTile.piece.color === 'black') {
-                    this.whiteCaptures.push(piece);
+                    this.whiteCaptures.push(endTile.piece);
                 } else {
-                    this.blackCaptures.push(piece);
+                    this.blackCaptures.push(endTile.piece);
                 }
+                this.addToMovesList(piece, endTile, true);
+            } else {
+                this.addToMovesList(piece, endTile);
             }
             endTile.piece = piece;                  // add the piece to the moved to tile
             delete this.currentPieces[piece.pos];       // remove old piece pos from hash
@@ -329,6 +383,9 @@ export class Board {
             }
             this.currentPieces[piece.pos] = piece;      // update hash piece location
             moveTile.piece = null;                  // remove the piece from its old tile
+            if (piece.symbol === 'P' && (piece.pos[0] === 7 || piece.pos[0] === 0)) {
+                this.promotePawn(piece);
+            }
             this.findAllMoves(); // find all moves beginning with pieces of current turn player
             this.currentTurnColor = piece.color;
             return true;

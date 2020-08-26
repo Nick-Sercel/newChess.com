@@ -11,6 +11,7 @@ const mSTP = state => ({
     },
     formType: 'Create User',
     formClassName: 'create',
+    sessionId: state.session.id,
 })
 
 const mDTP = dispatch => ({

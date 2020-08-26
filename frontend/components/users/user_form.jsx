@@ -6,6 +6,7 @@ class UserForm extends React.Component {
         super(props);
         this.state = this.props.user;
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.hasErrors = false;
     }
 
     update(formType) {
@@ -15,21 +16,31 @@ class UserForm extends React.Component {
     }
 
     handleSubmit() {
-        this.toggleShow();
         this.props.action(this.state)
+        if (this.props.sessionId) {
+            this.hasErrors = false;
+            this.toggleShow();
+        } else {
+            this.hasErrors = true;
+            this.setState({ password: '' });
+        }
             // .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`))
     }
 
     toggleShow() {
-        // add class 'activeForm'
         document.getElementById('create').classList.remove('active-form')
     }
 
     render() {
+        let errorShow = <div></div>;
+        if (this.hasErrors) {
+            errorShow = <li><p>Invalid Username, Email, or Password</p></li>
+        }
         return (
             <div id='create' className={`overlay-form ${this.props.formClassName}`}>
                 <div className='close-btn' onClick={() => this.toggleShow()}>&times;</div>
                 <h1>{this.props.formType}</h1>
+                {errorShow}
                 <div className='form-element'>
                     <label>Username:</label>
                     <input type='text' value={this.state.username} onChange={this.update('username')} />
@@ -39,7 +50,7 @@ class UserForm extends React.Component {
                     <input type='email' value={this.state.email} onChange={this.update('email')} />
                 </div>
                 <div className='form-element'>
-                    <label>Password:</label>
+                    <label>Password:  (6 character minimum)</label>
                     <input type='text' onChange={this.update('password')} />
                 </div>
                 <div className='form-element'>

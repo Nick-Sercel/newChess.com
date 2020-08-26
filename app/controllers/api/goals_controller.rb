@@ -3,7 +3,7 @@ class Api::GoalsController < ApplicationController
     before_action :require_logged_in
 
     def index
-        @goals = Goal.all
+        @goals = current_user.goals
         render :index
     end
 

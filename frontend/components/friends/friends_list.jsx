@@ -1,5 +1,7 @@
 import React from 'react';
+// import {connect} from 'react-redux';
 import FriendIndexItem from './friends_list_item';
+import FriendSearch from './friend_search';
 
 class FriendIndex extends React.Component {
     componentDidMount() {
@@ -10,8 +12,9 @@ class FriendIndex extends React.Component {
         return (
             <div className={'index-container friend-index-container'}>
                 <li><p>Friends</p></li>
+                <FriendSearch createFriend={this.props.createFriend} />
                 {
-                    this.props.friends.map(friend => <FriendIndexItem friend={friend} fetchUser={this.props.fetchUser} deleteFriend={this.props.deleteFriend} />)
+                    this.props.friends.map(friend => <FriendIndexItem key={friend.id} friend={friend} deleteFriend={this.props.deleteFriend} />)
                 }
             </div>
         )
@@ -19,3 +22,8 @@ class FriendIndex extends React.Component {
 }
 
 export default FriendIndex;
+
+
+
+
+// export default connect(mSTP, mDTP)(FriendIndex);

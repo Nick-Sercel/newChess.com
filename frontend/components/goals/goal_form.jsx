@@ -16,18 +16,18 @@ class GoalForm extends React.Component {
 
     handleSubmit() {
         this.props.action(this.state)
-            .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`)) // user show page
+            // .then(() => this.props.history.push(`/users/${this.props.match.params.userId}`)) // user show page
     }
 
     render() {
         return (
             <div>
                 <div>
-                    <label>Title:</label>
+                    <label className={'goal-form-item goal-form-title'}>Title:</label>
                     <input type='text' value={this.state.title} onChange={this.update('title')} />
                 </div>
                 <div>
-                    <label>Body:</label>
+                    <label className={'goal-form-item goal-form-body'}>Body:</label>
                     <input type='text' value={this.state.body} onChange={this.update('body')} />
                 </div>
                 <div>

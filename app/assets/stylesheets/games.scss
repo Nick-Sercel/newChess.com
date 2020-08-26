@@ -4,18 +4,46 @@
 
 // Board
 
+.big-board-container {
+    display: flex;
+}
+
+.captured-pieces-container {
+    display: flex;
+    flex-direction: column;
+    height: 880px;
+    // background-color: blueviolet;
+    padding-left: 20px;
+    width: 28%;
+}
+
+.white-captures {
+    padding-top: 60px;
+    height: 440px;
+}
+
+.white-captures div, .black-captures div {
+    display: flex;
+    padding-right: 5px;
+}
+
+.black-captures {
+    height: 410px;
+}
+
 #board-container {
+    padding-top: 10px;
+    margin-left: auto;
     display: flex;
     flex-wrap: wrap;
     align-content: center;
-    background-color: red;
-    width: 760px;
-    height: 760px;
+    // background-color: red;
+    width: 880px;
  }
 
  .board-element {
-    height: 75px;
-    width: 75px;
+    height: 90px;
+    width: 90px;
     background-color: blue;
     border: 5px solid gray;
     padding: 5px;
@@ -33,6 +61,18 @@
 
  .white-tile {
     background-color: white;
+ }
+
+ .green-background {
+     background-color: lightgreen;
+ }
+
+ .white {
+     color: blue;
+ }
+
+ .black {
+     color: red;
  }
 
 

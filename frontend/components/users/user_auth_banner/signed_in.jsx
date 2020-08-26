@@ -9,7 +9,7 @@ class SignedOut extends React.Component {
 
     click() {
         this.props.logout();
-        this.props.history.push('/');
+        // this.props.history.push('/');
     }
 
     showPage() {
