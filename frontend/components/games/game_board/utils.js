@@ -1,6 +1,5 @@
 export class Tile {
-    constructor(board, pos, piece = null) {
-        this.board = board;
+    constructor(pos, piece = null) {
         this.pos = pos;
         this.piece = piece;
         if ((pos[0] + pos[1]) % 2 === 0) {
@@ -22,25 +21,21 @@ export class Piece {
 
 export class Board {
     constructor() {
-        this.board = [];
+        this.board = {};
         this.whiteCaptures = [];
         this.blackCaptures = [];
         this.currentPieces = {};
         this.kings = {};
         this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
         this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
-        // this.kings['white']['direct'] = { 'init': 'init' }; this.kings['white']['indirect'] = { 'init': 'init'};
-        // this.kings['black']['direct'] = { 'init': 'init' }; this.kings['black']['indirect'] = { 'init': 'init'};
-        // this.kings['white']['saves'] = { 'init': 'init' }; this.kings['black']['saves'] = { 'init': 'init'};
-        // { indirect => {piece.pos => [movePos' leading to king] }  direct => {piece.pos => [movePos' leading to king] } }
         this.currentTurnColor = 'white';
         this.moves = "";
+        this.movesFor = { 'white': [], 'black': [] };
         this.generateBoard();
     }
 
     generateBoard() {
         for (let i = 0; i < 8; i++) {
-            this.board.push([]);
             for (let j = 0; j < 8; j++) {
                 let piece = null;
                 if (i === 1 || i === 6) {
@@ -69,8 +64,9 @@ export class Board {
                     }
                     this.currentPieces[piece.pos] = piece;
                 }
-                const tile = new Tile(this, [i, j], piece);
-                this.board[i].push(tile);
+                const tile = new Tile([i, j], piece);
+                const posKey = (i * 8) + j;
+                this.board[posKey] = tile;
             }
         }
     }
@@ -140,7 +136,7 @@ export class Board {
             if (!(this.currentPieces[piece.pos[0] + 1, piece.pos[1]])) {
                 dirs.push([piece.pos[0] + 1, piece.pos[1]]);
                 if (piece.pos[0] === 1 && !(this.currentPieces[piece.pos[0] + 2, piece.pos[1]])) { dirs.push([piece.pos[0] + 2, piece.pos[1]])}
-            }
+            } // take color into account ?
             if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[piece.pos[0] + 1, piece.pos[1] - 1]) { dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]) }
             if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[piece.pos[0] + 1, piece.pos[1] + 1]) { dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]) }
         }
@@ -272,6 +268,7 @@ export class Board {
                     this.findSavesOnMove(piece, moves);         // does not exist yet
                 }
             }
+            this.movesFor[piece.color].push(moves);
         }
         return moves;
     }
@@ -364,6 +361,8 @@ export class Board {
             this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {}; this.kings['white']['saves'] = {}
             this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {}; this.kings['black']['saves'] = {}
             
+            // this.lastMove = [moveTile.pos, endTile.pos];
+
             const piece = moveTile.piece;
             if (endTile.piece) {
                 if (endTile.piece.color === 'black') {
@@ -386,6 +385,7 @@ export class Board {
             if (piece.symbol === 'P' && (piece.pos[0] === 7 || piece.pos[0] === 0)) {
                 this.promotePawn(piece);
             }
+            this.blackMoves = []; this.whiteMoves = [];
             this.findAllMoves(); // find all moves beginning with pieces of current turn player
             this.currentTurnColor = piece.color;
             return true;
@@ -393,6 +393,10 @@ export class Board {
             console.log('Invalid move destination');
             return false;
         }
+    }
+
+    reverseMove() {
+
     }
 
     checkmate(otherTurnCol) {
@@ -411,6 +415,9 @@ export class Board {
             } else {
                 return false;
             }
+        } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && this.movesFor[otherTurnCol].length === 0) {
+            console.log('stalemate');
+            return true;
         } else {
             return false;
         }

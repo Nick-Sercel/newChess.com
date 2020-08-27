@@ -10,7 +10,7 @@ class Api::FriendsController < ApplicationController
     def create
         @friend = Friend.new()
         # loop do
-            @friend.id = SecureRandom.hex(10)
+            # @friend.id = SecureRandom.hex(10)
             # break unless Friend.where(id: @friend.id).exists?
         # end
         @friend.central_user_id = current_user.id

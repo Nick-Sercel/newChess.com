@@ -18,7 +18,7 @@ class GameBoard extends React.Component {
     }
 
     render() {
-        let board = this.props.board.board;
+        let board = Object.values(this.props.board.board);
         return (
             <div id='board-container'>
                 {board.map(row => {

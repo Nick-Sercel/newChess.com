@@ -1,8 +1,9 @@
 class Friend < ApplicationRecord
     validates :central_user_id,
      :foreign_user_id,
-      :accepted,
        presence: true
+
+    validates :accepted, inclusion: [true, false]
 
     belongs_to :primary_user,
         foreign_key: :foreign_user_id,

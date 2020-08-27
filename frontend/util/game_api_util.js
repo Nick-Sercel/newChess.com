@@ -19,3 +19,11 @@ export const createGame = (game) => {
         data: { game },
     })
 }
+
+export const updateGame = ( game) => {
+    return $.ajax({
+        method: 'PATCH',
+        url: `/api/ games/${ game.id}`,
+        data: {  game },
+    })
+}

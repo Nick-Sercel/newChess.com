@@ -31,3 +31,8 @@ export const createGame = (game) => dispatch => {
     return GameApiUtil.createGame(game)
         .then((game) => dispatch(receiveGame(game)))
 }
+
+export const updateGame = (game) => dispatch => {
+    return GameApiUtil.updateGame(game)
+        .then((game) => dispatch(receiveGame(game)))
+}

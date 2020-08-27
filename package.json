@@ -33,6 +33,7 @@
     "@babel/preset-react": "^7.10.4",
     "babel-loader": "^8.1.0",
     "react": "^16.13.1",
+    "react-actioncable-provider": "^2.0.0",
     "react-dom": "^16.13.1",
     "redux-logger": "^3.0.6",
     "react-redux": "^7.2.1",

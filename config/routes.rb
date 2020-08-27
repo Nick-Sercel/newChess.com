@@ -5,7 +5,8 @@ Rails.application.routes.draw do
     resources :users, except: [:index, :edit, :new]
     resource :session, only: [:create, :destroy]
     resources :goals, except: [:edit, :new]
-    resources :games, except: [:edit, :new, :update, :destroy]
+    resources :games, except: [:edit, :new, :destroy]
     resources :friends, except: [:edit, :new, :update]
   end
+  mount ActionCable.server => '/cable'
 end

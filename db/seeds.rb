@@ -9,12 +9,13 @@
 User.destroy_all
 Goal.destroy_all
 Game.destroy_all
+Friend.destroy_all
 
-User.create!(id: 1, username: 'Demo User', email: 'dummyEmail@gmail.com', elo: 420, password: '123456')
-User.create!(id: 2, username: 'Twilight Dave', email: 'allSkill@gmail.com', elo: 9001, password: 'procsOnlyFools')
+user1 = User.create!(username: 'Demo User', email: 'dummyEmail@gmail.com', elo: 420, password: '123456')
+user2 = User.create!(username: 'Twilight Dave', email: 'allSkill@gmail.com', elo: 9001, password: 'procsOnlyFools')
 
-Goal.create(id: 1, title: 'Learn the pieces', body: 'Figure out what each piece does and how to use them', user_id: 1)
+Goal.create(title: 'Learn the pieces', body: 'Figure out what each piece does and how to use them', user_id: user1.id)
 
-Game.create(id: 1, central_user_id: 1, foreign_user_id: 2, winner_id: 2, moves_list: 'e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7')
+Game.create(central_user_id: user1.id, foreign_user_id: user2.id, winner_id: user2.id, moves_list: 'e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7')
 
-Friend.create(id: 1, central_user_id: 1, foreign_user_id: 2, accepted: true)
+Friend.create(central_user_id: user1.id, foreign_user_id: user2.id, accepted: true)

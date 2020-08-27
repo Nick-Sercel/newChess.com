@@ -15,6 +15,16 @@ class Api::GamesController < ApplicationController
         end
     end
 
+    def update
+        @game = Game.find_by(id: params[:id])
+        if @game
+            @game.update(game_params)
+            render :show
+        else
+            render :show
+        end
+    end
+
     def show
         @game = Game.find_by(id: params[:id])
         render :show

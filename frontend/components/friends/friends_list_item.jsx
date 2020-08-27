@@ -19,16 +19,16 @@ class FriendIndexItem extends React.Component {
     render() {
         let userDisp = <div></div>
         let statusDisp = <div></div>;
-        if (!this.props.friend.accepted) {
-            if (this.props.sessionId === this.centralUser.id) {
-                statusDisp = <li><p>Pending</p></li>
-            } else {
-                statusDisp = <div>
-                    <li><button onClick={this.friendRequest('accept')} >Accept</button></li>
-                    <li><button onClick={this.friendRequest('deny')} >Decline</button></li>
-                </div>
-            }
-        }
+        // if (!this.props.friend.accepted) {
+        //     if (this.props.sessionId === this.centralUser.id) {
+        //         statusDisp = <li><p>Pending</p></li>
+        //     } else {
+        //         statusDisp = <div>
+        //             <li><button onClick={this.friendRequest('accept')} >Accept</button></li>
+        //             <li><button onClick={this.friendRequest('deny')} >Decline</button></li>
+        //         </div>
+        //     }
+        // }
         userDisp = <div>
                         <li><p>{this.centralUsername}</p></li>
                         <li><p>{this.foreignUsername}</p></li>

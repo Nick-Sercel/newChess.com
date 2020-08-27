@@ -164,7 +164,7 @@ var deleteFriend = function deleteFriend(friendId) {
 /*!******************************************!*\
   !*** ./frontend/actions/game_actions.js ***!
   \******************************************/
-/*! exports provided: RECEIVE_GAMES, RECEIVE_GAME, fetchGames, fetchGame, createGame */
+/*! exports provided: RECEIVE_GAMES, RECEIVE_GAME, fetchGames, fetchGame, createGame, updateGame */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -174,6 +174,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchGames", function() { return fetchGames; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchGame", function() { return fetchGame; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createGame", function() { return createGame; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "updateGame", function() { return updateGame; });
 /* harmony import */ var _util_game_api_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/game_api_util */ "./frontend/util/game_api_util.js");
 
 var RECEIVE_GAMES = 'RECEIVE_GAMES';
@@ -210,6 +211,13 @@ var fetchGame = function fetchGame(gameId) {
 var createGame = function createGame(game) {
   return function (dispatch) {
     return _util_game_api_util__WEBPACK_IMPORTED_MODULE_0__["createGame"](game).then(function (game) {
+      return dispatch(receiveGame(game));
+    });
+  };
+};
+var updateGame = function updateGame(game) {
+  return function (dispatch) {
+    return _util_game_api_util__WEBPACK_IMPORTED_MODULE_0__["updateGame"](game).then(function (game) {
       return dispatch(receiveGame(game));
     });
   };
@@ -784,19 +792,16 @@ var FriendIndexItem = /*#__PURE__*/function (_React$Component) {
     key: "render",
     value: function render() {
       var userDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
-      var statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
-
-      if (!this.props.friend.accepted) {
-        if (this.props.sessionId === this.centralUser.id) {
-          statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Pending"));
-        } else {
-          statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-            onClick: this.friendRequest('accept')
-          }, "Accept")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-            onClick: this.friendRequest('deny')
-          }, "Decline")));
-        }
-      }
+      var statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null); // if (!this.props.friend.accepted) {
+      //     if (this.props.sessionId === this.centralUser.id) {
+      //         statusDisp = <li><p>Pending</p></li>
+      //     } else {
+      //         statusDisp = <div>
+      //             <li><button onClick={this.friendRequest('accept')} >Accept</button></li>
+      //             <li><button onClick={this.friendRequest('deny')} >Decline</button></li>
+      //         </div>
+      //     }
+      // }
 
       userDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.centralUsername)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.foreignUsername)), statusDisp);
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -881,7 +886,7 @@ var GameBoard = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      var board = this.props.board.board;
+      var board = Object.values(this.props.board.board);
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         id: "board-container"
       }, board.map(function (row) {
@@ -1184,12 +1189,11 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Tile = function Tile(board, pos) {
-  var piece = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+var Tile = function Tile(pos) {
+  var piece = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
   _classCallCheck(this, Tile);
 
-  this.board = board;
   this.pos = pos;
   this.piece = piece;
 
@@ -1213,7 +1217,7 @@ var Board = /*#__PURE__*/function () {
   function Board() {
     _classCallCheck(this, Board);
 
-    this.board = [];
+    this.board = {};
     this.whiteCaptures = [];
     this.blackCaptures = [];
     this.currentPieces = {};
@@ -1229,13 +1233,13 @@ var Board = /*#__PURE__*/function () {
       'direct': {},
       'indirect': {},
       'saves': {}
-    }; // this.kings['white']['direct'] = { 'init': 'init' }; this.kings['white']['indirect'] = { 'init': 'init'};
-    // this.kings['black']['direct'] = { 'init': 'init' }; this.kings['black']['indirect'] = { 'init': 'init'};
-    // this.kings['white']['saves'] = { 'init': 'init' }; this.kings['black']['saves'] = { 'init': 'init'};
-    // { indirect => {piece.pos => [movePos' leading to king] }  direct => {piece.pos => [movePos' leading to king] } }
-
+    };
     this.currentTurnColor = 'white';
     this.moves = "";
+    this.movesFor = {
+      'white': [],
+      'black': []
+    };
     this.generateBoard();
   }
 
@@ -1243,8 +1247,6 @@ var Board = /*#__PURE__*/function () {
     key: "generateBoard",
     value: function generateBoard() {
       for (var i = 0; i < 8; i++) {
-        this.board.push([]);
-
         for (var j = 0; j < 8; j++) {
           var piece = null;
 
@@ -1284,8 +1286,9 @@ var Board = /*#__PURE__*/function () {
             this.currentPieces[piece.pos] = piece;
           }
 
-          var tile = new Tile(this, [i, j], piece);
-          this.board[i].push(tile);
+          var tile = new Tile([i, j], piece);
+          var posKey = i * 8 + j;
+          this.board[posKey] = tile;
         }
       }
     }
@@ -1377,7 +1380,8 @@ var Board = /*#__PURE__*/function () {
           if (piece.pos[0] === 1 && !this.currentPieces[(piece.pos[0] + 2, piece.pos[1])]) {
             dirs.push([piece.pos[0] + 2, piece.pos[1]]);
           }
-        }
+        } // take color into account ?
+
 
         if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[(piece.pos[0] + 1, piece.pos[1] - 1)]) {
           dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]);
@@ -1534,6 +1538,8 @@ var Board = /*#__PURE__*/function () {
             this.findSavesOnMove(piece, moves); // does not exist yet
           }
         }
+
+        this.movesFor[piece.color].push(moves);
       }
 
       return moves;
@@ -1659,7 +1665,8 @@ var Board = /*#__PURE__*/function () {
         this.kings['white']['saves'] = {};
         this.kings['black']['direct'] = {};
         this.kings['black']['indirect'] = {};
-        this.kings['black']['saves'] = {};
+        this.kings['black']['saves'] = {}; // this.lastMove = [moveTile.pos, endTile.pos];
+
         var piece = moveTile.piece;
 
         if (endTile.piece) {
@@ -1692,6 +1699,8 @@ var Board = /*#__PURE__*/function () {
           this.promotePawn(piece);
         }
 
+        this.blackMoves = [];
+        this.whiteMoves = [];
         this.findAllMoves(); // find all moves beginning with pieces of current turn player
 
         this.currentTurnColor = piece.color;
@@ -1701,6 +1710,9 @@ var Board = /*#__PURE__*/function () {
         return false;
       }
     }
+  }, {
+    key: "reverseMove",
+    value: function reverseMove() {}
   }, {
     key: "checkmate",
     value: function checkmate(otherTurnCol) {
@@ -1721,6 +1733,9 @@ var Board = /*#__PURE__*/function () {
         } else {
           return false;
         }
+      } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && this.movesFor[otherTurnCol].length === 0) {
+        console.log('stalemate');
+        return true;
       } else {
         return false;
       }
@@ -3833,7 +3848,7 @@ var deleteFriend = function deleteFriend(friendId) {
 /*!****************************************!*\
   !*** ./frontend/util/game_api_util.js ***!
   \****************************************/
-/*! exports provided: fetchGames, fetchGame, createGame */
+/*! exports provided: fetchGames, fetchGame, createGame, updateGame */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3841,6 +3856,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchGames", function() { return fetchGames; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchGame", function() { return fetchGame; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createGame", function() { return createGame; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "updateGame", function() { return updateGame; });
 var fetchGames = function fetchGames() {
   return $.ajax({
     method: 'GET',
@@ -3857,6 +3873,15 @@ var createGame = function createGame(game) {
   return $.ajax({
     method: 'POST',
     url: '/api/games',
+    data: {
+      game: game
+    }
+  });
+};
+var updateGame = function updateGame(game) {
+  return $.ajax({
+    method: 'PATCH',
+    url: "/api/ games/".concat(game.id),
     data: {
       game: game
     }
