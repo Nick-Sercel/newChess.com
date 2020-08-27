@@ -1237,9 +1237,10 @@ var Board = /*#__PURE__*/function () {
     this.currentTurnColor = 'white';
     this.moves = "";
     this.movesFor = {
-      'white': [],
-      'black': []
-    };
+      'white': {},
+      'black': {}
+    }; // refactor to { 'white': { piece.pos: [moves] } } and remove from piece object
+
     this.generateBoard();
   }
 
@@ -1267,7 +1268,7 @@ var Board = /*#__PURE__*/function () {
           }
 
           if (piece) {
-            piece.moves = [];
+            this.movesFor['white'][(i, j)] = [];
 
             if (piece.pos[0] > 5) {
               piece.color = 'white';
@@ -1528,9 +1529,8 @@ var Board = /*#__PURE__*/function () {
           return;
       }
 
-      piece.moves = moves;
-
       if (!usedToMark) {
+        // this needs to leave
         if (piece.symbol !== 'K') {
           if (piece.color !== this.currentTurnColor) {
             this.findThreatsAndRemove(piece, moves);
@@ -1539,7 +1539,7 @@ var Board = /*#__PURE__*/function () {
           }
         }
 
-        this.movesFor[piece.color].push(moves);
+        this.movesFor[piece.color][piece.pos] = moves;
       }
 
       return moves;
@@ -1579,7 +1579,8 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "validMove",
     value: function validMove(piece, pos) {
-      if (this.isIncluded(piece.moves, pos)) {
+      if (this.isIncluded(this.movesFor[piece.color][piece.pos], pos)) {
+        // may break w/o Object.values
         return true;
       }
 
@@ -1699,8 +1700,9 @@ var Board = /*#__PURE__*/function () {
           this.promotePawn(piece);
         }
 
-        this.blackMoves = [];
-        this.whiteMoves = [];
+        this.movesFor['white'] = {};
+        this.movesFor['black'] = {}; // reset object values => may be unnecessary
+
         this.findAllMoves(); // find all moves beginning with pieces of current turn player
 
         this.currentTurnColor = piece.color;
@@ -1733,7 +1735,7 @@ var Board = /*#__PURE__*/function () {
         } else {
           return false;
         }
-      } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && this.movesFor[otherTurnCol].length === 0) {
+      } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && Object.values(this.movesFor[otherTurnCol].length === 0)) {
         console.log('stalemate');
         return true;
       } else {

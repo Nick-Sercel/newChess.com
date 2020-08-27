@@ -30,7 +30,7 @@ export class Board {
         this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
         this.currentTurnColor = 'white';
         this.moves = "";
-        this.movesFor = { 'white': [], 'black': [] };
+        this.movesFor = { 'white': {}, 'black': {} }; // refactor to { 'white': { piece.pos: [moves] } } and remove from piece object
         this.generateBoard();
     }
 
@@ -54,7 +54,7 @@ export class Board {
                     }
                 }
                 if (piece) {
-                    piece.moves = [];
+                    this.movesFor['white'][i, j] = [];
                     if (piece.pos[0] > 5) {
                         piece.color = 'white';
                         if (piece.symbol === 'K') {this.kings['white']['piece'] = piece;}
@@ -259,8 +259,7 @@ export class Board {
                 console.log(`that piece is: ${piece}`)
                 return;
         }
-        piece.moves = moves;
-        if (!usedToMark) {
+        if (!usedToMark) { // this needs to leave
             if (piece.symbol !== 'K') {
                 if (piece.color !== this.currentTurnColor) {
                     this.findThreatsAndRemove(piece, moves);
@@ -268,7 +267,7 @@ export class Board {
                     this.findSavesOnMove(piece, moves);         // does not exist yet
                 }
             }
-            this.movesFor[piece.color].push(moves);
+            this.movesFor[piece.color][piece.pos] = moves;
         }
         return moves;
     }
@@ -301,7 +300,7 @@ export class Board {
     }
 
     validMove(piece, pos) {
-        if (this.isIncluded(piece.moves, pos)) {
+        if (this.isIncluded(this.movesFor[piece.color][piece.pos], pos)) { // may break w/o Object.values
             return true;
         }
         return false;
@@ -385,7 +384,7 @@ export class Board {
             if (piece.symbol === 'P' && (piece.pos[0] === 7 || piece.pos[0] === 0)) {
                 this.promotePawn(piece);
             }
-            this.blackMoves = []; this.whiteMoves = [];
+            this.movesFor['white'] = {}; this.movesFor['black'] = {};  // reset object values => may be unnecessary
             this.findAllMoves(); // find all moves beginning with pieces of current turn player
             this.currentTurnColor = piece.color;
             return true;
@@ -415,7 +414,7 @@ export class Board {
             } else {
                 return false;
             }
-        } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && this.movesFor[otherTurnCol].length === 0) {
+        } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && Object.values(this.movesFor[otherTurnCol].length === 0)) {
             console.log('stalemate');
             return true;
         } else {

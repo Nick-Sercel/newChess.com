@@ -1,5 +1,10 @@
 export const makeAiMove = (board, color, depth) => {
 
+    // board duplication if possible
+    // boarddd = new Board();
+    // boarddd.properties = Object.assign({}, board.properties);
+
+    findAiMove(board, color, depth);
 }
 
 function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 100000) {
@@ -8,9 +13,12 @@ function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 10
         return scorePosition(board);
     }
 
-    for (let i = 0; i < board.movesFor[color].length; i++) {
-        board.movePiece();
-
+    const entities = Object.entries(board.movesFor[color]); // [ [ [0, 1], [ [2, 3], [3, 4], [] ] ], [  ], [  ] ]
+    for (let i = 0; i < entities.length; i++) {
+        for (let j = 0; j < entities[i][1]; j++) {
+            board.movePiece(board.board[entities[i][0]], board.board[entities[i][1][j]]);
+            findAiMove(board, board.oppColor(color), depth - 1, !max, alpha, beta);
+        }
 
     }
 
@@ -53,7 +61,7 @@ function pieceTypePointsCase(piece) {
 }
 
 
-// this.board = [];
+// this.board = {};
 // this.whiteCaptures = [];
 // this.blackCaptures = [];
 // this.currentPieces = {};
@@ -62,4 +70,4 @@ function pieceTypePointsCase(piece) {
 // this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
 // this.currentTurnColor = 'white';
 // this.moves = "";
-// this.movesFor = { 'white': [], 'black': [] };
+// this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } and remove from piece object
