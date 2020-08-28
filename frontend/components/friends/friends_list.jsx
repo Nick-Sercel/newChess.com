@@ -11,10 +11,10 @@ class FriendIndex extends React.Component {
     render() {
         return (
             <div className={'index-container friend-index-container'}>
-                <li><p>Friends</p></li>
+                <li><p className='friends-text'>Friends</p></li>
                 <FriendSearch createFriend={this.props.createFriend} />
                 {
-                    this.props.friends.map(friend => <FriendIndexItem key={friend.id} friend={friend} deleteFriend={this.props.deleteFriend} />)
+                    this.props.friends.map(friend => <FriendIndexItem key={friend.id} friend={friend} sessionId={this.props.sessionId} updateFriend={this.props.updateFriend} deleteFriend={this.props.deleteFriend} />)
                 }
             </div>
         )

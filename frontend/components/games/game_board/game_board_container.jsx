@@ -3,8 +3,6 @@ import React from 'react';
 import * as Utils from './utils';
 import findAiMove from './chess_ai';
 
-
-
 class Game extends React.Component {
     constructor(props) {
         super(props);
@@ -18,6 +16,7 @@ class Game extends React.Component {
         this.aiTurn = 'black';
         this.humanMoved = false;
         this.currentMove = 0;
+        this.gameOver = false;
     }
 
     restartGame() {
@@ -30,9 +29,9 @@ class Game extends React.Component {
         const board = this.state.board;
         // console.log('currentTurnColor: ', board.currentTurnColor);
         // console.log('aiTurn', this.aiTurn);
-        if (board.currentTurnColor === this.aiTurn) {
+        if (board.currentTurnColor === this.aiTurn && !this.gameOver) {
             this.makeAiMove(board); // make an ai move on the board -> chess_ai.js util
-        } else {
+        } else if (!this.gameOver) {
             console.log(tile)
             console.log(this.currentTile);
             if (!(this.currentTile)) {
@@ -54,7 +53,18 @@ class Game extends React.Component {
                 if (tile.piece.color !== this.humanTurn) {
                     // set place to move piece
                     console.log('secondary click');
-                    if (board.movePiece(this.currentTile, tile)) {
+                    const moveResult = board.movePiece(this.currentTile, tile);
+                    if (moveResult === 'end') {
+                        console.log('creating a game for db')
+                        const dbGame = {
+                            central_user_id: this.props.sessionId,
+                            foreign_user_id: 1,
+                            winner_id: this.props.sessionId,
+                            moves_list: board.moves,
+                        };
+                        this.props.createGame(dbGame);
+                        this.gameOver = true;
+                    } else if (moveResult) {
                         this.currentTile = null;
                         this.potentialMoves = [];
                         this.humanMoved = true;
@@ -71,39 +81,54 @@ class Game extends React.Component {
             } else {
                 // set place to move piece
                 console.log('secondary click');
-                if (board.movePiece(this.currentTile, tile)) {
+                const moveResult = board.movePiece(this.currentTile, tile);
+                if (moveResult) {
                     this.currentTile = null;
                     this.potentialMoves = [];
                     this.humanMoved = true;
                 }
             }
         }
-        if (board.checkmate(board.currentTurnColor)) {
-            console.log('checkmate')
-        }
+        // if (board.checkmate(board.currentTurnColor)) { // re-enable with real game
+        //     console.log('checkmate')
+        // }
 
         this.setState({ board: board });
-        if (this.humanMoved) {
-            this.humanMoved = false;
-            this.updateGame();
+        if (!this.gameOver) {
+            if (this.humanMoved) {
+                this.humanMoved = false;
+                this.updateGame();
+            }
         }
     }
 
     makeAiMove(board) {
 
-            console.log('ai move called');
+        console.log('ai move called');
 
-            this.currentMove++;
-            if (this.currentMove === 1) {
-                const pieceTile = board.board[[0, 1]];
-                const moveTile = board.board[[2, 2]];
-                board.movePiece(pieceTile, moveTile);
-            } else if (this.currentMove === 2) {
-                const pieceTile = board.board[[0, 6]];
-                const moveTile = board.board[[2, 5]];
-                board.movePiece(pieceTile, moveTile);
-            } else {
+        this.currentMove++;
+        if (this.currentMove === 1) {
+            const pieceTile = board.board[[1, 2]];
+            const moveTile = board.board[[2, 2]];
+            board.movePiece(pieceTile, moveTile);
+        } else if (this.currentMove === 2) {
+            const pieceTile = board.board[[1, 1]];
+            const moveTile = board.board[[3, 1]];
+            board.movePiece(pieceTile, moveTile);
+        }
+        return;
 
+        let moveResult = false;
+        this.currentMove++;
+        if (this.currentMove === 1) {
+            const pieceTile = board.board[[0, 1]];
+            const moveTile = board.board[[2, 2]];
+            board.movePiece(pieceTile, moveTile);
+        } else if (this.currentMove === 2) {
+            const pieceTile = board.board[[0, 6]];
+            const moveTile = board.board[[2, 5]];
+            board.movePiece(pieceTile, moveTile);
+        } else {
             const dupBoard = new Utils.Board(false);
             // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
             dupBoard.board = JSON.parse(JSON.stringify(board.board));
@@ -122,21 +147,31 @@ class Game extends React.Component {
             const moveTile = board.board[move[1][1]];
             console.log('pieceTile: ', pieceTile);
             console.log('moveTile: ', moveTile);
-            board.movePiece(pieceTile, moveTile);
+            moveResult = board.movePiece(pieceTile, moveTile);
+        }
 
-            // const pieceTile = board.board[[1, 6]];
-            // const moveTile = board.board[[3, 6]];
-            // console.log('pieceTile: ', pieceTile);
-            // console.log('moveTile: ', moveTile);
-            // board.movePiece(pieceTile, moveTile);
+        if (moveResult === 'end') {
+            const dbGame = {
+                central_user_id: this.props.sessionId,
+                foreign_user_id: 1,
+                winner_id: 1,
+                moves_list: board.moves,
+            };
+            this.props.createGame(dbGame);
+            this.gameOver = true;
         }
     }
 
     render() {
         let whiteCaptures = this.state.board.whiteCaptures;
         let blackCaptures = this.state.board.blackCaptures;
+        let gameOverStuff = <div></div>
+        if (this.gameOver) {
+            gameOverStuff = <div><li><p>Game Over!</p></li></div>
+        }
         return (
             <div className='big-board-container'>
+                {gameOverStuff}
                 <Board board={this.state.board} updateGame={this.updateGame} potentialMoves={this.potentialMoves} />
                 <div className='captured-pieces-container'>
                     <div className='white-captures'>

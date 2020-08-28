@@ -9,7 +9,7 @@ class GameIndex extends React.Component {
     render() {
         return (
             <div className='index-container'>
-                <li><p>Games</p></li>
+                <li><p className='games-text'>Games</p></li>
                 {
                     this.props.games.map(game => <GameIndexItem key={game.id} game={game} fetchUser={this.props.fetchUser} />)
                 }

@@ -23,6 +23,10 @@
    color: white;
  }
 
+ label {
+   font-size: 22px;
+ }
+
  li {
    list-style: none;
  }
@@ -32,6 +36,7 @@
    display: flex;
    flex-flow: row wrap;
    justify-content: flex-start;
+   padding-bottom: 30px;
  }
 
  .index-container {
@@ -62,20 +67,37 @@
     text-decoration: underline;
 }
 
-.item-container li button {
+button {
+    padding: 8px 16px;
     text-decoration: none;
-    background-color: red;
+    background-color: lightgreen;
+    text-align: center;
+    font-size: 16px;
+    border: 2px solid green;
+}
+
+.item-container {
+  padding-bottom: 20px;
 }
 
 .item-container li p, .item-container li {
    max-width: 97%;
    word-wrap: break-word;
+   font-size: 18px;
 }
 
 .friend-index-container {
     min-width: 20%;
 }
 
-.friend-item-container {
-    min-width: 0%;
+.game-item-container .game-central {
+  font-size: 22px;
+}
+
+.game-item-container .game-foreign {
+  font-size: 22px;
+}
+
+.item-container .game-item-container div li {
+    word-wrap: none;
 }

@@ -26,6 +26,16 @@ class Api::FriendsController < ApplicationController
         end
     end
 
+    def update
+        @friend = Friend.find_by(id: params[:id])
+        if @friend && @friend.foreign_user_id == current_user.id
+            @friend.update!(friend_params)
+            render :show
+        else
+            render :show
+        end
+    end
+
     def show
         @friend = Friend.find_by(id: params[:id])
         render :show
@@ -33,11 +43,16 @@ class Api::FriendsController < ApplicationController
 
     def destroy
         @friend = Friend.find_by(id: params[:id])
-        if @friend && @friend.user_id == current_user.id
+        if @friend && @friend.central_user_id == current_user.id || @friend.foreign_user_id == current_user.id
             @friend.destroy
             render :show
         else
             render :show
         end
+    end
+
+    private
+    def friend_params
+        self.params.require(:friend).permit(:central_user_id, :foreign_user_id, :accepted)
     end
 end

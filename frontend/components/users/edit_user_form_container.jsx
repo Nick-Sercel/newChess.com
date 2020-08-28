@@ -5,22 +5,23 @@ import { fetchUser, updateUser } from '../../actions/user_actions';
 
 class EditUserForm extends React.Component {
     componentDidMount() {
-        this.props.fetchUser(this.props.match.params.userId);
+        this.props.fetchUser(this.props.sessionId);
     }
 
     render() {
         const { action, formType, user } = this.props;
         if (!user) return null;
         return (
-            <UserForm action={action} formType={formType} user={user} />
+            <UserForm action={action} sessionId={this.props.sessionId} formType={formType} user={user} />
         );
     }
 }
 
-const mSTP = (state, ownProps) => ({
-    user: state.entities.users[ownProps.match.params.userId],
+const mSTP = (state) => ({
+    user: state.entities.users[state.session.id],
     formType: 'Update User',
     formClassName: 'update',
+    sessionId: state.session.id,
 })
 
 const mDTP = dispatch => ({

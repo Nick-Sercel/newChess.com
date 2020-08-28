@@ -24,12 +24,10 @@ class FriendSearch extends React.Component {
 
     render() {
         return (
-            <div>
-                <div className='friend-search'>
-                    {/* <label>Search Users:</label> */}
-                    <input type='text' value={this.state.search} onChange={this.update()} />
-                    <button onClick={() => this.handleSubmit()}>Add Friend</button>
-                </div>
+            <div className='friend-search'>
+                {/* <label>Search Users:</label> */}
+                <input type='text' value={this.state.search} onChange={this.update()} />
+                <button onClick={() => this.handleSubmit()}>Add Friend</button>
             </div>
         )
     }

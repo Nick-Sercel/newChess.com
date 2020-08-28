@@ -14,12 +14,30 @@ class GameIndexItem extends React.Component {
     }
 
     render() {
+        let centralClass = 'game-central';
+        let foreignClass = 'game-foreign';
+        let winner = this.winner;
+        let loser;
+        if (this.winner === this.centralUsername) {
+            loser = this.foreignUsername;
+        } else {
+            loser = this.centralUsername;
+            centralClass = 'game-foreign';
+            foreignClass = 'game-central';
+        }
+
         return (
             <div className='item-container'>
-                <li><p>{this.centralUsername}</p></li>
-                <li><p>{this.foreignUsername}</p></li>
-                <li><p>{this.winner}</p></li>
-                <li><p>{this.props.game.moves_list}</p></li>
+                <div className='game-item-container'>
+                    <div>
+                        <li className='game-winner'><p className={`${centralClass}`}>{winner}</p></li>
+                        <li className='game-loser'><p className={`${foreignClass}`}>{loser}</p></li>
+                    </div>
+                    <div>
+                        <li className='game-moves-header'><p>Moves</p></li>
+                        <li className='game-moves'><p>{this.props.game.moves_list}</p></li>
+                    </div>
+                </div>
             </div>
         )
     }

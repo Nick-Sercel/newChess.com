@@ -101,7 +101,7 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
     const dupedBoard = dupBoard(board);
     // console.log('entities: ', entities);
     for (let i = 0; i < entities.length; i++) {
-        console.log('current value: ', entities[i][1]);
+        // console.log('current value: ', entities[i][1]);
         for (let j = 0; j < entities[i][1].length; j++) {
             let move = [entities[i][0], entities[i][1][j]];
             move[0] = move[0].split(",");
@@ -111,7 +111,7 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
             const score = findAiMove(board, depth - 1, !min)[0];
             board = dupBoard(dupedBoard); // revert state to before a move was made
             // board.reverseMove();
-            console.log('score: ', score);
+            // console.log('score: ', score);
             if (min) {
                 if (score < highestVal) {
                     highestVal = score;

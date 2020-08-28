@@ -40,6 +40,11 @@ export const createFriend = (friend) => dispatch => {
         .then((friend) => dispatch(receiveFriend(friend)))
 }
 
+export const updateFriend = (friend) => dispatch => {
+    return FriendApiUtil.updateFriend(friend)
+        .then((friend) => dispatch(receiveFriend(friend)))
+}
+
 export const deleteFriend = friendId => dispatch => {
     return FriendApiUtil.deleteFriend(friendId)
         .then(() => dispatch(removeFriend(friendId)))

@@ -3,10 +3,44 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
 .friend-search {
-    padding-left: 10px;
-    padding-right: 10px;
+    // margin: auto;
+    margin-left: 40px;
+    display: flex;
+    padding-bottom: 15px;
 }
 
-.friend-search label {
-    padding-right: 10px;
+.friend-item {
+    display: flex;
+    align-content: space-between;
 }
+
+.friend-item li {
+    width: 25%;
+}
+
+.friend-item > li {
+    width: 75%;
+}
+
+.item-container .friend-item li a,
+.item-container .friend-item li p {
+    color: rgb(180, 7, 180);
+    font-size: 35px;
+    text-decoration: none;
+}
+
+.friend-item li:hover {
+    text-decoration: underline;
+    color: rgb(180, 7, 180);
+    cursor: pointer;
+}
+
+.friend-item .no-decoration:hover {
+  text-decoration: none;
+  cursor: default;
+}
+
+.friends-text {
+    color: rgb(180, 7, 180);
+}
+

@@ -14,7 +14,7 @@
     height: 880px;
     // background-color: blueviolet;
     padding-left: 20px;
-    width: 28%;
+    min-width: 28%;
 }
 
 .white-captures {
@@ -78,35 +78,70 @@
 
  // Display Games
 
-.game-index-container {
-    
-    min-width: 40%;
-    background-color: rgba(42, 42, 42, 1);
-    padding: 0;
-    margin: 0 auto;
-    font-weight: 300;
+ .game-item-container {
+    //  padding-bottom: 10px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-content: space-between;
+    width: 90%;
+    background-color: rgba(24, 24, 24, 1);
     border: 5px solid black;
+    margin: auto;
+    // padding-bottom: 15px;
+ }
+
+ .game-item-container div {
+    //  display: flex;
+    //  flex-direction: column;
+    //  align-items: stretch;
+    //  max-height: 200px;
+    // min-width: 180px;
+    width: 50%;
+ }
+
+.game-winner {
+    margin: auto;
+    text-align: center;
+    margin-bottom: 5px;
+    background-color: rgb(151, 114, 21);
+    // height: 50px;
 }
 
-.game-index-container li {
-    list-style: none;
+.game-loser {
+    margin: auto;
+    text-align: center;
+    margin-top: 5px;
+    background-color: rgb(158, 158, 158);
+    // height: 50px;
 }
 
-
-.game-item-container li {
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 10px;
+.game-central {
+    color: blue;
 }
 
-.game-index-container > li > p {
+.game-foreign {
+    color: black;
+}
+
+.game-moves p {
+    color: red;
+    text-align: center;
+}
+
+.game-moves-header {
     padding: none;
-    font-size: 40px;
+    height: 30%;
+    color: red;
     text-align: center;
     text-decoration: underline;
 }
 
-.game-item-container li button {
-    text-decoration: none;
-    background-color: red;
+.game-item-container div .game-moves-header p {
+    padding: none;
+    color: red;
+    font-size: 26px;
+}
+
+.games-text {
+    color: red;
 }

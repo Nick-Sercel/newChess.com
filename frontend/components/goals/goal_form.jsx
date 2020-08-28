@@ -21,13 +21,13 @@ class GoalForm extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className='goal-form-container'>
                 <div>
                     <label className={'goal-form-item goal-form-title'}>Title:</label>
                     <input type='text' value={this.state.title} onChange={this.update('title')} />
                 </div>
-                <div>
-                    <label className={'goal-form-item goal-form-body'}>Body:</label>
+                <div className='goal-form-body-div'>
+                    <label className={'goal-form-item oal-form-body'}>Body:</label>
                     <input type='text' value={this.state.body} onChange={this.update('body')} />
                 </div>
                 <div>

@@ -18,15 +18,21 @@ class GoalIndexItem extends React.Component {
         let renderedContent;
         if (this.state.renderEdit) {
             renderedContent = <div className='item-container'>
-                                <EditGoalContainer goal={this.props.goal} />
-                                <li><button onClick={() => this.toggleEdit(false)}>Close Edit</button></li>
+                                <div className='goal-item-container'>
+                                    <EditGoalContainer goal={this.props.goal} />
+                                    <li><button onClick={() => this.toggleEdit(false)}>Close Edit</button></li>
+                                </div>
                               </div>
         } else {
             renderedContent = <div className='item-container'>
-                                <li><p className='goal-title'>{this.props.goal.title}</p></li>
-                                <li><p className='goal-body'>{this.props.goal.body}</p></li>
-                                <li><button onClick={() => this.toggleEdit(true)}>Edit Goal</button></li>
-                                <li><button onClick={() => this.props.deleteGoal(this.props.goal.id)}>Delete Goal</button></li>
+                                <div className='goal-item-container'>
+                                    <li><p className='goal-title'>{this.props.goal.title}</p></li>
+                                    <li><p className='goal-body'>{this.props.goal.body}</p></li>
+                                    <div>
+                                        <li><button onClick={() => this.toggleEdit(true)}>Edit Goal</button></li>
+                                        <li><button onClick={() => this.props.deleteGoal(this.props.goal.id)}>Delete Goal</button></li>
+                                    </div>
+                                </div>
                               </div>
         }
         return (

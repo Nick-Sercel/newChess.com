@@ -21,16 +21,18 @@ class GoalIndex extends React.Component {
     render() {
         let extraRenders;
         if (this.state.extraRender) {
-            extraRenders = <div>
+            extraRenders = <div className='goal-top-item'>
                             <CreateGoalContainer />
-                            <li><button onClick={() => this.click(false)}>Close</button></li>
+                            <li className='move-right'><button onClick={() => this.click(false)}>Close</button></li>
                            </div>;
         } else {
-            extraRenders = <li className='create-goal-button'><button onClick={() => this.click(true)}>Create new Goal</button></li>;
+            extraRenders = <div className='goal-top-item'>
+                                <li className='create-goal-button'><button onClick={() => this.click(true)}>Create new Goal</button></li>
+                            </div>;
         }
         return (
             <div className='index-container'>
-                <li><p>Goals</p></li>
+                <li><p className='goals-text'>Goals</p></li>
                 {extraRenders}
                 {this.props.goals.map(goal => <GoalIndexItem key={goal.id} goal={goal} deleteGoal={this.props.deleteGoal} />)}
             </div>

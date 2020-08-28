@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-// import GoalIndexContainer from '../goals/goal_index_container';
+import EditUserContainer from './edit_user_form_container';
 
 class UserShow extends React.Component {
     constructor(props) {
@@ -19,6 +19,10 @@ class UserShow extends React.Component {
         }
     }
 
+    toggleEditPage() {
+        document.getElementById('create').classList.add('active-form')
+    }
+
     render() {
         if (!this.props.user) { return(<div></div>) }
 
@@ -28,20 +32,24 @@ class UserShow extends React.Component {
         if (this.props.currentUserId === this.props.user.id) {
             loggedInContent = <div>
                                 <Link to='/game/new'>Play a Game</Link>
-                                <Link to={`/users/${this.props.user.id}/edit`}>Edit User Information</Link>
+                                <p>
+
+                                </p>
+                                <button onClick={() => this.toggleEditPage()}>Edit User Information</button>
                               </div>;
             email = <h2>{this.props.user.email}</h2>;
         } else {
-            loggedOutContent = <Link to={`/`}>Return to Home Page</Link>
+            loggedOutContent = <div></div>
         }
         
         return (
             <div>
                 <h1>{this.props.user.username}</h1>
                 {email}
-                <h3>{this.props.user.elo}</h3>
+                <h3>Elo: {this.props.user.elo}</h3>
                 {loggedInContent}
                 {loggedOutContent}
+                <EditUserContainer />
             </div>
         )
     }

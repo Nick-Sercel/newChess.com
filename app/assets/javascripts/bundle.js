@@ -90,7 +90,7 @@
 /*!********************************************!*\
   !*** ./frontend/actions/friend_actions.js ***!
   \********************************************/
-/*! exports provided: RECEIVE_FRIENDS, RECEIVE_FRIEND, REMOVE_FRIEND, fetchFriends, fetchFriend, createFriend, deleteFriend */
+/*! exports provided: RECEIVE_FRIENDS, RECEIVE_FRIEND, REMOVE_FRIEND, fetchFriends, fetchFriend, createFriend, updateFriend, deleteFriend */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -101,6 +101,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriends", function() { return fetchFriends; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriend", function() { return fetchFriend; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createFriend", function() { return createFriend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "updateFriend", function() { return updateFriend; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteFriend", function() { return deleteFriend; });
 /* harmony import */ var _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/friend_api_util */ "./frontend/util/friend_api_util.js");
 
@@ -146,6 +147,13 @@ var fetchFriend = function fetchFriend(friendId) {
 var createFriend = function createFriend(friend) {
   return function (dispatch) {
     return _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__["createFriend"](friend).then(function (friend) {
+      return dispatch(receiveFriend(friend));
+    });
+  };
+};
+var updateFriend = function updateFriend(friend) {
+  return function (dispatch) {
+    return _util_friend_api_util__WEBPACK_IMPORTED_MODULE_0__["updateFriend"](friend).then(function (friend) {
       return dispatch(receiveFriend(friend));
     });
   };
@@ -452,7 +460,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util_route_util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/route_util */ "./frontend/util/route_util.jsx");
 /* harmony import */ var _users_user_show_container__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./users/user_show_container */ "./frontend/components/users/user_show_container.jsx");
 /* harmony import */ var _users_edit_user_form_container__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./users/edit_user_form_container */ "./frontend/components/users/edit_user_form_container.jsx");
-/* harmony import */ var _games_game_board_game_board_container__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./games/game_board/game_board_container */ "./frontend/components/games/game_board/game_board_container.jsx");
+/* harmony import */ var _games_game_board_game_container__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./games/game_board/game_container */ "./frontend/components/games/game_board/game_container.jsx");
 /* harmony import */ var _splash_splash_page_container__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./splash/splash_page_container */ "./frontend/components/splash/splash_page_container.jsx");
 /* harmony import */ var _users_user_auth_banner_user_auth_banner_container__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./users/user_auth_banner/user_auth_banner_container */ "./frontend/components/users/user_auth_banner/user_auth_banner_container.jsx");
 
@@ -469,10 +477,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var App = function App() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_users_user_auth_banner_user_auth_banner_container__WEBPACK_IMPORTED_MODULE_7__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Switch"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Route"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_users_user_auth_banner_user_auth_banner_container__WEBPACK_IMPORTED_MODULE_7__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Switch"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_util_route_util__WEBPACK_IMPORTED_MODULE_2__["ProtectedRoute"], {
     exact: true,
     path: "/game/new",
-    component: _games_game_board_game_board_container__WEBPACK_IMPORTED_MODULE_5__["default"]
+    component: _games_game_board_game_container__WEBPACK_IMPORTED_MODULE_5__["default"]
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_util_route_util__WEBPACK_IMPORTED_MODULE_2__["ProtectedRoute"], {
     path: "/users/:userId/edit",
     component: _users_edit_user_form_container__WEBPACK_IMPORTED_MODULE_4__["default"]
@@ -576,7 +584,7 @@ var FriendSearch = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       var _this3 = this;
 
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "friend-search"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("input", {
         type: "text",
@@ -586,7 +594,7 @@ var FriendSearch = /*#__PURE__*/function (_React$Component) {
         onClick: function onClick() {
           return _this3.handleSubmit();
         }
-      }, "Add Friend")));
+      }, "Add Friend"));
     }
   }]);
 
@@ -660,12 +668,16 @@ var FriendIndex = /*#__PURE__*/function (_React$Component) {
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: 'index-container friend-index-container'
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Friends")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_friend_search__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+        className: "friends-text"
+      }, "Friends")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_friend_search__WEBPACK_IMPORTED_MODULE_2__["default"], {
         createFriend: this.props.createFriend
       }), this.props.friends.map(function (friend) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_friends_list_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
           key: friend.id,
           friend: friend,
+          sessionId: _this.props.sessionId,
+          updateFriend: _this.props.updateFriend,
           deleteFriend: _this.props.deleteFriend
         });
       }));
@@ -718,6 +730,9 @@ var mDTP = function mDTP(dispatch) {
     },
     createFriend: function createFriend(friend) {
       return dispatch(Object(_actions_friend_actions__WEBPACK_IMPORTED_MODULE_2__["createFriend"])(friend));
+    },
+    updateFriend: function updateFriend(friend) {
+      return dispatch(Object(_actions_friend_actions__WEBPACK_IMPORTED_MODULE_2__["updateFriend"])(friend));
     }
   };
 };
@@ -737,6 +752,7 @@ var mDTP = function mDTP(dispatch) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -761,6 +777,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
 var FriendIndexItem = /*#__PURE__*/function (_React$Component) {
   _inherits(FriendIndexItem, _React$Component);
 
@@ -774,6 +791,9 @@ var FriendIndexItem = /*#__PURE__*/function (_React$Component) {
     _this = _super.call(this, props);
     _this.centralUsername = _this.props.friend.central_username;
     _this.foreignUsername = _this.props.friend.foreign_username;
+    _this.state = {
+      accepted: _this.props.friend.accepted
+    };
     return _this;
   }
 
@@ -783,27 +803,62 @@ var FriendIndexItem = /*#__PURE__*/function (_React$Component) {
       switch (type) {
         case 'accept':
           this.props.friend.accepted = true;
+          this.props.updateFriend(this.props.friend);
+          this.setState({
+            accepted: this.props.friend.accepted
+          });
+          break;
 
         case 'deny':
           this.props.deleteFriend(this.props.friend.id);
+          break;
       }
+    }
+  }, {
+    key: "friendsPage",
+    value: function friendsPage() {// console.log('text');
     }
   }, {
     key: "render",
     value: function render() {
-      var userDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
-      var statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null); // if (!this.props.friend.accepted) {
-      //     if (this.props.sessionId === this.centralUser.id) {
-      //         statusDisp = <li><p>Pending</p></li>
-      //     } else {
-      //         statusDisp = <div>
-      //             <li><button onClick={this.friendRequest('accept')} >Accept</button></li>
-      //             <li><button onClick={this.friendRequest('deny')} >Decline</button></li>
-      //         </div>
-      //     }
-      // }
+      var _this2 = this;
 
-      userDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.centralUsername)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.foreignUsername)), statusDisp);
+      var userDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+      var statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+
+      if (!this.props.friend.accepted) {
+        // debugger;
+        if (this.props.sessionId === this.props.friend.central_user_id) {
+          statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+            className: "no-decoration"
+          }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Pending"));
+        } else {
+          statusDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+            onClick: function onClick() {
+              return _this2.friendRequest('accept');
+            }
+          }, "Accept")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+            onClick: function onClick() {
+              return _this2.friendRequest('deny');
+            }
+          }, "Decline")));
+        }
+      }
+
+      if (this.props.sessionId !== this.props.friend.central_user_id) {
+        userDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "friend-item"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+          to: "/users/".concat(this.props.friend.central_user_id, "/external")
+        }, this.foreignUsername)), statusDisp);
+      } else {
+        userDisp = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "friend-item"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+          to: "/users/".concat(this.props.friend.foreign_user_id, "/external")
+        }, this.centralUsername)), statusDisp);
+      }
+
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: 'item-container friend-item-container'
       }, userDisp);
@@ -931,8 +986,7 @@ function findAiMove(board, depth) {
   var dupedBoard = dupBoard(board); // console.log('entities: ', entities);
 
   for (var i = 0; i < entities.length; i++) {
-    console.log('current value: ', entities[i][1]);
-
+    // console.log('current value: ', entities[i][1]);
     for (var j = 0; j < entities[i][1].length; j++) {
       var move = [entities[i][0], entities[i][1][j]];
       move[0] = move[0].split(",");
@@ -943,8 +997,7 @@ function findAiMove(board, depth) {
       var score = findAiMove(board, depth - 1, !min)[0];
       board = dupBoard(dupedBoard); // revert state to before a move was made
       // board.reverseMove();
-
-      console.log('score: ', score);
+      // console.log('score: ', score);
 
       if (min) {
         if (score < highestVal) {
@@ -1203,6 +1256,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
     _this.aiTurn = 'black';
     _this.humanMoved = false;
     _this.currentMove = 0;
+    _this.gameOver = false;
     return _this;
   }
 
@@ -1221,9 +1275,9 @@ var Game = /*#__PURE__*/function (_React$Component) {
       var board = this.state.board; // console.log('currentTurnColor: ', board.currentTurnColor);
       // console.log('aiTurn', this.aiTurn);
 
-      if (board.currentTurnColor === this.aiTurn) {
+      if (board.currentTurnColor === this.aiTurn && !this.gameOver) {
         this.makeAiMove(board); // make an ai move on the board -> chess_ai.js util
-      } else {
+      } else if (!this.gameOver) {
         console.log(tile);
         console.log(this.currentTile);
 
@@ -1247,8 +1301,19 @@ var Game = /*#__PURE__*/function (_React$Component) {
           if (tile.piece.color !== this.humanTurn) {
             // set place to move piece
             console.log('secondary click');
+            var moveResult = board.movePiece(this.currentTile, tile);
 
-            if (board.movePiece(this.currentTile, tile)) {
+            if (moveResult === 'end') {
+              console.log('creating a game for db');
+              var dbGame = {
+                central_user_id: this.props.sessionId,
+                foreign_user_id: 1,
+                winner_id: this.props.sessionId,
+                moves_list: board.moves
+              };
+              this.props.createGame(dbGame);
+              this.gameOver = true;
+            } else if (moveResult) {
               this.currentTile = null;
               this.potentialMoves = [];
               this.humanMoved = true;
@@ -1268,25 +1333,28 @@ var Game = /*#__PURE__*/function (_React$Component) {
           // set place to move piece
           console.log('secondary click');
 
-          if (board.movePiece(this.currentTile, tile)) {
+          var _moveResult = board.movePiece(this.currentTile, tile);
+
+          if (_moveResult) {
             this.currentTile = null;
             this.potentialMoves = [];
             this.humanMoved = true;
           }
         }
-      }
+      } // if (board.checkmate(board.currentTurnColor)) { // re-enable with real game
+      //     console.log('checkmate')
+      // }
 
-      if (board.checkmate(board.currentTurnColor)) {
-        console.log('checkmate');
-      }
 
       this.setState({
         board: board
       });
 
-      if (this.humanMoved) {
-        this.humanMoved = false;
-        this.updateGame();
+      if (!this.gameOver) {
+        if (this.humanMoved) {
+          this.humanMoved = false;
+          this.updateGame();
+        }
       }
     }
   }, {
@@ -1296,13 +1364,27 @@ var Game = /*#__PURE__*/function (_React$Component) {
       this.currentMove++;
 
       if (this.currentMove === 1) {
-        var pieceTile = board.board[[0, 1]];
+        var pieceTile = board.board[[1, 2]];
         var moveTile = board.board[[2, 2]];
         board.movePiece(pieceTile, moveTile);
       } else if (this.currentMove === 2) {
-        var _pieceTile = board.board[[0, 6]];
-        var _moveTile = board.board[[2, 5]];
+        var _pieceTile = board.board[[1, 1]];
+        var _moveTile = board.board[[3, 1]];
         board.movePiece(_pieceTile, _moveTile);
+      }
+
+      return;
+      var moveResult = false;
+      this.currentMove++;
+
+      if (this.currentMove === 1) {
+        var _pieceTile2 = board.board[[0, 1]];
+        var _moveTile2 = board.board[[2, 2]];
+        board.movePiece(_pieceTile2, _moveTile2);
+      } else if (this.currentMove === 2) {
+        var _pieceTile3 = board.board[[0, 6]];
+        var _moveTile3 = board.board[[2, 5]];
+        board.movePiece(_pieceTile3, _moveTile3);
       } else {
         var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"](false); // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
 
@@ -1317,15 +1399,22 @@ var Game = /*#__PURE__*/function (_React$Component) {
         var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, 3); // make move with (num) depth
 
         console.log('ai move: ', move);
-        var _pieceTile2 = board.board[move[1][0]];
-        var _moveTile2 = board.board[move[1][1]];
-        console.log('pieceTile: ', _pieceTile2);
-        console.log('moveTile: ', _moveTile2);
-        board.movePiece(_pieceTile2, _moveTile2); // const pieceTile = board.board[[1, 6]];
-        // const moveTile = board.board[[3, 6]];
-        // console.log('pieceTile: ', pieceTile);
-        // console.log('moveTile: ', moveTile);
-        // board.movePiece(pieceTile, moveTile);
+        var _pieceTile4 = board.board[move[1][0]];
+        var _moveTile4 = board.board[move[1][1]];
+        console.log('pieceTile: ', _pieceTile4);
+        console.log('moveTile: ', _moveTile4);
+        moveResult = board.movePiece(_pieceTile4, _moveTile4);
+      }
+
+      if (moveResult === 'end') {
+        var dbGame = {
+          central_user_id: this.props.sessionId,
+          foreign_user_id: 1,
+          winner_id: 1,
+          moves_list: board.moves
+        };
+        this.props.createGame(dbGame);
+        this.gameOver = true;
       }
     }
   }, {
@@ -1333,9 +1422,15 @@ var Game = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       var whiteCaptures = this.state.board.whiteCaptures;
       var blackCaptures = this.state.board.blackCaptures;
+      var gameOverStuff = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null);
+
+      if (this.gameOver) {
+        gameOverStuff = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, "Game Over!")));
+      }
+
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
         className: "big-board-container"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_game_board__WEBPACK_IMPORTED_MODULE_0__["default"], {
+      }, gameOverStuff, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_game_board__WEBPACK_IMPORTED_MODULE_0__["default"], {
         board: this.state.board,
         updateGame: this.updateGame,
         potentialMoves: this.potentialMoves
@@ -1358,6 +1453,40 @@ var Game = /*#__PURE__*/function (_React$Component) {
 }(react__WEBPACK_IMPORTED_MODULE_1___default.a.Component);
 
 /* harmony default export */ __webpack_exports__["default"] = (Game);
+
+/***/ }),
+
+/***/ "./frontend/components/games/game_board/game_container.jsx":
+/*!*****************************************************************!*\
+  !*** ./frontend/components/games/game_board/game_container.jsx ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _game_board_container__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game_board_container */ "./frontend/components/games/game_board/game_board_container.jsx");
+/* harmony import */ var _actions_game_actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../actions/game_actions */ "./frontend/actions/game_actions.js");
+
+
+
+
+var mSTP = function mSTP(state) {
+  return {
+    sessionId: state.session.id
+  };
+};
+
+var mDTP = function mDTP(dispatch) {
+  return {
+    createGame: function createGame(game) {
+      return dispatch(Object(_actions_game_actions__WEBPACK_IMPORTED_MODULE_2__["createGame"])(game));
+    }
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_redux__WEBPACK_IMPORTED_MODULE_0__["connect"])(mSTP, mDTP)(_game_board_container__WEBPACK_IMPORTED_MODULE_1__["default"]));
 
 /***/ }),
 
@@ -1496,20 +1625,10 @@ var Board = /*#__PURE__*/function () {
 
     this.whiteCaptures = [];
     this.blackCaptures = [];
-    this.currentPieces = {};
-    this.kings = {};
-    this.kings['white'] = {
-      'piece': null,
-      'direct': {},
-      'indirect': {},
-      'saves': {}
-    };
-    this.kings['black'] = {
-      'piece': null,
-      'direct': {},
-      'indirect': {},
-      'saves': {}
-    };
+    this.currentPieces = {}; // this.kings = {};
+    // this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} }; // re-enable with real game
+    // this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
+
     this.currentTurnColor = 'white';
     this.moves = "";
     this.movesFor = {
@@ -1552,17 +1671,9 @@ var Board = /*#__PURE__*/function () {
             this.movesFor['white'][(i, j)] = [];
 
             if (piece.pos[0] > 5) {
-              piece.color = 'white';
-
-              if (piece.symbol === 'K') {
-                this.kings['white']['piece'] = piece;
-              }
+              piece.color = 'white'; // if (piece.symbol === 'K') {this.kings['white']['piece'] = piece;} // re-enable with real game
             } else {
-              piece.color = 'black';
-
-              if (piece.symbol === 'K') {
-                this.kings['black']['piece'] = piece;
-              }
+              piece.color = 'black'; // if (piece.symbol === 'K') { this.kings['black']['piece'] = piece; }
             }
 
             this.currentPieces[piece.pos] = piece;
@@ -1703,7 +1814,7 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "findThreatsAndRemove",
     value: function findThreatsAndRemove(piece, moves) {
-      // update this
+      // update this  // re-enable with real game
       var otherColor = this.oppColor(piece.color);
 
       for (var i = 0; i < moves.length; i++) {
@@ -1720,7 +1831,7 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "findMatchingThreat",
     value: function findMatchingThreat(primaryThreat, color) {
-      // primaryThreat should be a piece object reference
+      // primaryThreat should be a piece object reference   // re-enable with real game
       if (this.kings[color]['indirect'][primaryThreat.pos] !== undefined) {
         return this.kings[color]['indirect'][primaryThreat.pos][0]; // should only ever have one position => but it is in an array
       } else {
@@ -1742,7 +1853,7 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "findSavesOnMove",
     value: function findSavesOnMove(piece, moves) {
-      // needs update
+      // needs update  // re-enable with real game
       var dThreats = Object.values(this.kings[piece.color]['direct']);
 
       if (dThreats.length !== 0) {
@@ -1802,7 +1913,8 @@ var Board = /*#__PURE__*/function () {
 
         case 'K':
           // add castling and restrictions on moving near enemy kings
-          moves = this.kingMoves(piece); // console.log(`king moves: ${moves}`);
+          moves = this.kingMoves(piece); // re-enable with real game (remove)
+          // console.log(`king moves: ${moves}`);
           // this.kings[piece.color].moves = moves; // done in call statement
 
           break;
@@ -1811,15 +1923,14 @@ var Board = /*#__PURE__*/function () {
           console.log('that piece doesn\'t exist');
           console.log("that piece is: ".concat(piece));
           return;
-      }
+      } // if (piece.symbol !== 'K') { // re-enable an remove case 'K' for real game
+      //     if (piece.color !== this.currentTurnColor) {
+      //         this.findThreatsAndRemove(piece, moves);
+      //     } else {
+      //         this.findSavesOnMove(piece, moves);         // does not exist yet
+      //     }
+      // }
 
-      if (piece.symbol !== 'K') {
-        if (piece.color !== this.currentTurnColor) {
-          this.findThreatsAndRemove(piece, moves);
-        } else {
-          this.findSavesOnMove(piece, moves); // does not exist yet
-        }
-      }
 
       this.movesFor[piece.color][piece.pos] = moves;
       return moves;
@@ -1851,8 +1962,8 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "findAllMoves",
     value: function findAllMoves() {
-      this.kings[this.currentTurnColor]['piece'].moves = this.potentialMoves(this.kings[this.currentTurnColor]['piece']);
-      this.kings[this.oppColor(this.currentTurnColor)]['piece'].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]['piece']);
+      // this.kings[this.currentTurnColor]['piece'].moves = this.potentialMoves(this.kings[this.currentTurnColor]['piece']);  // re-enable for real game
+      // this.kings[this.oppColor(this.currentTurnColor)]['piece'].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]['piece']);
       this.findMovesForColor(this.currentTurnColor);
       this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
@@ -1941,12 +2052,14 @@ var Board = /*#__PURE__*/function () {
       this.potentialMoves(moveTile.piece);
 
       if (this.validMove(moveTile.piece, endTile.pos)) {
-        this.kings['white']['direct'] = {};
-        this.kings['white']['indirect'] = {};
-        this.kings['white']['saves'] = {};
-        this.kings['black']['direct'] = {};
-        this.kings['black']['indirect'] = {};
-        this.kings['black']['saves'] = {};
+        // this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {}; this.kings['white']['saves'] = {} // re-enable with real game
+        // this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {}; this.kings['black']['saves'] = {}
+        var gameOver = false;
+
+        if (endTile.piece && endTile.piece.symbol === 'K') {
+          gameOver = true;
+        }
+
         this.lastMove = [moveTile.pos, endTile.pos];
         var piece = moveTile.piece;
 
@@ -1969,10 +2082,9 @@ var Board = /*#__PURE__*/function () {
         delete this.currentPieces[piece.pos]; // remove old piece pos from hash
 
         piece.pos = endTile.pos; // move the piece's position
-
-        if (piece.symbol === 'K') {
-          this.kings[piece.color]['piece'].pos = piece.pos;
-        }
+        // if (piece.symbol === 'K') {
+        //     this.kings[piece.color]['piece'].pos = piece.pos // re-enable with real game
+        // }
 
         this.currentPieces[piece.pos] = piece; // update hash piece location
 
@@ -1988,6 +2100,11 @@ var Board = /*#__PURE__*/function () {
         this.findAllMoves(); // find all moves beginning with pieces of current turn player
 
         this.currentTurnColor = this.oppColor(piece.color);
+
+        if (gameOver) {
+          return 'end';
+        }
+
         return true;
       } else {
         console.log('Invalid move destination');
@@ -2108,7 +2225,9 @@ var GameIndex = /*#__PURE__*/function (_React$Component) {
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "index-container"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Games")), this.props.games.map(function (game) {
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+        className: "games-text"
+      }, "Games")), this.props.games.map(function (game) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_index_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
           key: game.id,
           game: game,
@@ -2226,9 +2345,36 @@ var GameIndexItem = /*#__PURE__*/function (_React$Component) {
   _createClass(GameIndexItem, [{
     key: "render",
     value: function render() {
+      var centralClass = 'game-central';
+      var foreignClass = 'game-foreign';
+      var winner = this.winner;
+      var loser;
+
+      if (this.winner === this.centralUsername) {
+        loser = this.foreignUsername;
+      } else {
+        loser = this.centralUsername;
+        centralClass = 'game-foreign';
+        foreignClass = 'game-central';
+      }
+
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "item-container"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.centralUsername)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.foreignUsername)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.winner)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.props.game.moves_list)));
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "game-item-container"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+        className: "game-winner"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+        className: "".concat(centralClass)
+      }, winner)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+        className: "game-loser"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+        className: "".concat(foreignClass)
+      }, loser))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+        className: "game-moves-header"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Moves")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+        className: "game-moves"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, this.props.game.moves_list)))));
     }
   }]);
 
@@ -2446,14 +2592,18 @@ var GoalForm = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "goal-form-container"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
         className: 'goal-form-item goal-form-title'
       }, "Title:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("input", {
         type: "text",
         value: this.state.title,
         onChange: this.update('title')
-      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
-        className: 'goal-form-item goal-form-body'
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "goal-form-body-div"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
+        className: 'goal-form-item oal-form-body'
       }, "Body:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("input", {
         type: "text",
         value: this.state.body,
@@ -2548,24 +2698,32 @@ var GoalIndex = /*#__PURE__*/function (_React$Component) {
       var extraRenders;
 
       if (this.state.extraRender) {
-        extraRenders = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_create_goal_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+        extraRenders = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "goal-top-item"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_create_goal_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+          className: "move-right"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
           onClick: function onClick() {
             return _this2.click(false);
           }
         }, "Close")));
       } else {
-        extraRenders = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+        extraRenders = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "goal-top-item"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
           className: "create-goal-button"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
           onClick: function onClick() {
             return _this2.click(true);
           }
-        }, "Create new Goal"));
+        }, "Create new Goal")));
       }
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "index-container"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Goals")), extraRenders, this.props.goals.map(function (goal) {
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+        className: "goals-text"
+      }, "Goals")), extraRenders, this.props.goals.map(function (goal) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goal_index_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
           key: goal.id,
           goal: goal,
@@ -2695,21 +2853,25 @@ var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
       if (this.state.renderEdit) {
         renderedContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "item-container"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "goal-item-container"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_edit_goal_container__WEBPACK_IMPORTED_MODULE_1__["default"], {
           goal: this.props.goal
         }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
           onClick: function onClick() {
             return _this2.toggleEdit(false);
           }
-        }, "Close Edit")));
+        }, "Close Edit"))));
       } else {
         renderedContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "item-container"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "goal-item-container"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
           className: "goal-title"
         }, this.props.goal.title)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
           className: "goal-body"
-        }, this.props.goal.body)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+        }, this.props.goal.body)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
           onClick: function onClick() {
             return _this2.toggleEdit(true);
           }
@@ -2717,7 +2879,7 @@ var GoalIndexItem = /*#__PURE__*/function (_React$Component) {
           onClick: function onClick() {
             return _this2.props.deleteGoal(_this2.props.goal.id);
           }
-        }, "Delete Goal")));
+        }, "Delete Goal")))));
       }
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, renderedContent);
@@ -3144,7 +3306,7 @@ var EditUserForm = /*#__PURE__*/function (_React$Component) {
   _createClass(EditUserForm, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      this.props.fetchUser(this.props.match.params.userId);
+      this.props.fetchUser(this.props.sessionId);
     }
   }, {
     key: "render",
@@ -3156,6 +3318,7 @@ var EditUserForm = /*#__PURE__*/function (_React$Component) {
       if (!user) return null;
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_user_form__WEBPACK_IMPORTED_MODULE_2__["default"], {
         action: action,
+        sessionId: this.props.sessionId,
         formType: formType,
         user: user
       });
@@ -3165,11 +3328,12 @@ var EditUserForm = /*#__PURE__*/function (_React$Component) {
   return EditUserForm;
 }(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
 
-var mSTP = function mSTP(state, ownProps) {
+var mSTP = function mSTP(state) {
   return {
-    user: state.entities.users[ownProps.match.params.userId],
+    user: state.entities.users[state.session.id],
     formType: 'Update User',
-    formClassName: 'update'
+    formClassName: 'update',
+    sessionId: state.session.id
   };
 };
 
@@ -3654,6 +3818,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+/* harmony import */ var _edit_user_form_container__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./edit_user_form_container */ "./frontend/components/users/edit_user_form_container.jsx");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3677,7 +3842,8 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 
- // import GoalIndexContainer from '../goals/goal_index_container';
+
+
 
 var UserShow = /*#__PURE__*/function (_React$Component) {
   _inherits(UserShow, _React$Component);
@@ -3705,8 +3871,15 @@ var UserShow = /*#__PURE__*/function (_React$Component) {
       }
     }
   }, {
+    key: "toggleEditPage",
+    value: function toggleEditPage() {
+      document.getElementById('create').classList.add('active-form');
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this = this;
+
       if (!this.props.user) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
       }
@@ -3718,17 +3891,17 @@ var UserShow = /*#__PURE__*/function (_React$Component) {
       if (this.props.currentUserId === this.props.user.id) {
         loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
           to: "/game/new"
-        }, "Play a Game"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-          to: "/users/".concat(this.props.user.id, "/edit")
+        }, "Play a Game"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+          onClick: function onClick() {
+            return _this.toggleEditPage();
+          }
         }, "Edit User Information"));
         email = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", null, this.props.user.email);
       } else {
-        loggedOutContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-          to: "/"
-        }, "Return to Home Page");
+        loggedOutContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
       }
 
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", null, this.props.user.username), email, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", null, this.props.user.elo), loggedInContent, loggedOutContent);
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", null, this.props.user.username), email, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", null, "Elo: ", this.props.user.elo), loggedInContent, loggedOutContent, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_edit_user_form_container__WEBPACK_IMPORTED_MODULE_2__["default"], null));
     }
   }]);
 
@@ -4106,7 +4279,7 @@ var configureStore = function configureStore() {
 /*!******************************************!*\
   !*** ./frontend/util/friend_api_util.js ***!
   \******************************************/
-/*! exports provided: fetchFriends, fetchFriend, createFriend, deleteFriend */
+/*! exports provided: fetchFriends, fetchFriend, createFriend, updateFriend, deleteFriend */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4114,6 +4287,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriends", function() { return fetchFriends; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchFriend", function() { return fetchFriend; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createFriend", function() { return createFriend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "updateFriend", function() { return updateFriend; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteFriend", function() { return deleteFriend; });
 var fetchFriends = function fetchFriends() {
   return $.ajax({
@@ -4131,6 +4305,15 @@ var createFriend = function createFriend(friend) {
   return $.ajax({
     method: 'POST',
     url: '/api/friends',
+    data: {
+      friend: friend
+    }
+  });
+};
+var updateFriend = function updateFriend(friend) {
+  return $.ajax({
+    method: 'PATCH',
+    url: "/api/friends/".concat(friend.id),
     data: {
       friend: friend
     }

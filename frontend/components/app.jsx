@@ -7,7 +7,7 @@ import {AuthRoute, ProtectedRoute} from '../util/route_util';
 import UserShowContainer from './users/user_show_container';
 import EditUserFormContainer from './users/edit_user_form_container';
 
-import GameBoardContainer from './games/game_board/game_board_container';
+import GameBoardContainer from './games/game_board/game_container';
 
 // import CreateGoalContainer from './goals/create_goal_container';
 // import EditGoalContainer from './goals/edit_goal_container';
@@ -21,7 +21,7 @@ const App = () => (
     <div>
         <UserBannerContainer />
         <Switch>
-            <Route exact path="/game/new" component={GameBoardContainer} />
+            <ProtectedRoute exact path="/game/new" component={GameBoardContainer} />
             {/* <AuthRoute path='/users/:userId/goals/new' component={CreateGoalContainer} />
             <AuthRoute path='/users/:userId/goals/:goalId/edit' component={EditGoalContainer} />
             <AuthRoute path='/users/:userId/goals/:goalId' component={GoalIndexContainer} />*/ }

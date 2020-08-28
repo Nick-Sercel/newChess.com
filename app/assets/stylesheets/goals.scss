@@ -2,9 +2,16 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-.goal-title {
-    padding-left: 30px;
-    font-size: 20px;
+
+
+.item-container .goal-item-container li .goal-title {
+    font-size: 24px;
+    width: 50%;
+    padding: 5px;
+    background-color: rgb(12, 175, 12);
+    color: blue;
+    text-align: center;
+    margin: auto;
 }
 
 .goal-body {
@@ -16,9 +23,31 @@
 }
 
 .goal-form-title {
-    padding-right: 15px;
+    padding-right: 18px;
 }
 
-.create-goal-button {
-    padding-left: 10px;
+.goal-form-body-div {
+    padding-bottom: 15px;
+}
+
+.goal-item-container {
+    margin: auto;
+    width: 90%;
+    background-color: rgb(7, 167, 167);
+    border: 5px solid rgb(23, 206, 206);
+}
+
+.goal-top-item {
+    padding-bottom: 25px;
+    width: 90%;
+    margin: auto;
+}
+
+.goal-item-container div {
+    display: flex;
+    align-content: space-between;
+}
+
+.goals-text {
+    color: rgb(11, 192, 192);
 }
