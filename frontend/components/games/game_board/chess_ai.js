@@ -1,39 +1,151 @@
-export const makeAiMove = (board, color, depth) => {
+import * as Utils from './utils';
 
-    // board duplication if possible
-    // boarddd = new Board();
-    // boarddd.properties = Object.assign({}, board.properties);
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
 
-    findAiMove(board, color, depth);
-}
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
 
-function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 100000) {
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
 
-    if (depth === 0) {
-        return scorePosition(board);
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
     }
 
-    const entities = Object.entries(board.movesFor[color]); // [ [ [0, 1], [ [2, 3], [3, 4], [] ] ], [  ], [  ] ]
+    return array;
+}
+
+function dupBoard (board) { // this apparently slow af - maybe write custom duplicator?
+    const dupBoard = new Utils.Board(false);
+    // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication -> maybe try on base components of each object for speed ?
+    dupBoard.board = JSON.parse(JSON.stringify(board.board));
+    dupBoard.whiteCaptures = board.whiteCaptures.slice();
+    dupBoard.blackCaptures = board.blackCaptures.slice();
+    dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
+    dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+    dupBoard.currentTurnColor = board.currentTurnColor;
+    dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
+    dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+    return dupBoard;
+}
+
+// function findAiMove (board) {
+//     // random board element
+//     console.log('random ai move');
+//     const entities = Object.entries(board.movesFor[board.currentTurnColor]);
+//     shuffle(entities);
+//     shuffle(entities[0][1]);
+//     // console.log(entities[0][1][0]);
+//     entities[0][0] = entities[0][0].split(",")
+//     entities[0][0][1] = parseInt(entities[0][0][1]); entities[0][0][0] = parseInt(entities[0][0][0])
+//     // console.log(entities[0]);
+//     return [entities[0][0], entities[0][1][0]];
+// }
+
+// function addBoardProps(dupBoard, board) {
+//     dupBoard.board = JSON.parse(JSON.stringify(board.board));
+//     dupBoard.whiteCaptures = board.whiteCaptures.slice();
+//     dupBoard.blackCaptures = board.blackCaptures.slice();
+//     dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
+//     dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+//     dupBoard.currentTurnColor = board.currentTurnColor;
+//     dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
+//     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+// }
+
+function findAiMove (board, depth) {
+    console.log('ai one state into the future');
+    const entities = Object.entries(board.movesFor[board.currentTurnColor]);
+    let highestVal = 100000; // playing as black so we want low score
+    let bestMove = null;
+    shuffle(entities);
+    const dupedBoard = dupBoard(board);
+    console.log('entities: ', entities);
     for (let i = 0; i < entities.length; i++) {
-        for (let j = 0; j < entities[i][1]; j++) {
-            board.movePiece(board.board[entities[i][0]], board.board[entities[i][1][j]]);
-            findAiMove(board, board.oppColor(color), depth - 1, !max, alpha, beta);
+        console.log('current value: ', entities[i][1]);
+        for (let j = 0; j < entities[i][1].length; j++) {
+            let move = [entities[i][0], entities[i][1][j]];
+            move[0] = move[0].split(",");
+            move[0][1] = parseInt(move[0][1]); move[0][0] = parseInt(move[0][0]);
+            // console.log('inner loop');
+            board.movePiece(board.board[move[0]], board.board[move[1]]);
+            const score = scorePosition(board.currentPieces);
+            board = dupBoard(dupedBoard); // revert state to before a move was made
+            // board.reverseMove();
+            console.log('score: ', score);
+            if (score < highestVal) {
+                highestVal = score;
+                bestMove = move;
+            }
         }
-
     }
-
-
+    return bestMove;
 }
+
+// function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 100000) {
+
+//     if (depth === 0) {
+//         return scorePosition(board);
+//     }
+
+//     let bestMove = null;
+//     const entities = Object.entries(board.movesFor[color]); // [ [ [0, 1], [ [2, 3], [3, 4], [] ] ], [  ], [  ] ]
+//     for (let i = 0; i < entities.length; i++) {
+//         for (let j = 0; j < entities[i][1]; j++) {
+//             const move = [board.board[entities[i][0]], board.board[entities[i][1][j]]];
+//             board.movePiece(move[0], move[1]);
+//             score = findAiMove(board, board.oppColor(color), depth - 1, !max, alpha, beta);
+
+//             console.log(isMaximizingPlayer ? 'Max: ' : 'Min: ', depth, move[0].pos, move[1].pos, score, bestMove, bestMoveScore);
+
+//             if (max) {
+//                 // Look for moves that maximize position
+//                 if (score > bestMoveScore) {
+//                     bestMoveScore = score;
+//                     bestMove = move;
+//                 }
+//                 alpha = Math.max(alpha, score);
+//             } else {
+//                 // Look for moves that minimize position
+//                 if (score < bestMoveScore) {
+//                     bestMoveScore = score;
+//                     bestMove = move;
+//                 }
+//                 beta = Math.min(beta, score);
+//             }
+//             // Undo previous move
+//             board.reverseMove(); // the baaad guieey
+//             // Check for alpha beta pruning
+//             if (beta <= alpha) {
+//                 // console.log('Prune', alpha, beta);
+//                 break;
+//             }
+//         }
+//     }
+// }
+
 
 function scorePosition(pieces) {
+    const piecesArr = Object.values(pieces);
+    const piecesKeys = Object.keys(pieces);
+    console.log('piecesArrVals: ', piecesArr);
+    console.log('piecesArrKeys: ', piecesKeys);
     let points = 0;
     // let pieces = Object.values(board.currentPieces);
-    for (let i = 0; i < pieces.length; i++) {
-        switch (pieces[i].color) {
+    for (let i = 0; i < piecesArr.length; i++) {
+        switch (piecesArr[i].color) {
             case 'white':
-                points += pieceTypePointsCase(pieces[i]);
+                points += pieceTypePointsCase(piecesArr[i]);
+                break;
             case 'black':
-                points -= pieceTypePointsCase(pieces[i]);
+                points -= pieceTypePointsCase(piecesArr[i]);
+                break;
+            default:
+                console.log('color does not exist: ', piecesArr[i].color);
         }
     }
     return points;
@@ -71,3 +183,6 @@ function pieceTypePointsCase(piece) {
 // this.currentTurnColor = 'white';
 // this.moves = "";
 // this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } and remove from piece object
+
+
+export default findAiMove;

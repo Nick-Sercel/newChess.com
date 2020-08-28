@@ -817,6 +817,214 @@ var FriendIndexItem = /*#__PURE__*/function (_React$Component) {
 
 /***/ }),
 
+/***/ "./frontend/components/games/game_board/chess_ai.js":
+/*!**********************************************************!*\
+  !*** ./frontend/components/games/game_board/chess_ai.js ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./frontend/components/games/game_board/utils.js");
+
+
+function shuffle(array) {
+  var currentIndex = array.length,
+      temporaryValue,
+      randomIndex; // While there remain elements to shuffle...
+
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1; // And swap it with the current element.
+
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+function dupBoard(board) {
+  // this apparently slow af - maybe write custom duplicator?
+  var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_0__["Board"](false); // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication -> maybe try on base components of each object for speed ?
+
+  dupBoard.board = JSON.parse(JSON.stringify(board.board));
+  dupBoard.whiteCaptures = board.whiteCaptures.slice();
+  dupBoard.blackCaptures = board.blackCaptures.slice();
+  dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
+  dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+  dupBoard.currentTurnColor = board.currentTurnColor;
+  dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
+
+  dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+  return dupBoard;
+} // function findAiMove (board) {
+//     // random board element
+//     console.log('random ai move');
+//     const entities = Object.entries(board.movesFor[board.currentTurnColor]);
+//     shuffle(entities);
+//     shuffle(entities[0][1]);
+//     // console.log(entities[0][1][0]);
+//     entities[0][0] = entities[0][0].split(",")
+//     entities[0][0][1] = parseInt(entities[0][0][1]); entities[0][0][0] = parseInt(entities[0][0][0])
+//     // console.log(entities[0]);
+//     return [entities[0][0], entities[0][1][0]];
+// }
+// function addBoardProps(dupBoard, board) {
+//     dupBoard.board = JSON.parse(JSON.stringify(board.board));
+//     dupBoard.whiteCaptures = board.whiteCaptures.slice();
+//     dupBoard.blackCaptures = board.blackCaptures.slice();
+//     dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
+//     dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+//     dupBoard.currentTurnColor = board.currentTurnColor;
+//     dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
+//     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+// }
+
+
+function findAiMove(board, depth) {
+  console.log('ai one state into the future');
+  var entities = Object.entries(board.movesFor[board.currentTurnColor]);
+  var highestVal = 100000; // playing as black so we want low score
+
+  var bestMove = null;
+  shuffle(entities);
+  var dupedBoard = dupBoard(board);
+  console.log('entities: ', entities);
+
+  for (var i = 0; i < entities.length; i++) {
+    console.log('current value: ', entities[i][1]);
+
+    for (var j = 0; j < entities[i][1].length; j++) {
+      var move = [entities[i][0], entities[i][1][j]];
+      move[0] = move[0].split(",");
+      move[0][1] = parseInt(move[0][1]);
+      move[0][0] = parseInt(move[0][0]); // console.log('inner loop');
+
+      board.movePiece(board.board[move[0]], board.board[move[1]]);
+      var score = scorePosition(board.currentPieces);
+      board = dupBoard(dupedBoard); // revert state to before a move was made
+      // board.reverseMove();
+
+      console.log('score: ', score);
+
+      if (score < highestVal) {
+        highestVal = score;
+        bestMove = move;
+      }
+    }
+  }
+
+  return bestMove;
+} // function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 100000) {
+//     if (depth === 0) {
+//         return scorePosition(board);
+//     }
+//     let bestMove = null;
+//     const entities = Object.entries(board.movesFor[color]); // [ [ [0, 1], [ [2, 3], [3, 4], [] ] ], [  ], [  ] ]
+//     for (let i = 0; i < entities.length; i++) {
+//         for (let j = 0; j < entities[i][1]; j++) {
+//             const move = [board.board[entities[i][0]], board.board[entities[i][1][j]]];
+//             board.movePiece(move[0], move[1]);
+//             score = findAiMove(board, board.oppColor(color), depth - 1, !max, alpha, beta);
+//             console.log(isMaximizingPlayer ? 'Max: ' : 'Min: ', depth, move[0].pos, move[1].pos, score, bestMove, bestMoveScore);
+//             if (max) {
+//                 // Look for moves that maximize position
+//                 if (score > bestMoveScore) {
+//                     bestMoveScore = score;
+//                     bestMove = move;
+//                 }
+//                 alpha = Math.max(alpha, score);
+//             } else {
+//                 // Look for moves that minimize position
+//                 if (score < bestMoveScore) {
+//                     bestMoveScore = score;
+//                     bestMove = move;
+//                 }
+//                 beta = Math.min(beta, score);
+//             }
+//             // Undo previous move
+//             board.reverseMove(); // the baaad guieey
+//             // Check for alpha beta pruning
+//             if (beta <= alpha) {
+//                 // console.log('Prune', alpha, beta);
+//                 break;
+//             }
+//         }
+//     }
+// }
+
+
+function scorePosition(pieces) {
+  var piecesArr = Object.values(pieces);
+  var piecesKeys = Object.keys(pieces);
+  console.log('piecesArrVals: ', piecesArr);
+  console.log('piecesArrKeys: ', piecesKeys);
+  var points = 0; // let pieces = Object.values(board.currentPieces);
+
+  for (var i = 0; i < piecesArr.length; i++) {
+    switch (piecesArr[i].color) {
+      case 'white':
+        points += pieceTypePointsCase(piecesArr[i]);
+        break;
+
+      case 'black':
+        points -= pieceTypePointsCase(piecesArr[i]);
+        break;
+
+      default:
+        console.log('color does not exist: ', piecesArr[i].color);
+    }
+  }
+
+  return points;
+}
+
+function pieceTypePointsCase(piece) {
+  switch (piece.symbol) {
+    case 'P':
+      return 10;
+
+    case 'R':
+      return 50;
+
+    case 'N':
+      return 35;
+
+    case 'B':
+      return 35;
+
+    case 'Q':
+      return 100;
+
+    case 'K':
+      // add castling and restrictions on moving near enemy kings
+      return 1000;
+
+    default:
+      console.log('that piece doesn\'t exist');
+      console.log("that piece is: ".concat(piece, " -> in ai code"));
+      return;
+  }
+} // this.board = {};
+// this.whiteCaptures = [];
+// this.blackCaptures = [];
+// this.currentPieces = {};
+// this.kings = {};
+// this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
+// this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
+// this.currentTurnColor = 'white';
+// this.moves = "";
+// this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } and remove from piece object
+
+
+/* harmony default export */ __webpack_exports__["default"] = (findAiMove);
+
+/***/ }),
+
 /***/ "./frontend/components/games/game_board/game_board.jsx":
 /*!*************************************************************!*\
   !*** ./frontend/components/games/game_board/game_board.jsx ***!
@@ -889,25 +1097,23 @@ var GameBoard = /*#__PURE__*/function (_React$Component) {
       var board = Object.values(this.props.board.board);
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         id: "board-container"
-      }, board.map(function (row) {
-        return row.map(function (tile) {
-          if (_this2.hasMoveToShow(tile.pos)) {
-            console.log('returned true');
-            return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_tile__WEBPACK_IMPORTED_MODULE_1__["default"], {
-              key: tile.pos[0] * 8 + tile.pos[1],
-              tile: tile,
-              updateGame: _this2.props.updateGame,
-              green: 'green-background'
-            });
-          } else {
-            return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_tile__WEBPACK_IMPORTED_MODULE_1__["default"], {
-              key: tile.pos[0] * 8 + tile.pos[1],
-              tile: tile,
-              updateGame: _this2.props.updateGame,
-              green: 'fake-class'
-            });
-          }
-        });
+      }, board.map(function (tile) {
+        if (_this2.hasMoveToShow(tile.pos)) {
+          console.log('returned true');
+          return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_tile__WEBPACK_IMPORTED_MODULE_1__["default"], {
+            key: tile.pos[0] * 8 + tile.pos[1],
+            tile: tile,
+            updateGame: _this2.props.updateGame,
+            green: 'green-background'
+          });
+        } else {
+          return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_tile__WEBPACK_IMPORTED_MODULE_1__["default"], {
+            key: tile.pos[0] * 8 + tile.pos[1],
+            tile: tile,
+            updateGame: _this2.props.updateGame,
+            green: 'fake-class'
+          });
+        }
       }));
     }
   }]);
@@ -932,6 +1138,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils */ "./frontend/components/games/game_board/utils.js");
+/* harmony import */ var _chess_ai__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./chess_ai */ "./frontend/components/games/game_board/chess_ai.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -958,6 +1165,34 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
+function makeAiMove(board, depth) {
+  console.log('ai move called');
+  var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"](false); // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
+
+  dupBoard.board = JSON.parse(JSON.stringify(board.board));
+  dupBoard.whiteCaptures = board.whiteCaptures.slice();
+  dupBoard.blackCaptures = board.blackCaptures.slice();
+  dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
+  dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+  dupBoard.currentTurnColor = board.currentTurnColor; // not gonna add in the moves array since it doesnt matter for this
+
+  dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+  var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, depth);
+  console.log('ai move: ', move);
+  var pieceTile = board.board[move[0]];
+  var moveTile = board.board[move[1]];
+  console.log('pieceTile: ', pieceTile);
+  console.log('moveTile: ', moveTile);
+  board.movePiece(pieceTile, moveTile); // const pieceTile = board.board[[1, 6]];
+  // const moveTile = board.board[[3, 6]];
+  // console.log('pieceTile: ', pieceTile);
+  // console.log('moveTile: ', moveTile);
+  // board.movePiece(pieceTile, moveTile);
+
+  return;
+}
+
 var Game = /*#__PURE__*/function (_React$Component) {
   _inherits(Game, _React$Component);
 
@@ -976,8 +1211,10 @@ var Game = /*#__PURE__*/function (_React$Component) {
     _this.restartGame = _this.restartGame.bind(_assertThisInitialized(_this));
     _this.updateGame = _this.updateGame.bind(_assertThisInitialized(_this));
     _this.currentTile = null;
-    _this.currentTurn = 'white';
+    _this.humanTurn = 'white';
     _this.potentialMoves = [];
+    _this.aiTurn = 'black';
+    _this.humanMoved = false;
     return _this;
   }
 
@@ -993,67 +1230,76 @@ var Game = /*#__PURE__*/function (_React$Component) {
     key: "updateGame",
     value: function updateGame(tile) {
       // game logic
-      console.log(tile);
-      console.log(this.currentTile);
+      var board = this.state.board; // console.log('currentTurnColor: ', board.currentTurnColor);
+      // console.log('aiTurn', this.aiTurn);
 
-      if (!this.currentTile) {
-        // console.log('initial click');
-        if (tile.piece && tile.piece.color === this.currentTurn) {
-          // set piece to be moved
-          this.currentTile = tile;
-          this.potentialMoves = this.state.board.potentialMoves(tile.piece, true);
+      if (board.currentTurnColor === this.aiTurn) {
+        makeAiMove(board, 1); // make an ai move on the board -> chess_ai.js util
+      } else {
+        console.log(tile);
+        console.log(this.currentTile);
+
+        if (!this.currentTile) {
+          // console.log('initial click');
+          if (tile.piece && tile.piece.color === this.humanTurn) {
+            // set piece to be moved
+            this.currentTile = tile;
+
+            if (!board.movesFor[this.currentTile.piece.color][this.currentTile.pos]) {
+              this.potentialMoves = board.potentialMoves(this.currentTile.piece);
+            } else {
+              this.potentialMoves = board.movesFor[tile.piece.color][tile.pos];
+              ;
+            }
+          } else {
+            console.log('invalid piece selected'); // console.log(tile.piece.color);
+            // console.log(this.currentTurn);
+          }
+        } else if (tile.piece) {
+          if (tile.piece.color !== this.humanTurn) {
+            // set place to move piece
+            console.log('secondary click');
+
+            if (board.movePiece(this.currentTile, tile)) {
+              this.currentTile = null;
+              this.potentialMoves = [];
+              this.humanMoved = true;
+            }
+          } else {
+            console.log('You cannot capture your own piece!');
+            this.currentTile = tile;
+
+            if (!board.movesFor[this.currentTile.piece.color][this.currentTile.pos]) {
+              this.potentialMoves = board.potentialMoves(this.currentTile.piece);
+            } else {
+              this.potentialMoves = board.movesFor[tile.piece.color][tile.pos];
+              ;
+            }
+          }
         } else {
-          console.log('invalid piece selected'); // console.log(tile.piece.color);
-          // console.log(this.currentTurn);
-        }
-      } else if (tile.piece) {
-        if (tile.piece.color !== this.currentTurn) {
           // set place to move piece
           console.log('secondary click');
 
-          if (this.state.board.movePiece(this.currentTile, tile)) {
+          if (board.movePiece(this.currentTile, tile)) {
             this.currentTile = null;
-
-            if (this.currentTurn === 'white') {
-              this.currentTurn = 'black';
-            } else {
-              this.currentTurn = 'white';
-            }
-
-            if (this.state.board.checkmate(this.currentTurn)) {
-              console.log('checkmate');
-            }
+            this.potentialMoves = [];
+            this.humanMoved = true;
           }
-
-          this.potentialMoves = [];
-        } else {
-          console.log('You cannot capture your own piece!');
-          this.currentTile = tile;
-          this.potentialMoves = this.state.board.potentialMoves(tile.piece, true);
-        }
-      } else {
-        // set place to move piece
-        console.log('secondary click');
-
-        if (this.state.board.movePiece(this.currentTile, tile)) {
-          if (this.currentTurn === 'white') {
-            this.currentTurn = 'black';
-          } else {
-            this.currentTurn = 'white';
-          }
-
-          if (this.state.board.checkmate(this.currentTurn)) {
-            console.log('checkmate');
-          }
-
-          this.currentTile = null;
-          this.potentialMoves = [];
         }
       }
 
+      if (board.checkmate(board.currentTurnColor)) {
+        console.log('checkmate');
+      }
+
       this.setState({
-        board: this.state.board
+        board: board
       });
+
+      if (this.humanMoved) {
+        this.humanMoved = false;
+        this.updateGame();
+      }
     }
   }, {
     key: "render",
@@ -1215,9 +1461,12 @@ var Piece = function Piece(pos, symbol) {
 };
 var Board = /*#__PURE__*/function () {
   function Board() {
+    var genBoard = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
     _classCallCheck(this, Board);
 
-    this.board = {};
+    this.board = {}; // { posKey: tile }
+
     this.whiteCaptures = [];
     this.blackCaptures = [];
     this.currentPieces = {};
@@ -1239,9 +1488,14 @@ var Board = /*#__PURE__*/function () {
     this.movesFor = {
       'white': {},
       'black': {}
-    }; // refactor to { 'white': { piece.pos: [moves] } } and remove from piece object
+    }; // refactored to { 'white': { piece.pos: [moves] } } -> not removed from piece object
 
-    this.generateBoard();
+    if (genBoard) {
+      this.generateBoard();
+    }
+
+    this.lastMove = [];
+    this.lastMoveCap = null;
   }
 
   _createClass(Board, [{
@@ -1287,9 +1541,9 @@ var Board = /*#__PURE__*/function () {
             this.currentPieces[piece.pos] = piece;
           }
 
-          var tile = new Tile([i, j], piece);
-          var posKey = i * 8 + j;
-          this.board[posKey] = tile;
+          var tile = new Tile([i, j], piece); // const posKey = (i * 8) + j;
+
+          this.board[[i, j]] = tile;
         }
       }
     }
@@ -1422,6 +1676,7 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "findThreatsAndRemove",
     value: function findThreatsAndRemove(piece, moves) {
+      // update this
       var otherColor = this.oppColor(piece.color);
 
       for (var i = 0; i < moves.length; i++) {
@@ -1460,7 +1715,10 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "findSavesOnMove",
     value: function findSavesOnMove(piece, moves) {
-      if (this.kings[piece.color]['direct']) {
+      // needs update
+      var dThreats = Object.values(this.kings[piece.color]['direct']);
+
+      if (dThreats.length !== 0) {
         var threatLocations = Object.keys(this.kings[piece.color]['direct']);
         var threatPieces = [];
 
@@ -1486,14 +1744,13 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "potentialMoves",
     value: function potentialMoves(piece) {
-      var usedToMark = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var moves;
 
       switch (piece.symbol) {
         case 'P':
           moves = this.pawnMoves(piece); // add enpausant and test promotion
+          // console.log(`pawn moves: ${moves}`);
 
-          console.log("pawn moves: ".concat(moves));
           break;
 
         case 'R':
@@ -1518,8 +1775,8 @@ var Board = /*#__PURE__*/function () {
 
         case 'K':
           // add castling and restrictions on moving near enemy kings
-          moves = this.kingMoves(piece);
-          console.log("king moves: ".concat(moves)); // this.kings[piece.color].moves = moves; // done in call statement
+          moves = this.kingMoves(piece); // console.log(`king moves: ${moves}`);
+          // this.kings[piece.color].moves = moves; // done in call statement
 
           break;
 
@@ -1529,19 +1786,15 @@ var Board = /*#__PURE__*/function () {
           return;
       }
 
-      if (!usedToMark) {
-        // this needs to leave
-        if (piece.symbol !== 'K') {
-          if (piece.color !== this.currentTurnColor) {
-            this.findThreatsAndRemove(piece, moves);
-          } else {
-            this.findSavesOnMove(piece, moves); // does not exist yet
-          }
+      if (piece.symbol !== 'K') {
+        if (piece.color !== this.currentTurnColor) {
+          this.findThreatsAndRemove(piece, moves);
+        } else {
+          this.findSavesOnMove(piece, moves); // does not exist yet
         }
-
-        this.movesFor[piece.color][piece.pos] = moves;
       }
 
+      this.movesFor[piece.color][piece.pos] = moves;
       return moves;
     }
   }, {
@@ -1666,8 +1919,8 @@ var Board = /*#__PURE__*/function () {
         this.kings['white']['saves'] = {};
         this.kings['black']['direct'] = {};
         this.kings['black']['indirect'] = {};
-        this.kings['black']['saves'] = {}; // this.lastMove = [moveTile.pos, endTile.pos];
-
+        this.kings['black']['saves'] = {};
+        this.lastMove = [moveTile.pos, endTile.pos];
         var piece = moveTile.piece;
 
         if (endTile.piece) {
@@ -1677,8 +1930,10 @@ var Board = /*#__PURE__*/function () {
             this.blackCaptures.push(endTile.piece);
           }
 
+          this.lastMoveCap = endTile.piece;
           this.addToMovesList(piece, endTile, true);
         } else {
+          this.lastMoveCap = null;
           this.addToMovesList(piece, endTile);
         }
 
@@ -1705,7 +1960,7 @@ var Board = /*#__PURE__*/function () {
 
         this.findAllMoves(); // find all moves beginning with pieces of current turn player
 
-        this.currentTurnColor = piece.color;
+        this.currentTurnColor = this.oppColor(piece.color);
         return true;
       } else {
         console.log('Invalid move destination');
@@ -1714,7 +1969,32 @@ var Board = /*#__PURE__*/function () {
     }
   }, {
     key: "reverseMove",
-    value: function reverseMove() {}
+    value: function reverseMove() {
+      this.board[this.lastMove[0]].piece = this.currentPieces[this.lastMove[1]]; // state -> old tile has piece and new tile has piece => same piece
+
+      this.board[this.lastMove[1]].piece = null; // state -> only old tile now has the piece
+
+      if (this.lastMoveCap) {
+        this.board[this.lastMove[1]].piece = this.lastMoveCap;
+      } // add the deleted piece back to the moved pos tile if there was one
+
+
+      this.currentPieces[this.lastMove[0]] = this.currentPieces[this.lastMove[1]]; // state -> currentPieces[oldPos] has the same piece as currentPieces[newPos]
+
+      delete this.currentPieces[this.lastMove[1]]; // state -> piece deleted from new pos
+
+      if (this.lastMoveCap) {
+        this.currentPieces[this.lastMove[1]] = this.lastMoveCap;
+      } // replace the moved pos with the deleted piece if there was one
+      // need to revserse pawn promotions too but thats gonna take a minute
+
+
+      this.currentTurnColor = this.oppColor(this.currentTurnColor);
+      this.findAllMoves();
+    }
+  }, {
+    key: "inCheck",
+    value: function inCheck(color) {}
   }, {
     key: "checkmate",
     value: function checkmate(otherTurnCol) {

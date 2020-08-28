@@ -21,18 +21,14 @@ class GameBoard extends React.Component {
         let board = Object.values(this.props.board.board);
         return (
             <div id='board-container'>
-                {board.map(row => {
-                        return (
-                            row.map(tile => {
-                                if (this.hasMoveToShow(tile.pos)) {
-                                    console.log('returned true');
-                                    return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} green={'green-background'} /> )
-                                } else {
-                                    return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} green={'fake-class'} /> )
-                                }
-                            })
-                        )
-                }   )}
+                {board.map(tile => {
+                    if (this.hasMoveToShow(tile.pos)) {
+                        console.log('returned true');
+                        return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} green={'green-background'} /> )
+                    } else {
+                        return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} green={'fake-class'} /> )
+                    }
+                })}
             </div>
         )
     }
