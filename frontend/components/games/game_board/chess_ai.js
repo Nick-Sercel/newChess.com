@@ -135,49 +135,6 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
     return [highestVal, bestMove];
 }
 
-// function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 100000) {
-
-//     if (depth === 0) {
-//         return scorePosition(board);
-//     }
-
-//     let bestMove = null;
-//     const entities = Object.entries(board.movesFor[color]); // [ [ [0, 1], [ [2, 3], [3, 4], [] ] ], [  ], [  ] ]
-//     for (let i = 0; i < entities.length; i++) {
-//         for (let j = 0; j < entities[i][1]; j++) {
-//             const move = [board.board[entities[i][0]], board.board[entities[i][1][j]]];
-//             board.movePiece(move[0], move[1]);
-//             score = findAiMove(board, board.oppColor(color), depth - 1, !max, alpha, beta);
-
-//             console.log(isMaximizingPlayer ? 'Max: ' : 'Min: ', depth, move[0].pos, move[1].pos, score, bestMove, bestMoveScore);
-
-//             if (max) {
-//                 // Look for moves that maximize position
-//                 if (score > bestMoveScore) {
-//                     bestMoveScore = score;
-//                     bestMove = move;
-//                 }
-//                 alpha = Math.max(alpha, score);
-//             } else {
-//                 // Look for moves that minimize position
-//                 if (score < bestMoveScore) {
-//                     bestMoveScore = score;
-//                     bestMove = move;
-//                 }
-//                 beta = Math.min(beta, score);
-//             }
-//             // Undo previous move
-//             board.reverseMove(); // the baaad guieey
-//             // Check for alpha beta pruning
-//             if (beta <= alpha) {
-//                 // console.log('Prune', alpha, beta);
-//                 break;
-//             }
-//         }
-//     }
-// }
-
-
 function scorePosition(pieces) {
     const piecesArr = Object.values(pieces);
     // const piecesKeys = Object.keys(pieces);
