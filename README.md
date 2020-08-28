@@ -25,15 +25,13 @@
 export class Board {
     constructor(genBoard = true) {
         this.board = {};  // { posKey: tile }
-        this.whiteCaptures = [];
+        this.whiteCaptures = []; // pieces captured by white
         this.blackCaptures = [];
         this.currentPieces = {}; // posKey: piece
         this.currentTurnColor = 'white';
-        this.moves = "";
+        this.moves = ""; // string containing chess notation for each move made
         this.movesFor = { 'white': {}, 'black': {} }; // 'white': { piece.pos: [moves] } }
         if (genBoard) { this.generateBoard(); }
-        this.lastMove = [];
-        this.lastMoveCap = null;
     }
     // methods, etc.    
 }
