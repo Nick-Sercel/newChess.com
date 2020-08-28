@@ -1760,11 +1760,15 @@ var Board = /*#__PURE__*/function () {
           }
         }
 
-        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] - 1]]) {
+        var check = this.currentPieces[[piece.pos[0] - 1, piece.pos[1] - 1]];
+
+        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && check && check.color === 'black') {
           dirs.push([piece.pos[0] - 1, piece.pos[1] - 1]);
         }
 
-        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] + 1]]) {
+        check = this.currentPieces[[piece.pos[0] - 1, piece.pos[1] + 1]];
+
+        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && check && check.color === 'black') {
           dirs.push([piece.pos[0] - 1, piece.pos[1] + 1]);
         }
       } else {
@@ -1774,14 +1778,17 @@ var Board = /*#__PURE__*/function () {
           if (piece.pos[0] === 1 && !this.currentPieces[[piece.pos[0] + 2, piece.pos[1]]]) {
             dirs.push([piece.pos[0] + 2, piece.pos[1]]);
           }
-        } // take color into account ?
+        }
 
+        var _check = this.currentPieces[[piece.pos[0] + 1, piece.pos[1] - 1]];
 
-        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] - 1]]) {
+        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && _check && _check.color === 'white') {
           dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]);
         }
 
-        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] + 1]]) {
+        _check = this.currentPieces[[piece.pos[0] + 1, piece.pos[1] + 1]];
+
+        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && _check && _check.color === 'white') {
           dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]);
         }
       }
@@ -2383,6 +2390,320 @@ var GameIndexItem = /*#__PURE__*/function (_React$Component) {
 }(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
 
 /* harmony default export */ __webpack_exports__["default"] = (GameIndexItem);
+
+/***/ }),
+
+/***/ "./frontend/components/games/splash_board/splash_board_container.jsx":
+/*!***************************************************************************!*\
+  !*** ./frontend/components/games/splash_board/splash_board_container.jsx ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _splash_board_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./splash_board_index */ "./frontend/components/games/splash_board/splash_board_index.jsx");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _game_board_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../game_board/utils */ "./frontend/components/games/game_board/utils.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+
+
+
+var Game = /*#__PURE__*/function (_React$Component) {
+  _inherits(Game, _React$Component);
+
+  var _super = _createSuper(Game);
+
+  _createClass(Game, [{
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      clearInterval(this.timer);
+      console.log('cleared interval');
+    }
+  }]);
+
+  function Game(props) {
+    var _this;
+
+    _classCallCheck(this, Game);
+
+    _this = _super.call(this, props);
+    var board = new _game_board_utils__WEBPACK_IMPORTED_MODULE_2__["Board"]();
+    _this.state = {
+      board: board
+    };
+    _this.restartGame = _this.restartGame.bind(_assertThisInitialized(_this));
+    _this.updateGame = _this.updateGame.bind(_assertThisInitialized(_this));
+    _this.aiTurn1 = 'white';
+    _this.aiTurn2 = 'black';
+    _this.currentMove = 0;
+    _this.timer = setInterval(function () {
+      return _this.updateGame();
+    }, 3000);
+    return _this;
+  }
+
+  _createClass(Game, [{
+    key: "restartGame",
+    value: function restartGame() {
+      var board = new _game_board_utils__WEBPACK_IMPORTED_MODULE_2__["Board"]();
+      this.setState({
+        board: board
+      });
+      this.currentMove = 0;
+      this.potentialMoves = [];
+    }
+  }, {
+    key: "updateGame",
+    value: function updateGame() {
+      console.log('update game');
+
+      if (this.currentMove === 10) {
+        this.restartGame();
+      } else {
+        this.makeAiMove(this.state.board);
+      }
+    }
+  }, {
+    key: "makeAiMove",
+    value: function makeAiMove(board) {
+      console.log('ai move called');
+      this.currentMove++;
+
+      if (this.currentMove === 1) {
+        board.movePiece(board.board[[7, 6]], board.board[[5, 5]]);
+      } else if (this.currentMove === 2) {
+        board.movePiece(board.board[[0, 1]], board.board[[2, 2]]);
+      } else if (this.currentMove === 3) {
+        board.movePiece(board.board[[7, 1]], board.board[[5, 2]]);
+      } else if (this.currentMove === 4) {
+        board.movePiece(board.board[[0, 6]], board.board[[2, 5]]);
+      } else if (this.currentMove === 5) {
+        board.movePiece(board.board[[6, 3]], board.board[[4, 3]]);
+      } else if (this.currentMove === 6) {
+        board.movePiece(board.board[[1, 4]], board.board[[3, 4]]);
+      } else if (this.currentMove === 7) {
+        board.movePiece(board.board[[4, 3]], board.board[[3, 4]]);
+      } else if (this.currentMove === 8) {
+        board.movePiece(board.board[[2, 2]], board.board[[3, 4]]);
+      } else if (this.currentMove === 9) {
+        board.movePiece(board.board[[5, 5]], board.board[[3, 4]]);
+      } else if (this.currentMove === 10) {
+        board.movePiece(board.board[[0, 4]], board.board[[3, 4]]);
+      } else {
+        console.log('this shouldnt have been called');
+      }
+
+      this.setState({
+        board: board
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var whiteCaptures = this.state.board.whiteCaptures;
+      var blackCaptures = this.state.board.blackCaptures;
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        className: "big-board-container"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_splash_board_index__WEBPACK_IMPORTED_MODULE_0__["default"], {
+        board: this.state.board
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        className: "captured-pieces-container"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        className: "white-captures"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, "White Captures")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, whiteCaptures.map(function (capture) {
+        // how to fix warning ?
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, capture.symbol)));
+      }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        className: "black-captures"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, "Black Captures")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, blackCaptures.map(function (capture) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, capture.symbol)));
+      })))));
+    }
+  }]);
+
+  return Game;
+}(react__WEBPACK_IMPORTED_MODULE_1___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (Game);
+
+/***/ }),
+
+/***/ "./frontend/components/games/splash_board/splash_board_index.jsx":
+/*!***********************************************************************!*\
+  !*** ./frontend/components/games/splash_board/splash_board_index.jsx ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _splash_board_item__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./splash_board_item */ "./frontend/components/games/splash_board/splash_board_item.jsx");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+
+var GameBoard = /*#__PURE__*/function (_React$Component) {
+  _inherits(GameBoard, _React$Component);
+
+  var _super = _createSuper(GameBoard);
+
+  function GameBoard(props) {
+    _classCallCheck(this, GameBoard);
+
+    return _super.call(this, props);
+  }
+
+  _createClass(GameBoard, [{
+    key: "render",
+    value: function render() {
+      var board = Object.values(this.props.board.board);
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        id: "board-container"
+      }, board.map(function (tile) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_splash_board_item__WEBPACK_IMPORTED_MODULE_1__["default"], {
+          key: tile.pos[0] * 8 + tile.pos[1],
+          tile: tile
+        });
+      }));
+    }
+  }]);
+
+  return GameBoard;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (GameBoard);
+
+/***/ }),
+
+/***/ "./frontend/components/games/splash_board/splash_board_item.jsx":
+/*!**********************************************************************!*\
+  !*** ./frontend/components/games/splash_board/splash_board_item.jsx ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+
+var Tile = /*#__PURE__*/function (_React$Component) {
+  _inherits(Tile, _React$Component);
+
+  var _super = _createSuper(Tile);
+
+  function Tile(props) {
+    var _this;
+
+    _classCallCheck(this, Tile);
+
+    _this = _super.call(this, props);
+    _this.handleClick = _this.handleClick.bind(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  _createClass(Tile, [{
+    key: "handleClick",
+    value: function handleClick() {
+      document.getElementById('create').classList.add('active-form');
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var piece = this.props.tile.piece;
+      var symbol = null;
+      var color = 'missing';
+
+      if (piece) {
+        symbol = piece.symbol;
+        color = piece.color;
+      }
+
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "board-element ".concat(this.props.tile.color),
+        onClick: this.handleClick
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+        className: "piece-type ".concat(color)
+      }, symbol));
+    }
+  }]);
+
+  return Tile;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["default"] = (Tile);
 
 /***/ }),
 
@@ -3115,6 +3436,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../goals/goal_index_container */ "./frontend/components/goals/goal_index_container.jsx");
 /* harmony import */ var _games_game_index_game_index_container__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../games/game_index/game_index_container */ "./frontend/components/games/game_index/game_index_container.jsx");
 /* harmony import */ var _friends_friends_list_container__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../friends/friends_list_container */ "./frontend/components/friends/friends_list_container.jsx");
+/* harmony import */ var _games_splash_board_splash_board_container__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../games/splash_board/splash_board_container */ "./frontend/components/games/splash_board/splash_board_container.jsx");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3143,6 +3465,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
+
 var SplashPage = /*#__PURE__*/function (_React$Component) {
   _inherits(SplashPage, _React$Component);
 
@@ -3160,14 +3483,18 @@ var SplashPage = /*#__PURE__*/function (_React$Component) {
       var loggedInContent = null;
 
       if (this.props.currentUser) {
-        loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+          className: "play-a-game"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+          to: "/game/new"
+        }, "Play a Game")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "splash-indexes-container"
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_games_game_index_game_index_container__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_friends_friends_list_container__WEBPACK_IMPORTED_MODULE_4__["default"], null));
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_games_game_index_game_index_container__WEBPACK_IMPORTED_MODULE_3__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_goals_goal_index_container__WEBPACK_IMPORTED_MODULE_2__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_friends_friends_list_container__WEBPACK_IMPORTED_MODULE_4__["default"], null)), ";");
+      } else {
+        loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_games_splash_board_splash_board_container__WEBPACK_IMPORTED_MODULE_5__["default"], null));
       }
 
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, loggedInContent, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
-        to: "/game/new"
-      }, "Play a Game")));
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, loggedInContent);
     }
   }]);
 
@@ -3890,9 +4217,11 @@ var UserShow = /*#__PURE__*/function (_React$Component) {
       var loggedOutContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
 
       if (this.props.currentUserId === this.props.user.id) {
-        loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
+        loggedInContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+          className: "button-format"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Link"], {
           to: "/game/new"
-        }, "Play a Game"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+        }, "Play a Game")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
           onClick: function onClick() {
             return _this.toggleEditPage();
           }

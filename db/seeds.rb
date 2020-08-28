@@ -16,7 +16,10 @@ user1 = User.create!(username: 'Demo User', email: 'dummyEmail@gmail.com', elo: 
 user2 = User.create!(username: 'Twilight Dave', email: 'allSkill@gmail.com', elo: 9001, password: 'procsOnlyFools')
 
 Goal.create(title: 'Learn the pieces', body: 'Figure out what each piece does and how to use them', user_id: user1.id)
+Goal.create(title: 'Openings', body: 'Find a good opening to use as black against knights', user_id: user1.id)
 
 Game.create(central_user_id: user1.id, foreign_user_id: user2.id, winner_id: user2.id, moves_list: 'e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7')
+Game.create(central_user_id: user1.id, foreign_user_id: computer.id, winner_id: user1.id, moves_list: 'd3, c6, c4, b5, Qa5')
 
 Friend.create(central_user_id: user1.id, foreign_user_id: user2.id, accepted: true)
+Friend.create(central_user_id: computer.id, foreign_user_id: user1.id, accepted: false);

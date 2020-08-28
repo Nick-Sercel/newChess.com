@@ -132,15 +132,19 @@ export class Board {
                 dirs.push([piece.pos[0] - 1, piece.pos[1]]);
                 if (piece.pos[0] === 6 && !(this.currentPieces[[piece.pos[0] - 2, piece.pos[1]]])) { dirs.push([piece.pos[0] - 2, piece.pos[1]])}
             }
-            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] - 1]]) { dirs.push([piece.pos[0] - 1, piece.pos[1] - 1]) }
-            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] + 1]]) { dirs.push([piece.pos[0] - 1, piece.pos[1] + 1]) }
+            let check = this.currentPieces[[piece.pos[0] - 1, piece.pos[1] - 1]];
+            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && check && check.color === 'black') { dirs.push([piece.pos[0] - 1, piece.pos[1] - 1]) }
+            check = this.currentPieces[[piece.pos[0] - 1, piece.pos[1] + 1]];
+            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && check && check.color === 'black') { dirs.push([piece.pos[0] - 1, piece.pos[1] + 1]) }
         } else {
             if (!(this.currentPieces[[piece.pos[0] + 1, piece.pos[1]]])) {
                 dirs.push([piece.pos[0] + 1, piece.pos[1]]);
                 if (piece.pos[0] === 1 && !(this.currentPieces[[piece.pos[0] + 2, piece.pos[1]]])) { dirs.push([piece.pos[0] + 2, piece.pos[1]])}
-            } // take color into account ?
-            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] - 1]]) { dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]) }
-            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] + 1]]) { dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]) }
+            }
+            let check = this.currentPieces[[piece.pos[0] + 1, piece.pos[1] - 1]];
+            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && check && check.color === 'white') { dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]) }
+            check = this.currentPieces[[piece.pos[0] + 1, piece.pos[1] + 1]];
+            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && check && check.color === 'white') { dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]) }
         }
         return dirs;
     }

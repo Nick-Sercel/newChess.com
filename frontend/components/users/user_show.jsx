@@ -31,7 +31,7 @@ class UserShow extends React.Component {
         let loggedOutContent = <div></div>
         if (this.props.currentUserId === this.props.user.id) {
             loggedInContent = <div>
-                                <Link to='/game/new'>Play a Game</Link>
+                                <li className='button-format'><Link to='/game/new'>Play a Game</Link></li>
                                 <p>
 
                                 </p>

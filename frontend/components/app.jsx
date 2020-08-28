@@ -18,20 +18,20 @@ import SplashContainer from './splash/splash_page_container';
 import UserBannerContainer from './users/user_auth_banner/user_auth_banner_container';
 
 const App = () => (
-    <div>
-        <UserBannerContainer />
-        <Switch>
-            <ProtectedRoute exact path="/game/new" component={GameBoardContainer} />
-            {/* <AuthRoute path='/users/:userId/goals/new' component={CreateGoalContainer} />
-            <AuthRoute path='/users/:userId/goals/:goalId/edit' component={EditGoalContainer} />
-            <AuthRoute path='/users/:userId/goals/:goalId' component={GoalIndexContainer} />*/ }
-            <ProtectedRoute path="/users/:userId/edit" component={EditUserFormContainer} />
-            <Route path="/users/:userId/external" component={UserShowContainer} />
-            <ProtectedRoute path="/users/:userId" component={UserShowContainer} />
-            <Route path="/" component={SplashContainer} />
-        </Switch>
-        <Link to='/'>Return to Home Page</Link>
-    </div>
+        <div>
+            <UserBannerContainer />
+            <Switch>
+                <ProtectedRoute exact path="/game/new" component={GameBoardContainer} />
+                {/* <AuthRoute path='/users/:userId/goals/new' component={CreateGoalContainer} />
+                <AuthRoute path='/users/:userId/goals/:goalId/edit' component={EditGoalContainer} />
+                <AuthRoute path='/users/:userId/goals/:goalId' component={GoalIndexContainer} />*/ }
+                <ProtectedRoute path="/users/:userId/edit" component={EditUserFormContainer} />
+                <Route path="/users/:userId/external" component={UserShowContainer} />
+                <ProtectedRoute path="/users/:userId" component={UserShowContainer} />
+                <Route path="/" component={SplashContainer} />
+            </Switch>
+            <Link to='/'>Return to Home Page</Link>
+        </div>
 );
 
 export default App;
