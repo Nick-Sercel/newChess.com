@@ -3,37 +3,7 @@ import React from 'react';
 import * as Utils from './utils';
 import findAiMove from './chess_ai';
 
-function makeAiMove(board) {
 
-    console.log('ai move called');
-
-    const dupBoard = new Utils.Board(false);
-    // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
-    dupBoard.board = JSON.parse(JSON.stringify(board.board));
-    dupBoard.whiteCaptures = board.whiteCaptures.slice();
-    dupBoard.blackCaptures = board.blackCaptures.slice();
-    dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-    dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
-    dupBoard.currentTurnColor = board.currentTurnColor;
-    // not gonna add in the moves array since it doesnt matter for this
-    dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
-
-    const move = findAiMove(dupBoard, 2);
-    console.log('ai move: ', move);
-    const pieceTile = board.board[move[1][0]];
-    const moveTile = board.board[move[1][1]];
-    console.log('pieceTile: ', pieceTile);
-    console.log('moveTile: ', moveTile);
-    board.movePiece(pieceTile, moveTile);
-
-    // const pieceTile = board.board[[1, 6]];
-    // const moveTile = board.board[[3, 6]];
-    // console.log('pieceTile: ', pieceTile);
-    // console.log('moveTile: ', moveTile);
-    // board.movePiece(pieceTile, moveTile);
-
-    return;
-}
 
 class Game extends React.Component {
     constructor(props) {
@@ -47,6 +17,7 @@ class Game extends React.Component {
         this.potentialMoves = [];
         this.aiTurn = 'black';
         this.humanMoved = false;
+        this.currentMove = 0;
     }
 
     restartGame() {
@@ -60,7 +31,7 @@ class Game extends React.Component {
         // console.log('currentTurnColor: ', board.currentTurnColor);
         // console.log('aiTurn', this.aiTurn);
         if (board.currentTurnColor === this.aiTurn) {
-            makeAiMove(board); // make an ai move on the board -> chess_ai.js util
+            this.makeAiMove(board); // make an ai move on the board -> chess_ai.js util
         } else {
             console.log(tile)
             console.log(this.currentTile);
@@ -115,6 +86,49 @@ class Game extends React.Component {
         if (this.humanMoved) {
             this.humanMoved = false;
             this.updateGame();
+        }
+    }
+
+    makeAiMove(board) {
+
+            console.log('ai move called');
+
+            this.currentMove++;
+            if (this.currentMove === 1) {
+                const pieceTile = board.board[[0, 1]];
+                const moveTile = board.board[[2, 2]];
+                board.movePiece(pieceTile, moveTile);
+            } else if (this.currentMove === 2) {
+                const pieceTile = board.board[[0, 6]];
+                const moveTile = board.board[[2, 5]];
+                board.movePiece(pieceTile, moveTile);
+            } else {
+
+            const dupBoard = new Utils.Board(false);
+            // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
+            dupBoard.board = JSON.parse(JSON.stringify(board.board));
+            dupBoard.whiteCaptures = board.whiteCaptures.slice();
+            dupBoard.blackCaptures = board.blackCaptures.slice();
+            dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
+            dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+            dupBoard.currentTurnColor = board.currentTurnColor;
+            // not gonna add in the moves array since it doesnt matter for this
+            dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+
+            const move = findAiMove(dupBoard, 3); // make move with (num) depth
+
+            console.log('ai move: ', move);
+            const pieceTile = board.board[move[1][0]];
+            const moveTile = board.board[move[1][1]];
+            console.log('pieceTile: ', pieceTile);
+            console.log('moveTile: ', moveTile);
+            board.movePiece(pieceTile, moveTile);
+
+            // const pieceTile = board.board[[1, 6]];
+            // const moveTile = board.board[[3, 6]];
+            // console.log('pieceTile: ', pieceTile);
+            // console.log('moveTile: ', moveTile);
+            // board.movePiece(pieceTile, moveTile);
         }
     }
 

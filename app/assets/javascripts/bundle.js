@@ -951,11 +951,19 @@ function findAiMove(board, depth) {
           highestVal = score;
           bestMove = move;
         }
+
+        beta = Math.min(beta, score);
       } else {
         if (score > highestVal) {
           highestVal = score;
           bestMove = move;
         }
+
+        alpha = Math.max(alpha, score);
+      }
+
+      if (beta <= alpha) {
+        break;
       }
     }
   }
@@ -1209,33 +1217,6 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-function makeAiMove(board) {
-  console.log('ai move called');
-  var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"](false); // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
-
-  dupBoard.board = JSON.parse(JSON.stringify(board.board));
-  dupBoard.whiteCaptures = board.whiteCaptures.slice();
-  dupBoard.blackCaptures = board.blackCaptures.slice();
-  dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-  dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
-  dupBoard.currentTurnColor = board.currentTurnColor; // not gonna add in the moves array since it doesnt matter for this
-
-  dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
-  var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, 2);
-  console.log('ai move: ', move);
-  var pieceTile = board.board[move[1][0]];
-  var moveTile = board.board[move[1][1]];
-  console.log('pieceTile: ', pieceTile);
-  console.log('moveTile: ', moveTile);
-  board.movePiece(pieceTile, moveTile); // const pieceTile = board.board[[1, 6]];
-  // const moveTile = board.board[[3, 6]];
-  // console.log('pieceTile: ', pieceTile);
-  // console.log('moveTile: ', moveTile);
-  // board.movePiece(pieceTile, moveTile);
-
-  return;
-}
-
 var Game = /*#__PURE__*/function (_React$Component) {
   _inherits(Game, _React$Component);
 
@@ -1258,6 +1239,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
     _this.potentialMoves = [];
     _this.aiTurn = 'black';
     _this.humanMoved = false;
+    _this.currentMove = 0;
     return _this;
   }
 
@@ -1277,7 +1259,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
       // console.log('aiTurn', this.aiTurn);
 
       if (board.currentTurnColor === this.aiTurn) {
-        makeAiMove(board); // make an ai move on the board -> chess_ai.js util
+        this.makeAiMove(board); // make an ai move on the board -> chess_ai.js util
       } else {
         console.log(tile);
         console.log(this.currentTile);
@@ -1342,6 +1324,45 @@ var Game = /*#__PURE__*/function (_React$Component) {
       if (this.humanMoved) {
         this.humanMoved = false;
         this.updateGame();
+      }
+    }
+  }, {
+    key: "makeAiMove",
+    value: function makeAiMove(board) {
+      console.log('ai move called');
+      this.currentMove++;
+
+      if (this.currentMove === 1) {
+        var pieceTile = board.board[[0, 1]];
+        var moveTile = board.board[[2, 2]];
+        board.movePiece(pieceTile, moveTile);
+      } else if (this.currentMove === 2) {
+        var _pieceTile = board.board[[0, 6]];
+        var _moveTile = board.board[[2, 5]];
+        board.movePiece(_pieceTile, _moveTile);
+      } else {
+        var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"](false); // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
+
+        dupBoard.board = JSON.parse(JSON.stringify(board.board));
+        dupBoard.whiteCaptures = board.whiteCaptures.slice();
+        dupBoard.blackCaptures = board.blackCaptures.slice();
+        dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
+        dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+        dupBoard.currentTurnColor = board.currentTurnColor; // not gonna add in the moves array since it doesnt matter for this
+
+        dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+        var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, 3); // make move with (num) depth
+
+        console.log('ai move: ', move);
+        var _pieceTile2 = board.board[move[1][0]];
+        var _moveTile2 = board.board[move[1][1]];
+        console.log('pieceTile: ', _pieceTile2);
+        console.log('moveTile: ', _moveTile2);
+        board.movePiece(_pieceTile2, _moveTile2); // const pieceTile = board.board[[1, 6]];
+        // const moveTile = board.board[[3, 6]];
+        // console.log('pieceTile: ', pieceTile);
+        // console.log('moveTile: ', moveTile);
+        // board.movePiece(pieceTile, moveTile);
       }
     }
   }, {

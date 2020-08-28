@@ -117,11 +117,16 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
                     highestVal = score;
                     bestMove = move;
                 }
+                beta = Math.min(beta, score)
             } else {
                 if (score > highestVal) {
                     highestVal = score;
                     bestMove = move;
                 }
+                alpha = Math.max(alpha, score);
+            }
+            if (beta <= alpha) {
+                break;
             }
         }
     }
