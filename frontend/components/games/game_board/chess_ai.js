@@ -57,14 +57,49 @@ function dupBoard (board) { // this apparently slow af - maybe write custom dupl
 //     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
 // }
 
-function findAiMove (board, depth) {
-    console.log('ai one state into the future');
+// function findAiMove (board, depth) {
+//     console.log('ai one state into the future');
+//     const entities = Object.entries(board.movesFor[board.currentTurnColor]);
+//     let highestVal = 100000; // playing as black so we want low score
+//     let bestMove = null;
+//     shuffle(entities);
+//     const dupedBoard = dupBoard(board);
+//     // console.log('entities: ', entities);
+//     for (let i = 0; i < entities.length; i++) {
+//         console.log('current value: ', entities[i][1]);
+//         for (let j = 0; j < entities[i][1].length; j++) {
+//             let move = [entities[i][0], entities[i][1][j]];
+//             move[0] = move[0].split(",");
+//             move[0][1] = parseInt(move[0][1]); move[0][0] = parseInt(move[0][0]);
+//             // console.log('inner loop');
+//             board.movePiece(board.board[move[0]], board.board[move[1]]);
+//             const score = scorePosition(board.currentPieces);
+//             board = dupBoard(dupedBoard); // revert state to before a move was made
+//             // board.reverseMove();
+//             console.log('score: ', score);
+//             if (score < highestVal) {
+//                 highestVal = score;
+//                 bestMove = move;
+//             }
+//         }
+//     }
+//     return bestMove;
+// }
+
+function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
+
+    if (depth === 0) {
+        return [scorePosition(board.currentPieces)];
+    }
+
     const entities = Object.entries(board.movesFor[board.currentTurnColor]);
-    let highestVal = 100000; // playing as black so we want low score
+    let highestVal = 0;
+    min ? highestVal = 10000 : highestVal = -10000;
+    // playing as black so we want low score
     let bestMove = null;
     shuffle(entities);
     const dupedBoard = dupBoard(board);
-    console.log('entities: ', entities);
+    // console.log('entities: ', entities);
     for (let i = 0; i < entities.length; i++) {
         console.log('current value: ', entities[i][1]);
         for (let j = 0; j < entities[i][1].length; j++) {
@@ -73,17 +108,26 @@ function findAiMove (board, depth) {
             move[0][1] = parseInt(move[0][1]); move[0][0] = parseInt(move[0][0]);
             // console.log('inner loop');
             board.movePiece(board.board[move[0]], board.board[move[1]]);
-            const score = scorePosition(board.currentPieces);
+            const score = findAiMove(board, depth - 1, !min)[0];
             board = dupBoard(dupedBoard); // revert state to before a move was made
             // board.reverseMove();
             console.log('score: ', score);
-            if (score < highestVal) {
-                highestVal = score;
-                bestMove = move;
+            if (min) {
+                if (score < highestVal) {
+                    highestVal = score;
+                    bestMove = move;
+                }
+            } else {
+                if (score > highestVal) {
+                    highestVal = score;
+                    bestMove = move;
+                }
             }
         }
     }
-    return bestMove;
+    console.log(`ai ${depth} state(s) into the future`);
+    console.log('final best move: ', bestMove);
+    return [highestVal, bestMove];
 }
 
 // function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 100000) {
@@ -131,9 +175,9 @@ function findAiMove (board, depth) {
 
 function scorePosition(pieces) {
     const piecesArr = Object.values(pieces);
-    const piecesKeys = Object.keys(pieces);
-    console.log('piecesArrVals: ', piecesArr);
-    console.log('piecesArrKeys: ', piecesKeys);
+    // const piecesKeys = Object.keys(pieces);
+    // console.log('piecesArrVals: ', piecesArr);
+    // console.log('piecesArrKeys: ', piecesKeys);
     let points = 0;
     // let pieces = Object.values(board.currentPieces);
     for (let i = 0; i < piecesArr.length; i++) {

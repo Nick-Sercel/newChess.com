@@ -13,6 +13,7 @@ Friend.destroy_all
 
 user1 = User.create!(username: 'Demo User', email: 'dummyEmail@gmail.com', elo: 420, password: '123456')
 user2 = User.create!(username: 'Twilight Dave', email: 'allSkill@gmail.com', elo: 9001, password: 'procsOnlyFools')
+computer = User.create!(username: 'Dave the computer', email: 'dddddave@mechanicalGod.com', password: 'lmaoxd')
 
 Goal.create(title: 'Learn the pieces', body: 'Figure out what each piece does and how to use them', user_id: user1.id)
 

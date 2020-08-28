@@ -3,7 +3,7 @@ import React from 'react';
 import * as Utils from './utils';
 import findAiMove from './chess_ai';
 
-function makeAiMove(board, depth) {
+function makeAiMove(board) {
 
     console.log('ai move called');
 
@@ -18,10 +18,10 @@ function makeAiMove(board, depth) {
     // not gonna add in the moves array since it doesnt matter for this
     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
 
-    const move = findAiMove(dupBoard, depth);
+    const move = findAiMove(dupBoard, 2);
     console.log('ai move: ', move);
-    const pieceTile = board.board[move[0]];
-    const moveTile = board.board[move[1]];
+    const pieceTile = board.board[move[1][0]];
+    const moveTile = board.board[move[1][1]];
     console.log('pieceTile: ', pieceTile);
     console.log('moveTile: ', moveTile);
     board.movePiece(pieceTile, moveTile);
@@ -60,7 +60,7 @@ class Game extends React.Component {
         // console.log('currentTurnColor: ', board.currentTurnColor);
         // console.log('aiTurn', this.aiTurn);
         if (board.currentTurnColor === this.aiTurn) {
-            makeAiMove(board, 1); // make an ai move on the board -> chess_ai.js util
+            makeAiMove(board); // make an ai move on the board -> chess_ai.js util
         } else {
             console.log(tile)
             console.log(this.currentTile);

@@ -883,17 +883,52 @@ function dupBoard(board) {
 //     dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
 //     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
 // }
+// function findAiMove (board, depth) {
+//     console.log('ai one state into the future');
+//     const entities = Object.entries(board.movesFor[board.currentTurnColor]);
+//     let highestVal = 100000; // playing as black so we want low score
+//     let bestMove = null;
+//     shuffle(entities);
+//     const dupedBoard = dupBoard(board);
+//     // console.log('entities: ', entities);
+//     for (let i = 0; i < entities.length; i++) {
+//         console.log('current value: ', entities[i][1]);
+//         for (let j = 0; j < entities[i][1].length; j++) {
+//             let move = [entities[i][0], entities[i][1][j]];
+//             move[0] = move[0].split(",");
+//             move[0][1] = parseInt(move[0][1]); move[0][0] = parseInt(move[0][0]);
+//             // console.log('inner loop');
+//             board.movePiece(board.board[move[0]], board.board[move[1]]);
+//             const score = scorePosition(board.currentPieces);
+//             board = dupBoard(dupedBoard); // revert state to before a move was made
+//             // board.reverseMove();
+//             console.log('score: ', score);
+//             if (score < highestVal) {
+//                 highestVal = score;
+//                 bestMove = move;
+//             }
+//         }
+//     }
+//     return bestMove;
+// }
 
 
 function findAiMove(board, depth) {
-  console.log('ai one state into the future');
+  var min = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  var alpha = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : -10000;
+  var beta = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10000;
+
+  if (depth === 0) {
+    return [scorePosition(board.currentPieces)];
+  }
+
   var entities = Object.entries(board.movesFor[board.currentTurnColor]);
-  var highestVal = 100000; // playing as black so we want low score
+  var highestVal = 0;
+  min ? highestVal = 10000 : highestVal = -10000; // playing as black so we want low score
 
   var bestMove = null;
   shuffle(entities);
-  var dupedBoard = dupBoard(board);
-  console.log('entities: ', entities);
+  var dupedBoard = dupBoard(board); // console.log('entities: ', entities);
 
   for (var i = 0; i < entities.length; i++) {
     console.log('current value: ', entities[i][1]);
@@ -905,20 +940,29 @@ function findAiMove(board, depth) {
       move[0][0] = parseInt(move[0][0]); // console.log('inner loop');
 
       board.movePiece(board.board[move[0]], board.board[move[1]]);
-      var score = scorePosition(board.currentPieces);
+      var score = findAiMove(board, depth - 1, !min)[0];
       board = dupBoard(dupedBoard); // revert state to before a move was made
       // board.reverseMove();
 
       console.log('score: ', score);
 
-      if (score < highestVal) {
-        highestVal = score;
-        bestMove = move;
+      if (min) {
+        if (score < highestVal) {
+          highestVal = score;
+          bestMove = move;
+        }
+      } else {
+        if (score > highestVal) {
+          highestVal = score;
+          bestMove = move;
+        }
       }
     }
   }
 
-  return bestMove;
+  console.log("ai ".concat(depth, " state(s) into the future"));
+  console.log('final best move: ', bestMove);
+  return [highestVal, bestMove];
 } // function findAiMove (board, color, depth, max = true, alpha = -100000, beta = 100000) {
 //     if (depth === 0) {
 //         return scorePosition(board);
@@ -959,10 +1003,10 @@ function findAiMove(board, depth) {
 
 
 function scorePosition(pieces) {
-  var piecesArr = Object.values(pieces);
-  var piecesKeys = Object.keys(pieces);
-  console.log('piecesArrVals: ', piecesArr);
-  console.log('piecesArrKeys: ', piecesKeys);
+  var piecesArr = Object.values(pieces); // const piecesKeys = Object.keys(pieces);
+  // console.log('piecesArrVals: ', piecesArr);
+  // console.log('piecesArrKeys: ', piecesKeys);
+
   var points = 0; // let pieces = Object.values(board.currentPieces);
 
   for (var i = 0; i < piecesArr.length; i++) {
@@ -1099,7 +1143,6 @@ var GameBoard = /*#__PURE__*/function (_React$Component) {
         id: "board-container"
       }, board.map(function (tile) {
         if (_this2.hasMoveToShow(tile.pos)) {
-          console.log('returned true');
           return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_game_tile__WEBPACK_IMPORTED_MODULE_1__["default"], {
             key: tile.pos[0] * 8 + tile.pos[1],
             tile: tile,
@@ -1166,7 +1209,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-function makeAiMove(board, depth) {
+function makeAiMove(board) {
   console.log('ai move called');
   var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"](false); // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
 
@@ -1178,10 +1221,10 @@ function makeAiMove(board, depth) {
   dupBoard.currentTurnColor = board.currentTurnColor; // not gonna add in the moves array since it doesnt matter for this
 
   dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
-  var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, depth);
+  var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, 2);
   console.log('ai move: ', move);
-  var pieceTile = board.board[move[0]];
-  var moveTile = board.board[move[1]];
+  var pieceTile = board.board[move[1][0]];
+  var moveTile = board.board[move[1][1]];
   console.log('pieceTile: ', pieceTile);
   console.log('moveTile: ', moveTile);
   board.movePiece(pieceTile, moveTile); // const pieceTile = board.board[[1, 6]];
@@ -1234,7 +1277,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
       // console.log('aiTurn', this.aiTurn);
 
       if (board.currentTurnColor === this.aiTurn) {
-        makeAiMove(board, 1); // make an ai move on the board -> chess_ai.js util
+        makeAiMove(board); // make an ai move on the board -> chess_ai.js util
       } else {
         console.log(tile);
         console.log(this.currentTile);
@@ -1613,36 +1656,36 @@ var Board = /*#__PURE__*/function () {
       var dirs = [];
 
       if (piece.color === 'white') {
-        if (!this.currentPieces[(piece.pos[0] - 1, piece.pos[1])]) {
+        if (!this.currentPieces[[piece.pos[0] - 1, piece.pos[1]]]) {
           dirs.push([piece.pos[0] - 1, piece.pos[1]]);
 
-          if (piece.pos[0] === 6 && !this.currentPieces[(piece.pos[0] - 2, piece.pos[1])]) {
+          if (piece.pos[0] === 6 && !this.currentPieces[[piece.pos[0] - 2, piece.pos[1]]]) {
             dirs.push([piece.pos[0] - 2, piece.pos[1]]);
           }
         }
 
-        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && this.currentPieces[(piece.pos[0] - 1, piece.pos[1] - 1)]) {
+        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] - 1]]) {
           dirs.push([piece.pos[0] - 1, piece.pos[1] - 1]);
         }
 
-        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && this.currentPieces[(piece.pos[0] - 1, piece.pos[1] + 1)]) {
+        if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] + 1]]) {
           dirs.push([piece.pos[0] - 1, piece.pos[1] + 1]);
         }
       } else {
-        if (!this.currentPieces[(piece.pos[0] + 1, piece.pos[1])]) {
+        if (!this.currentPieces[[piece.pos[0] + 1, piece.pos[1]]]) {
           dirs.push([piece.pos[0] + 1, piece.pos[1]]);
 
-          if (piece.pos[0] === 1 && !this.currentPieces[(piece.pos[0] + 2, piece.pos[1])]) {
+          if (piece.pos[0] === 1 && !this.currentPieces[[piece.pos[0] + 2, piece.pos[1]]]) {
             dirs.push([piece.pos[0] + 2, piece.pos[1]]);
           }
         } // take color into account ?
 
 
-        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[(piece.pos[0] + 1, piece.pos[1] - 1)]) {
+        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] - 1]]) {
           dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]);
         }
 
-        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[(piece.pos[0] + 1, piece.pos[1] + 1)]) {
+        if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] + 1]]) {
           dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]);
         }
       }
@@ -1966,32 +2009,24 @@ var Board = /*#__PURE__*/function () {
         console.log('Invalid move destination');
         return false;
       }
-    }
-  }, {
-    key: "reverseMove",
-    value: function reverseMove() {
-      this.board[this.lastMove[0]].piece = this.currentPieces[this.lastMove[1]]; // state -> old tile has piece and new tile has piece => same piece
+    } // reverseMove() {
+    //     this.board[this.lastMove[0]].piece = this.currentPieces[this.lastMove[1]];
+    //     // state -> old tile has piece and new tile has piece => same piece
+    //     this.board[this.lastMove[1]].piece = null;
+    //     // state -> only old tile now has the piece
+    //     if (this.lastMoveCap) { this.board[this.lastMove[1]].piece = this.lastMoveCap }
+    //     // add the deleted piece back to the moved pos tile if there was one
+    //     this.currentPieces[this.lastMove[0]] = this.currentPieces[this.lastMove[1]];
+    //     // state -> currentPieces[oldPos] has the same piece as currentPieces[newPos]
+    //     delete this.currentPieces[this.lastMove[1]];
+    //     // state -> piece deleted from new pos
+    //     if (this.lastMoveCap) { this.currentPieces[this.lastMove[1]] = this.lastMoveCap }
+    //     // replace the moved pos with the deleted piece if there was one
+    //     // need to revserse pawn promotions too but thats gonna take a minute
+    //     this.currentTurnColor = this.oppColor(this.currentTurnColor);
+    //     this.findAllMoves();
+    // }
 
-      this.board[this.lastMove[1]].piece = null; // state -> only old tile now has the piece
-
-      if (this.lastMoveCap) {
-        this.board[this.lastMove[1]].piece = this.lastMoveCap;
-      } // add the deleted piece back to the moved pos tile if there was one
-
-
-      this.currentPieces[this.lastMove[0]] = this.currentPieces[this.lastMove[1]]; // state -> currentPieces[oldPos] has the same piece as currentPieces[newPos]
-
-      delete this.currentPieces[this.lastMove[1]]; // state -> piece deleted from new pos
-
-      if (this.lastMoveCap) {
-        this.currentPieces[this.lastMove[1]] = this.lastMoveCap;
-      } // replace the moved pos with the deleted piece if there was one
-      // need to revserse pawn promotions too but thats gonna take a minute
-
-
-      this.currentTurnColor = this.oppColor(this.currentTurnColor);
-      this.findAllMoves();
-    }
   }, {
     key: "inCheck",
     value: function inCheck(color) {}

@@ -128,19 +128,19 @@ export class Board {
     pawnMoves(piece) {
         const dirs = [];
         if (piece.color === 'white') {
-            if (!(this.currentPieces[piece.pos[0] - 1, piece.pos[1]])) {
+            if (!(this.currentPieces[[piece.pos[0] - 1, piece.pos[1]]])) {
                 dirs.push([piece.pos[0] - 1, piece.pos[1]]);
-                if (piece.pos[0] === 6 && !(this.currentPieces[piece.pos[0] - 2, piece.pos[1]])) { dirs.push([piece.pos[0] - 2, piece.pos[1]])}
+                if (piece.pos[0] === 6 && !(this.currentPieces[[piece.pos[0] - 2, piece.pos[1]]])) { dirs.push([piece.pos[0] - 2, piece.pos[1]])}
             }
-            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && this.currentPieces[piece.pos[0] - 1, piece.pos[1] - 1]) { dirs.push([piece.pos[0] - 1, piece.pos[1] - 1]) }
-            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && this.currentPieces[piece.pos[0] - 1, piece.pos[1] + 1]) { dirs.push([piece.pos[0] - 1, piece.pos[1] + 1]) }
+            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] - 1]]) { dirs.push([piece.pos[0] - 1, piece.pos[1] - 1]) }
+            if (this.onBoard([piece.pos[0] - 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] - 1, piece.pos[1] + 1]]) { dirs.push([piece.pos[0] - 1, piece.pos[1] + 1]) }
         } else {
-            if (!(this.currentPieces[piece.pos[0] + 1, piece.pos[1]])) {
+            if (!(this.currentPieces[[piece.pos[0] + 1, piece.pos[1]]])) {
                 dirs.push([piece.pos[0] + 1, piece.pos[1]]);
-                if (piece.pos[0] === 1 && !(this.currentPieces[piece.pos[0] + 2, piece.pos[1]])) { dirs.push([piece.pos[0] + 2, piece.pos[1]])}
+                if (piece.pos[0] === 1 && !(this.currentPieces[[piece.pos[0] + 2, piece.pos[1]]])) { dirs.push([piece.pos[0] + 2, piece.pos[1]])}
             } // take color into account ?
-            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[piece.pos[0] + 1, piece.pos[1] - 1]) { dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]) }
-            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[piece.pos[0] + 1, piece.pos[1] + 1]) { dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]) }
+            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] - 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] - 1]]) { dirs.push([piece.pos[0] + 1, piece.pos[1] - 1]) }
+            if (this.onBoard([piece.pos[0] + 1, piece.pos[1] + 1]) && this.currentPieces[[piece.pos[0] + 1, piece.pos[1] + 1]]) { dirs.push([piece.pos[0] + 1, piece.pos[1] + 1]) }
         }
         return dirs;
     }
@@ -397,26 +397,26 @@ export class Board {
         }
     }
 
-    reverseMove() {
-        this.board[this.lastMove[0]].piece = this.currentPieces[this.lastMove[1]];
-        // state -> old tile has piece and new tile has piece => same piece
-        this.board[this.lastMove[1]].piece = null;
-        // state -> only old tile now has the piece
-        if (this.lastMoveCap) { this.board[this.lastMove[1]].piece = this.lastMoveCap }
-        // add the deleted piece back to the moved pos tile if there was one
+    // reverseMove() {
+    //     this.board[this.lastMove[0]].piece = this.currentPieces[this.lastMove[1]];
+    //     // state -> old tile has piece and new tile has piece => same piece
+    //     this.board[this.lastMove[1]].piece = null;
+    //     // state -> only old tile now has the piece
+    //     if (this.lastMoveCap) { this.board[this.lastMove[1]].piece = this.lastMoveCap }
+    //     // add the deleted piece back to the moved pos tile if there was one
 
-        this.currentPieces[this.lastMove[0]] = this.currentPieces[this.lastMove[1]];
-        // state -> currentPieces[oldPos] has the same piece as currentPieces[newPos]
-        delete this.currentPieces[this.lastMove[1]];
-        // state -> piece deleted from new pos
-        if (this.lastMoveCap) { this.currentPieces[this.lastMove[1]] = this.lastMoveCap }
-        // replace the moved pos with the deleted piece if there was one
+    //     this.currentPieces[this.lastMove[0]] = this.currentPieces[this.lastMove[1]];
+    //     // state -> currentPieces[oldPos] has the same piece as currentPieces[newPos]
+    //     delete this.currentPieces[this.lastMove[1]];
+    //     // state -> piece deleted from new pos
+    //     if (this.lastMoveCap) { this.currentPieces[this.lastMove[1]] = this.lastMoveCap }
+    //     // replace the moved pos with the deleted piece if there was one
 
-        // need to revserse pawn promotions too but thats gonna take a minute
+    //     // need to revserse pawn promotions too but thats gonna take a minute
 
-        this.currentTurnColor = this.oppColor(this.currentTurnColor);
-        this.findAllMoves();
-    }
+    //     this.currentTurnColor = this.oppColor(this.currentTurnColor);
+    //     this.findAllMoves();
+    // }
 
     inCheck(color) {
 

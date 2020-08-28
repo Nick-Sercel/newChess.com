@@ -23,7 +23,6 @@ class GameBoard extends React.Component {
             <div id='board-container'>
                 {board.map(tile => {
                     if (this.hasMoveToShow(tile.pos)) {
-                        console.log('returned true');
                         return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} green={'green-background'} /> )
                     } else {
                         return ( <Tile key={(tile.pos[0] * 8) + tile.pos[1]} tile={tile} updateGame={this.props.updateGame} green={'fake-class'} /> )
