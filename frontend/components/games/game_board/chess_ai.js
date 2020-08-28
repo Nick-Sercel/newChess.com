@@ -26,7 +26,7 @@ function dupBoard (board) { // this apparently slow af - maybe write custom dupl
     dupBoard.whiteCaptures = board.whiteCaptures.slice();
     dupBoard.blackCaptures = board.blackCaptures.slice();
     dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-    dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+    // dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        //re-enable
     dupBoard.currentTurnColor = board.currentTurnColor;
     dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
@@ -132,6 +132,7 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
     }
     console.log(`ai ${depth} state(s) into the future`);
     console.log('final best move: ', bestMove);
+    console.log('final score: ', highestVal);
     return [highestVal, bestMove];
 }
 

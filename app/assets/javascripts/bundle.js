@@ -909,8 +909,8 @@ function dupBoard(board) {
   dupBoard.board = JSON.parse(JSON.stringify(board.board));
   dupBoard.whiteCaptures = board.whiteCaptures.slice();
   dupBoard.blackCaptures = board.blackCaptures.slice();
-  dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-  dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+  dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces)); // dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        //re-enable
+
   dupBoard.currentTurnColor = board.currentTurnColor;
   dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
 
@@ -1023,6 +1023,7 @@ function findAiMove(board, depth) {
 
   console.log("ai ".concat(depth, " state(s) into the future"));
   console.log('final best move: ', bestMove);
+  console.log('final score: ', highestVal);
   return [highestVal, bestMove];
 }
 
@@ -1360,50 +1361,50 @@ var Game = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "makeAiMove",
     value: function makeAiMove(board) {
-      console.log('ai move called');
-      this.currentMove++;
+      console.log('ai move called'); // this.currentMove++;
+      // if (this.currentMove === 1) {
+      //     const pieceTile = board.board[[1, 2]];
+      //     const moveTile = board.board[[2, 2]];
+      //     board.movePiece(pieceTile, moveTile);
+      // } else if (this.currentMove === 2) {
+      //     const pieceTile = board.board[[1, 1]];
+      //     const moveTile = board.board[[3, 1]];
+      //     board.movePiece(pieceTile, moveTile);
+      // }
+      // return;
 
-      if (this.currentMove === 1) {
-        var pieceTile = board.board[[1, 2]];
-        var moveTile = board.board[[2, 2]];
-        board.movePiece(pieceTile, moveTile);
-      } else if (this.currentMove === 2) {
-        var _pieceTile = board.board[[1, 1]];
-        var _moveTile = board.board[[3, 1]];
-        board.movePiece(_pieceTile, _moveTile);
-      }
-
-      return;
       var moveResult = false;
       this.currentMove++;
 
       if (this.currentMove === 1) {
-        var _pieceTile2 = board.board[[0, 1]];
-        var _moveTile2 = board.board[[2, 2]];
-        board.movePiece(_pieceTile2, _moveTile2);
+        var pieceTile = board.board[[0, 1]];
+        var moveTile = board.board[[2, 2]];
+        board.movePiece(pieceTile, moveTile);
       } else if (this.currentMove === 2) {
-        var _pieceTile3 = board.board[[0, 6]];
-        var _moveTile3 = board.board[[2, 5]];
-        board.movePiece(_pieceTile3, _moveTile3);
+        var _pieceTile = board.board[[0, 6]];
+        var _moveTile = board.board[[2, 5]];
+        board.movePiece(_pieceTile, _moveTile);
       } else {
         var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"](false); // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
 
         dupBoard.board = JSON.parse(JSON.stringify(board.board));
         dupBoard.whiteCaptures = board.whiteCaptures.slice();
-        dupBoard.blackCaptures = board.blackCaptures.slice();
-        dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-        dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+        dupBoard.blackCaptures = board.blackCaptures.slice(); // console.log('no, over here')
+
+        dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces)); // console.log('actually, here')
+        // dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        // re-enable
+
         dupBoard.currentTurnColor = board.currentTurnColor; // not gonna add in the moves array since it doesnt matter for this
 
         dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
-        var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, 3); // make move with (num) depth
+        var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, 2); // make move with (num) depth
 
         console.log('ai move: ', move);
-        var _pieceTile4 = board.board[move[1][0]];
-        var _moveTile4 = board.board[move[1][1]];
-        console.log('pieceTile: ', _pieceTile4);
-        console.log('moveTile: ', _moveTile4);
-        moveResult = board.movePiece(_pieceTile4, _moveTile4);
+        var _pieceTile2 = board.board[move[1][0]];
+        var _moveTile2 = board.board[move[1][1]];
+        console.log('pieceTile: ', _pieceTile2);
+        console.log('moveTile: ', _moveTile2);
+        moveResult = board.movePiece(_pieceTile2, _moveTile2);
       }
 
       if (moveResult === 'end') {

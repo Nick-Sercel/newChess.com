@@ -106,17 +106,17 @@ class Game extends React.Component {
 
         console.log('ai move called');
 
-        this.currentMove++;
-        if (this.currentMove === 1) {
-            const pieceTile = board.board[[1, 2]];
-            const moveTile = board.board[[2, 2]];
-            board.movePiece(pieceTile, moveTile);
-        } else if (this.currentMove === 2) {
-            const pieceTile = board.board[[1, 1]];
-            const moveTile = board.board[[3, 1]];
-            board.movePiece(pieceTile, moveTile);
-        }
-        return;
+        // this.currentMove++;
+        // if (this.currentMove === 1) {
+        //     const pieceTile = board.board[[1, 2]];
+        //     const moveTile = board.board[[2, 2]];
+        //     board.movePiece(pieceTile, moveTile);
+        // } else if (this.currentMove === 2) {
+        //     const pieceTile = board.board[[1, 1]];
+        //     const moveTile = board.board[[3, 1]];
+        //     board.movePiece(pieceTile, moveTile);
+        // }
+        // return;
 
         let moveResult = false;
         this.currentMove++;
@@ -134,13 +134,15 @@ class Game extends React.Component {
             dupBoard.board = JSON.parse(JSON.stringify(board.board));
             dupBoard.whiteCaptures = board.whiteCaptures.slice();
             dupBoard.blackCaptures = board.blackCaptures.slice();
+            // console.log('no, over here')
             dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-            dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+            // console.log('actually, here')
+            // dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        // re-enable
             dupBoard.currentTurnColor = board.currentTurnColor;
             // not gonna add in the moves array since it doesnt matter for this
             dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
 
-            const move = findAiMove(dupBoard, 3); // make move with (num) depth
+            const move = findAiMove(dupBoard, 2); // make move with (num) depth
 
             console.log('ai move: ', move);
             const pieceTile = board.board[move[1][0]];
