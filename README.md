@@ -20,6 +20,24 @@
 
 #### This required a significant amount of refactoring and modification in order to impliment. The way the Board class is structured, I built its movement and state changing methods almost entirely out of nested objects. This made it very efficient for finding a player's moves and making them on the board object as well as removing any chance of re-calculating positions or piece moves that have already been calculated and dont need re-evaluation. However, this made the ai interaction quite difficult as with so many moving parts, reversing a move the ai has checked became a very difficult process. I resolved this by creating a new board object before checking (with deeply duplicated values from the origional board) and tacking those properties back onto the new board state after moving to artificially reverse a move. The actual base logic for the ai is a fairly simple recursive loop where the computer will check all of its potential moves and rank the state of the game upon that move (the ranking is just based upon pieces on the board). The harder logic for it was implimenting alpha beta pruning for each move in order to increase efficiency by removing any paths that did not need to be traversed.
 
+```js
+
+export class Board {
+    constructor(genBoard = true) {
+        this.board = {};  // { posKey: tile }
+        this.whiteCaptures = [];
+        this.blackCaptures = [];
+        this.currentPieces = {};
+        this.currentTurnColor = 'white';
+        this.moves = "";
+        this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } -> not removed from piece object
+        if (genBoard) { this.generateBoard(); }
+        this.lastMove = [];
+        this.lastMoveCap = null;
+    }
+    // methods, etc.    
+}
+```
 
 ```js
 function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
