@@ -14,7 +14,7 @@
 
 ### Users can create, edit, and destroy goals for themselves, send friend requests which can be accepted or denied, and play games which are automatically recorded upon game completion.
 
-#### The major issue with this was actually CSS styling and conditionals for when and what to display where. I wanted to use one root CSS *thing* for all of my boxes in order to have it uniform but also keep the code base clean.
+#### The major issue with this was actually CSS styling and conditionals for when and what to display where. I wanted to use one root CSS *thing* for all of my boxes in order to have it uniform but also keep the code base clean and without repetition. This meant I had to figure out how to nest several flex displays and use percentage values for all widths and heights of elements. The conditionals were solved, essentially, by most of the elements always being on the page and only displaying and fetching certain components based on which values are in the current state shape.
 
 ### Users can play against a chess computer which thinks 2 moves ahead to practice and improve (the computer is limited to two moves for faster performance).
 
