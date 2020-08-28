@@ -27,10 +27,10 @@ export class Board {
         this.board = {};  // { posKey: tile }
         this.whiteCaptures = [];
         this.blackCaptures = [];
-        this.currentPieces = {};
+        this.currentPieces = {}; // posKey: piece
         this.currentTurnColor = 'white';
         this.moves = "";
-        this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } -> not removed from piece object
+        this.movesFor = { 'white': {}, 'black': {} }; // 'white': { piece.pos: [moves] } }
         if (genBoard) { this.generateBoard(); }
         this.lastMove = [];
         this.lastMoveCap = null;
