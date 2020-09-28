@@ -77,7 +77,7 @@ button, .button-format a {
     color: black;
 }
 
-button:hover, .button-format a:hover {
+button:hover, .button-format a:hover, .clickable {
   cursor: pointer;
 }
 

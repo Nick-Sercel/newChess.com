@@ -29,9 +29,11 @@ class SignedOut extends React.Component {
                 <div className='user-auth-banner-links'>
                     {/* <li><Link to={`/users/new`}>Create New User</Link></li>
                     <li><Link to={`/session/new`}>Login</Link></li> */}
-                    <li><a><button onClick={() => this.click('new')}>Create New User</button></a></li>
-                    <li><a><button onClick={() => this.click('login')}>Login</button></a></li>
-                    <li><a><button onClick={() => this.click('demo')}>Demo User</button></a></li>
+                    <li><a target='_blank' href='https://www.linkedin.com/in/nick-sercel-4402261a0/'>LinkedIn</a></li>
+                    <li><a target="_blank" href='https://github.com/Jim-Heftypants/newChess.com'>Github</a></li>
+                    <li><a className='clickable' onClick={() => this.click('new')}>Create New User</a></li>
+                    <li><a className='clickable' onClick={() => this.click('login')}>Login</a></li>
+                    <li><a className='clickable' onClick={() => this.click('demo')}>Demo User</a></li>
                 </div>
                 <CreateUserContainer />
                 <LoginUserContainer />

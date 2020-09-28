@@ -32,9 +32,10 @@ export class Board {
         this.moves = "";
         this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } -> not removed from piece object
         if (genBoard) { this.generateBoard(); }
-        this.lastMove = [];
-        this.lastMoveCap = null;
+        // this.lastMove = [];
+        // this.lastMoveCap = null; // dont think this is needed anymore
     }
+
 
     generateBoard() {
         for (let i = 0; i < 8; i++) {
