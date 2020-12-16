@@ -10,6 +10,7 @@ class Game extends React.Component {
         this.state = { board: board };
         this.restartGame = this.restartGame.bind(this);
         this.updateGame = this.updateGame.bind(this);
+        this.undoMove = this.undoMove.bind(this);
         this.currentTile = null;
         this.humanTurn = 'white';
         this.potentialMoves = [];
@@ -164,6 +165,12 @@ class Game extends React.Component {
         }
     }
 
+    undoMove() {
+        const board = this.state.board;
+        board.reverseMove();
+        this.setState({ board: board });
+    }
+
     render() {
         let whiteCaptures = this.state.board.whiteCaptures;
         let blackCaptures = this.state.board.blackCaptures;
@@ -204,6 +211,9 @@ class Game extends React.Component {
                             }
                         </div>
                     </div>
+                </div>
+                <div className='undo-button' onClick={this.undoMove}>
+                    <p> Undo </p>
                 </div>
             </div>
         )

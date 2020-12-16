@@ -97,21 +97,17 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
     min ? highestVal = 10000 : highestVal = -10000;
     // playing as black so we want low score
     let bestMove = null;
-    shuffle(entities);
+    // shuffle(entities);
     const dupedBoard = dupBoard(board);
-    // console.log('entities: ', entities);
     for (let i = 0; i < entities.length; i++) {
-        // console.log('current value: ', entities[i][1]);
         for (let j = 0; j < entities[i][1].length; j++) {
             let move = [entities[i][0], entities[i][1][j]];
             move[0] = move[0].split(",");
             move[0][1] = parseInt(move[0][1]); move[0][0] = parseInt(move[0][0]);
-            // console.log('inner loop');
             board.movePiece(board.board[move[0]], board.board[move[1]]);
             const score = findAiMove(board, depth - 1, !min)[0];
             board = dupBoard(dupedBoard); // revert state to before a move was made
             // board.reverseMove();
-            // console.log('score: ', score);
             if (min) {
                 if (score < highestVal) {
                     highestVal = score;

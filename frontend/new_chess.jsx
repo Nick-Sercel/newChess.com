@@ -26,8 +26,3 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 //sudo service postgresql start
-
-
-// route_util
-// controller routes
-// CSS location

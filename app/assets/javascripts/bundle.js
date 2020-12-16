@@ -981,23 +981,20 @@ function findAiMove(board, depth) {
   var highestVal = 0;
   min ? highestVal = 10000 : highestVal = -10000; // playing as black so we want low score
 
-  var bestMove = null;
-  shuffle(entities);
-  var dupedBoard = dupBoard(board); // console.log('entities: ', entities);
+  var bestMove = null; // shuffle(entities);
+
+  var dupedBoard = dupBoard(board);
 
   for (var i = 0; i < entities.length; i++) {
-    // console.log('current value: ', entities[i][1]);
     for (var j = 0; j < entities[i][1].length; j++) {
       var move = [entities[i][0], entities[i][1][j]];
       move[0] = move[0].split(",");
       move[0][1] = parseInt(move[0][1]);
-      move[0][0] = parseInt(move[0][0]); // console.log('inner loop');
-
+      move[0][0] = parseInt(move[0][0]);
       board.movePiece(board.board[move[0]], board.board[move[1]]);
       var score = findAiMove(board, depth - 1, !min)[0];
       board = dupBoard(dupedBoard); // revert state to before a move was made
       // board.reverseMove();
-      // console.log('score: ', score);
 
       if (min) {
         if (score < highestVal) {
@@ -1251,6 +1248,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
     };
     _this.restartGame = _this.restartGame.bind(_assertThisInitialized(_this));
     _this.updateGame = _this.updateGame.bind(_assertThisInitialized(_this));
+    _this.undoMove = _this.undoMove.bind(_assertThisInitialized(_this));
     _this.currentTile = null;
     _this.humanTurn = 'white';
     _this.potentialMoves = [];
@@ -1419,6 +1417,15 @@ var Game = /*#__PURE__*/function (_React$Component) {
       }
     }
   }, {
+    key: "undoMove",
+    value: function undoMove() {
+      var board = this.state.board;
+      board.reverseMove();
+      this.setState({
+        board: board
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       var whiteCaptures = this.state.board.whiteCaptures;
@@ -1446,7 +1453,10 @@ var Game = /*#__PURE__*/function (_React$Component) {
         className: "black-captures"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, "Black Captures")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, blackCaptures.map(function (capture) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, capture.symbol)));
-      })))));
+      })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+        className: "undo-button",
+        onClick: this.undoMove
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, " Undo ")));
     }
   }]);
 
@@ -1616,6 +1626,17 @@ var Piece = function Piece(pos, symbol) {
   this.color = color;
   this.moves = [];
 };
+
+var move = function move(piece, priorPos) {
+  var capturedPiece = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+  _classCallCheck(this, move);
+
+  this.piece = piece;
+  this.priorPos = priorPos;
+  this.capturedPiece = capturedPiece;
+};
+
 var Board = /*#__PURE__*/function () {
   function Board() {
     var genBoard = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
@@ -1624,24 +1645,32 @@ var Board = /*#__PURE__*/function () {
 
     this.board = {}; // { posKey: tile }
 
+    this.kings = {
+      "white": null,
+      "black": null
+    };
     this.whiteCaptures = [];
     this.blackCaptures = [];
-    this.currentPieces = {}; // this.kings = {};
-    // this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} }; // re-enable with real game
-    // this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
-
+    this.currentPieces = {};
     this.currentTurnColor = 'white';
     this.moves = "";
     this.movesFor = {
       'white': {},
       'black': {}
-    }; // refactored to { 'white': { piece.pos: [moves] } } -> not removed from piece object
+    };
 
     if (genBoard) {
       this.generateBoard();
-    } // this.lastMove = [];
-    // this.lastMoveCap = null; // dont think this is needed anymore
+    }
 
+    this.moveTree = [];
+    this.inCheck = false;
+    this.threats = [];
+    this.deniedMoves = {};
+    this.kings = {
+      "white": null,
+      "black": null
+    };
   }
 
   _createClass(Board, [{
@@ -1662,6 +1691,12 @@ var Board = /*#__PURE__*/function () {
               piece = new Piece([i, j], 'B');
             } else if (j === 3) {
               piece = new Piece([i, j], 'K');
+
+              if (i > 5) {
+                this.kings["white"] = piece;
+              } else {
+                this.kings["black"] = piece;
+              }
             } else {
               piece = new Piece([i, j], 'Q');
             }
@@ -1671,9 +1706,9 @@ var Board = /*#__PURE__*/function () {
             this.movesFor['white'][(i, j)] = [];
 
             if (piece.pos[0] > 5) {
-              piece.color = 'white'; // if (piece.symbol === 'K') {this.kings['white']['piece'] = piece;} // re-enable with real game
+              piece.color = 'white';
             } else {
-              piece.color = 'black'; // if (piece.symbol === 'K') { this.kings['black']['piece'] = piece; }
+              piece.color = 'black';
             }
 
             this.currentPieces[piece.pos] = piece;
@@ -1819,76 +1854,8 @@ var Board = /*#__PURE__*/function () {
       return this.singleMoveDirs(piece, moveDirs);
     }
   }, {
-    key: "findThreatsAndRemove",
-    value: function findThreatsAndRemove(piece, moves) {
-      // update this  // re-enable with real game
-      var otherColor = this.oppColor(piece.color);
-
-      for (var i = 0; i < moves.length; i++) {
-        if (this.isIncluded(this.kings[otherColor]['piece'].moves, moves[i])) {
-          this.kings[otherColor]['indirect'][piece.pos] instanceof Array ? this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : this.kings[otherColor]['indirect'][piece.pos] = [moves[i]];
-          this.kings[otherColor]['piece'].moves.splice(this.kings[otherColor]['piece'].moves.indexOf(moves[i]), 1);
-          console.log("indirect threat added: ".concat(Object.keys(this.kings[otherColor]['indirect'])));
-        } else if (moves[i][0] === this.kings[otherColor]['piece'].pos[0] && moves[i][1] === this.kings[otherColor]['piece'].pos[1]) {
-          this.kings[otherColor]['direct'][piece.pos] = moves[i];
-          console.log("direct threat added: ".concat(Object.keys(this.kings[otherColor]['direct'])));
-        }
-      }
-    }
-  }, {
-    key: "findMatchingThreat",
-    value: function findMatchingThreat(primaryThreat, color) {
-      // primaryThreat should be a piece object reference   // re-enable with real game
-      if (this.kings[color]['indirect'][primaryThreat.pos] !== undefined) {
-        return this.kings[color]['indirect'][primaryThreat.pos][0]; // should only ever have one position => but it is in an array
-      } else {
-        return [-1, -1];
-      }
-    }
-  }, {
-    key: "adjacent",
-    value: function adjacent(piece1, piece2) {
-      var pos1 = piece1.pos;
-      var pos2 = piece2.pos;
-
-      if (pos1[0] + 1 === pos2[0] && pos1[1] === pos2[1] || pos1[0] - 1 === pos2[0] && pos1[1] === pos2[1] || pos1[0] + 1 === pos2[0] && pos1[1] + 1 === pos2[1] || pos1[0] + 1 === pos2[0] && pos1[1] - 1 === pos2[1] || pos1[0] - 1 === pos2[0] && pos1[1] + 1 === pos2[1] || pos1[0] - 1 === pos2[0] && pos1[1] - 1 === pos2[1] || pos1[0] === pos2[0] && pos1[1] + 1 === pos2[1] || pos1[0] === pos2[0] && pos1[1] - 1 === pos2[1]) {
-        return true;
-      }
-
-      return false;
-    }
-  }, {
-    key: "findSavesOnMove",
-    value: function findSavesOnMove(piece, moves) {
-      // needs update  // re-enable with real game
-      var dThreats = Object.values(this.kings[piece.color]['direct']);
-
-      if (dThreats.length !== 0) {
-        var threatLocations = Object.keys(this.kings[piece.color]['direct']);
-        var threatPieces = [];
-
-        for (var i = 0; i < threatLocations.length; i++) {
-          threatPieces.push(this.currentPieces[threatLocations[i]]); // take the [pos[0], pos[1]] from the keys and find their objects
-        }
-
-        for (var _i = 0; _i < threatPieces.length; _i++) {
-          for (var j = 0; j < moves.length; j++) {
-            if (moves[j] === threatPieces[_i].pos) {
-              this.kings[piece.color]['saves'][piece.pos] = moves[j];
-            } else if (threatPieces[j].symbol !== 'N' && threatPieces[j].symbol !== 'P' && !this.adjacent(threatPieces[j], this.kings[piece.color]['piece'])) {
-              var blockPos = this.findMatchingThreat(threatPieces[j]);
-
-              if (moves[j] === blockPos) {
-                this.kings[piece.color]['saves'][piece.pos] = moves[j];
-              }
-            }
-          }
-        }
-      }
-    }
-  }, {
     key: "potentialMoves",
-    value: function potentialMoves(piece) {
+    value: function potentialMoves(piece, firstMove) {
       var moves;
 
       switch (piece.symbol) {
@@ -1899,7 +1866,12 @@ var Board = /*#__PURE__*/function () {
           break;
 
         case 'R':
-          moves = this.rookMoves(piece); // console.log(`rook moves: ${moves}`);
+          moves = this.rookMoves(piece);
+
+          if (firstMove) {
+            this.threats.push(piece);
+          } // console.log(`rook moves: ${moves}`);
+
 
           break;
 
@@ -1909,20 +1881,28 @@ var Board = /*#__PURE__*/function () {
           break;
 
         case 'B':
-          moves = this.bishopMoves(piece); // console.log(`bishop moves: ${moves}`);
+          moves = this.bishopMoves(piece);
+
+          if (firstMove) {
+            this.threats.push(piece);
+          } // console.log(`bishop moves: ${moves}`);
+
 
           break;
 
         case 'Q':
-          moves = this.rookMoves(piece).concat(this.bishopMoves(piece)); // console.log(`queen moves: ${moves}`);
+          moves = this.rookMoves(piece).concat(this.bishopMoves(piece));
+
+          if (firstMove) {
+            this.threats.push(piece);
+          } // console.log(`queen moves: ${moves}`);
+
 
           break;
 
         case 'K':
           // add castling and restrictions on moving near enemy kings
-          moves = this.kingMoves(piece); // re-enable with real game (remove)
-          // console.log(`king moves: ${moves}`);
-          // this.kings[piece.color].moves = moves; // done in call statement
+          moves = this.kingMoves(piece); // console.log(`king moves: ${moves}`);
 
           break;
 
@@ -1930,59 +1910,27 @@ var Board = /*#__PURE__*/function () {
           console.log('that piece doesn\'t exist');
           console.log("that piece is: ".concat(piece));
           return;
-      } // if (piece.symbol !== 'K') { // re-enable an remove case 'K' for real game
-      //     if (piece.color !== this.currentTurnColor) {
-      //         this.findThreatsAndRemove(piece, moves);
-      //     } else {
-      //         this.findSavesOnMove(piece, moves);         // does not exist yet
-      //     }
-      // }
-
+      }
 
       this.movesFor[piece.color][piece.pos] = moves;
       return moves;
     }
   }, {
-    key: "isIncluded",
-    value: function isIncluded(positions, pos) {
-      // console.log(`positions to check: ${positions}`);
-      // console.log(`pos checked: ${pos}`);
-      for (var i = 0; i < positions.length; i++) {
-        if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
-          return true;
-        }
-      }
-
-      return false;
-    }
-  }, {
     key: "findMovesForColor",
-    value: function findMovesForColor(color) {
+    value: function findMovesForColor(color, firstMove) {
       var pieces = Object.values(this.currentPieces);
 
       for (var i = 0; i < pieces.length; i++) {
         if (pieces[i].color === color && pieces[i].symbol !== 'K') {
-          this.potentialMoves(pieces[i]);
+          this.potentialMoves(pieces[i], firstMove);
         }
       }
     }
   }, {
     key: "findAllMoves",
-    value: function findAllMoves() {
-      // this.kings[this.currentTurnColor]['piece'].moves = this.potentialMoves(this.kings[this.currentTurnColor]['piece']);  // re-enable for real game
-      // this.kings[this.oppColor(this.currentTurnColor)]['piece'].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]['piece']);
-      this.findMovesForColor(this.currentTurnColor);
-      this.findMovesForColor(this.oppColor(this.currentTurnColor));
-    }
-  }, {
-    key: "validMove",
-    value: function validMove(piece, pos) {
-      if (this.isIncluded(this.movesFor[piece.color][piece.pos], pos)) {
-        // may break w/o Object.values
-        return true;
-      }
-
-      return false;
+    value: function findAllMoves(aiMove) {
+      this.findMovesForColor(this.currentTurnColor, true);
+      this.findMovesForColor(this.oppColor(this.currentTurnColor), false);
     }
   }, {
     key: "stringifyPos",
@@ -2030,6 +1978,8 @@ var Board = /*#__PURE__*/function () {
     key: "addToMovesList",
     value: function addToMovesList(piece, endTile) {
       var capture = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      this.moveTree.push(new move(piece, piece.pos.slice(), capture));
+      console.log(this.moveTree);
 
       if (piece.symbol !== 'P') {
         this.moves += piece.symbol;
@@ -2040,8 +1990,7 @@ var Board = /*#__PURE__*/function () {
       }
 
       this.moves += this.stringifyPos(endTile.pos);
-      this.moves += " ";
-      console.log(this.moves);
+      this.moves += " "; // console.log(this.moves);
     }
   }, {
     key: "promotePawn",
@@ -2053,21 +2002,38 @@ var Board = /*#__PURE__*/function () {
       this.potentialMoves(queen);
     }
   }, {
+    key: "isIncluded",
+    value: function isIncluded(positions, pos) {
+      for (var i = 0; i < positions.length; i++) {
+        if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+  }, {
+    key: "validMove",
+    value: function validMove(piece, pos) {
+      if (this.isIncluded(this.movesFor[piece.color][piece.pos], pos)) {
+        return true;
+      }
+
+      return false;
+    }
+  }, {
     key: "movePiece",
     value: function movePiece(moveTile, endTile) {
-      // console.log
-      this.potentialMoves(moveTile.piece);
+      var aiMove = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
+      // this.potentialMoves(moveTile.piece);
       if (this.validMove(moveTile.piece, endTile.pos)) {
-        // this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {}; this.kings['white']['saves'] = {} // re-enable with real game
-        // this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {}; this.kings['black']['saves'] = {}
         var gameOver = false;
 
         if (endTile.piece && endTile.piece.symbol === 'K') {
           gameOver = true;
         }
 
-        this.lastMove = [moveTile.pos, endTile.pos];
         var piece = moveTile.piece;
 
         if (endTile.piece) {
@@ -2077,10 +2043,8 @@ var Board = /*#__PURE__*/function () {
             this.blackCaptures.push(endTile.piece);
           }
 
-          this.lastMoveCap = endTile.piece;
-          this.addToMovesList(piece, endTile, true);
+          this.addToMovesList(piece, endTile, endTile.piece);
         } else {
-          this.lastMoveCap = null;
           this.addToMovesList(piece, endTile);
         }
 
@@ -2089,9 +2053,6 @@ var Board = /*#__PURE__*/function () {
         delete this.currentPieces[piece.pos]; // remove old piece pos from hash
 
         piece.pos = endTile.pos; // move the piece's position
-        // if (piece.symbol === 'K') {
-        //     this.kings[piece.color]['piece'].pos = piece.pos // re-enable with real game
-        // }
 
         this.currentPieces[piece.pos] = piece; // update hash piece location
 
@@ -2102,11 +2063,11 @@ var Board = /*#__PURE__*/function () {
         }
 
         this.movesFor['white'] = {};
-        this.movesFor['black'] = {}; // reset object values => may be unnecessary
+        this.movesFor['black'] = {}; // reset object values
 
-        this.findAllMoves(); // find all moves beginning with pieces of current turn player
+        this.findAllMoves(aiMove); // find all moves beginning with pieces of current turn player
 
-        this.currentTurnColor = this.oppColor(piece.color);
+        this.currentTurnColor = this.oppColor(this.currentTurnColor);
 
         if (gameOver) {
           return 'end';
@@ -2117,58 +2078,68 @@ var Board = /*#__PURE__*/function () {
         console.log('Invalid move destination');
         return false;
       }
-    } // reverseMove() {
-    //     this.board[this.lastMove[0]].piece = this.currentPieces[this.lastMove[1]];
-    //     // state -> old tile has piece and new tile has piece => same piece
-    //     this.board[this.lastMove[1]].piece = null;
-    //     // state -> only old tile now has the piece
-    //     if (this.lastMoveCap) { this.board[this.lastMove[1]].piece = this.lastMoveCap }
-    //     // add the deleted piece back to the moved pos tile if there was one
-    //     this.currentPieces[this.lastMove[0]] = this.currentPieces[this.lastMove[1]];
-    //     // state -> currentPieces[oldPos] has the same piece as currentPieces[newPos]
-    //     delete this.currentPieces[this.lastMove[1]];
-    //     // state -> piece deleted from new pos
-    //     if (this.lastMoveCap) { this.currentPieces[this.lastMove[1]] = this.lastMoveCap }
-    //     // replace the moved pos with the deleted piece if there was one
-    //     // need to revserse pawn promotions too but thats gonna take a minute
-    //     this.currentTurnColor = this.oppColor(this.currentTurnColor);
-    //     this.findAllMoves();
-    // }
-
+    }
   }, {
-    key: "inCheck",
-    value: function inCheck(color) {}
-  }, {
-    key: "checkmate",
-    value: function checkmate(otherTurnCol) {
-      // console.log(`non-object white king: ${this.kings['white']['direct']}`)
-      // console.log(`non-object black king: ${this.kings['black']['direct']}`)
-      // console.log(`other turn color: ${otherTurnCol}`);
-      var dThreats = Object.keys(this.kings[otherTurnCol]['direct']);
-      console.log("dThreats: ".concat(dThreats));
+    key: "reverseMove",
+    value: function reverseMove(shouldUndoAgain) {
+      if (this.moveTree.length === 0) {
+        return;
+      }
 
-      if (dThreats.length !== 0) {
-        console.log('has dThreats');
-        console.log("king escapes: ".concat(this.kings[otherTurnCol]['piece'].moves));
-        var saves = Object.keys(this.kings[otherTurnCol]['saves']);
-        console.log("piece saves: ".concat(saves));
+      var idx = this.moveTree.length - 1;
+      console.log(idx);
+      console.log(this.moveTree[idx]);
+      var piece = this.moveTree[idx].piece;
+      var capture = this.moveTree[idx].capturedPiece;
+      var priorPos = this.moveTree[idx].priorPos;
+      var priorTile = this.board[priorPos];
+      var currentPosTile = this.board[piece.pos];
+      priorTile.piece = piece; // add the moved piece to the prior tile
 
-        if (this.kings[otherTurnCol]['piece'].moves.length === 0 && saves.length === 0) {
-          return true;
+      delete this.currentPieces[piece.pos]; // remove old piece pos from hash
+
+      piece.pos = priorPos; // move the piece's position
+
+      this.currentPieces[piece.pos] = piece; // update hash piece location
+
+      currentPosTile.piece = null; // remove the piece from its old tile
+
+      if (capture) {
+        currentPosTile.piece = capture; // remove from captured list
+
+        if (capture.color === 'white') {
+          this.whiteCaptures.splice(this.whiteCaptures.length - 1, 1);
         } else {
-          return false;
+          this.blackCaptures.splice(this.blackCaptures.length - 1, 1);
         }
-      } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && Object.values(this.movesFor[otherTurnCol].length === 0)) {
-        console.log('stalemate');
-        return true;
+
+        this.currentPieces[capture.pos] = capture;
+      }
+
+      this.currentTurnColor = piece.color;
+      this.moveTree.splice(idx, 1);
+
+      if (!shouldUndoAgain) {
+        this.reverseMove(true);
       } else {
-        return false;
+        this.movesFor['white'] = {};
+        this.movesFor['black'] = {}; // reset object values => may be unnecessary
+
+        this.findAllMoves(); // find all moves beginning with pieces of current turn player
       }
     }
+  }, {
+    key: "check",
+    value: function check() {}
+  }, {
+    key: "checkmate",
+    value: function checkmate() {}
   }]);
 
   return Board;
-}();
+}(); // begin game by finding white to move then black to move
+// upon move, check move player's next moves then current player
+// checkmate === king threatened and no way to move plus no way to block
 
 /***/ }),
 
@@ -2480,8 +2451,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "updateGame",
     value: function updateGame() {
-      console.log('update game');
-
+      // console.log('update game');
       if (this.currentMove === 10) {
         this.restartGame();
       } else {
@@ -2491,7 +2461,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "makeAiMove",
     value: function makeAiMove(board) {
-      console.log('ai move called');
+      // console.log('ai move called');
       this.currentMove++;
 
       if (this.currentMove === 1) {
@@ -4348,9 +4318,6 @@ document.addEventListener('DOMContentLoaded', function () {
     store: store
   }), root);
 }); //sudo service postgresql start
-// route_util
-// controller routes
-// CSS location
 
 /***/ }),
 

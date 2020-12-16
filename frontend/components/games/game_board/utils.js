@@ -19,21 +19,34 @@ export class Piece {
     }
 }
 
+class move {
+    constructor(piece, priorPos, capturedPiece = null) {
+        this.piece = piece;
+        this.priorPos = priorPos;
+        this.capturedPiece = capturedPiece;
+    }
+}
+
 export class Board {
     constructor(genBoard = true) {
         this.board = {};  // { posKey: tile }
+        this.kings = { "white": null, "black": null };
         this.whiteCaptures = [];
         this.blackCaptures = [];
         this.currentPieces = {};
-        // this.kings = {};
-        // this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} }; // re-enable with real game
-        // this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
         this.currentTurnColor = 'white';
         this.moves = "";
-        this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } -> not removed from piece object
+        this.movesFor = { 'white': {}, 'black': {} };
         if (genBoard) { this.generateBoard(); }
-        // this.lastMove = [];
-        // this.lastMoveCap = null; // dont think this is needed anymore
+
+        this.moveTree = [];
+
+        this.inCheck = false;
+        this.threats = [];
+        this.deniedMoves = {};
+
+        this.kings = {"white": null, "black": null};
+
     }
 
 
@@ -52,6 +65,11 @@ export class Board {
                         piece = new Piece([i, j], 'B');
                     } else if (j === 3) {
                         piece = new Piece([i, j], 'K');
+                        if (i > 5) {
+                            this.kings["white"] = piece;
+                        } else {
+                            this.kings["black"] = piece;
+                        }
                     } else {
                         piece = new Piece([i, j], 'Q');
                     }
@@ -60,10 +78,8 @@ export class Board {
                     this.movesFor['white'][i, j] = [];
                     if (piece.pos[0] > 5) {
                         piece.color = 'white';
-                        // if (piece.symbol === 'K') {this.kings['white']['piece'] = piece;} // re-enable with real game
                     } else {
                         piece.color = 'black';
-                        // if (piece.symbol === 'K') { this.kings['black']['piece'] = piece; }
                     }
                     this.currentPieces[piece.pos] = piece;
                 }
@@ -170,71 +186,7 @@ export class Board {
         return this.singleMoveDirs(piece, moveDirs);
     }
 
-    findThreatsAndRemove(piece, moves) {                // update this  // re-enable with real game
-        const otherColor = this.oppColor(piece.color);
-        for (let i = 0; i < moves.length; i++) {
-            if (this.isIncluded(this.kings[otherColor]['piece'].moves, moves[i])) {
-                (this.kings[otherColor]['indirect'][piece.pos] instanceof Array) ?
-                    this.kings[otherColor]['indirect'][piece.pos].push(moves[i]) : this.kings[otherColor]['indirect'][piece.pos] = [moves[i]];
-                this.kings[otherColor]['piece'].moves.splice(this.kings[otherColor]['piece'].moves.indexOf(moves[i]), 1);
-                console.log(`indirect threat added: ${Object.keys(this.kings[otherColor]['indirect'])}`);
-            } else if (moves[i][0] === this.kings[otherColor]['piece'].pos[0] && moves[i][1] === this.kings[otherColor]['piece'].pos[1]) {
-                this.kings[otherColor]['direct'][piece.pos] = moves[i];
-                console.log(`direct threat added: ${Object.keys(this.kings[otherColor]['direct'])}`);
-            }
-        }
-    }
-
-    findMatchingThreat(primaryThreat, color) {  // primaryThreat should be a piece object reference   // re-enable with real game
-        if (this.kings[color]['indirect'][primaryThreat.pos] !== undefined) {
-            return this.kings[color]['indirect'][primaryThreat.pos][0]; // should only ever have one position => but it is in an array
-        } else {
-            return [-1, -1];
-        }
-    }
-
-    adjacent(piece1, piece2) {
-        const pos1 = piece1.pos;
-        const pos2 = piece2.pos;
-        if ((pos1[0] + 1 === pos2[0] && pos1[1] === pos2[1])
-            || (pos1[0] - 1 === pos2[0] && pos1[1] === pos2[1])
-            || (pos1[0] + 1 === pos2[0] && pos1[1] + 1 === pos2[1])
-            || (pos1[0] + 1 === pos2[0] && pos1[1] - 1 === pos2[1])
-            || (pos1[0] - 1 === pos2[0] && pos1[1] + 1 === pos2[1])
-            || (pos1[0] - 1 === pos2[0] && pos1[1] - 1 === pos2[1])
-            || (pos1[0] === pos2[0] && pos1[1] + 1 === pos2[1])
-            || (pos1[0] === pos2[0] && pos1[1] - 1 === pos2[1])
-            ) {
-             return true;
-        }
-        return false;
-    }
-
-    findSavesOnMove(piece, moves) {     // needs update  // re-enable with real game
-        const dThreats = Object.values(this.kings[piece.color]['direct']);
-        if (dThreats.length !== 0) {
-            const threatLocations = Object.keys(this.kings[piece.color]['direct']);
-            const threatPieces = [];
-            for (let i = 0; i < threatLocations.length; i++) {
-                threatPieces.push(this.currentPieces[threatLocations[i]]);  // take the [pos[0], pos[1]] from the keys and find their objects
-            }
-            for (let i = 0; i < threatPieces.length; i++) {
-                for (let j = 0; j < moves.length; j++) {
-                    if (moves[j] === threatPieces[i].pos) {
-                        this.kings[piece.color]['saves'][piece.pos] = moves[j];
-                    } else if (threatPieces[j].symbol !== 'N' && threatPieces[j].symbol !== 'P' && !(this.adjacent(threatPieces[j], this.kings[piece.color]['piece']))) {
-                        const blockPos = this.findMatchingThreat(threatPieces[j]);
-                        if (moves[j] === blockPos) {
-                            this.kings[piece.color]['saves'][piece.pos] = moves[j];
-                        }
-                    }
-
-                }
-            }
-        }
-    }
-
-    potentialMoves(piece) {
+    potentialMoves(piece, firstMove) {
         let moves;
         switch (piece.symbol) {
             case 'P':
@@ -243,6 +195,9 @@ export class Board {
                 break;
             case 'R':
                 moves = (this.rookMoves(piece));
+                if (firstMove) {
+                    this.threats.push(piece);
+                }
                 // console.log(`rook moves: ${moves}`);
                 break;
             case 'N':
@@ -251,65 +206,43 @@ export class Board {
                 break;
             case 'B':
                 moves = (this.bishopMoves(piece));
+                if (firstMove) {
+                    this.threats.push(piece);
+                }
                 // console.log(`bishop moves: ${moves}`);
                 break;
             case 'Q':
                 moves = (this.rookMoves(piece).concat(this.bishopMoves(piece)));
+                if (firstMove) {
+                    this.threats.push(piece);
+                }
                 // console.log(`queen moves: ${moves}`);
                 break;
             case 'K': // add castling and restrictions on moving near enemy kings
-                moves = this.kingMoves(piece)   // re-enable with real game (remove)
+                moves = this.kingMoves(piece);
                 // console.log(`king moves: ${moves}`);
-                // this.kings[piece.color].moves = moves; // done in call statement
                 break;
             default:
                 console.log('that piece doesn\'t exist');
                 console.log(`that piece is: ${piece}`)
                 return;
         }
-        // if (piece.symbol !== 'K') { // re-enable an remove case 'K' for real game
-        //     if (piece.color !== this.currentTurnColor) {
-        //         this.findThreatsAndRemove(piece, moves);
-        //     } else {
-        //         this.findSavesOnMove(piece, moves);         // does not exist yet
-        //     }
-        // }
         this.movesFor[piece.color][piece.pos] = moves;
         return moves;
     }
 
-    isIncluded(positions, pos) {
-        // console.log(`positions to check: ${positions}`);
-        // console.log(`pos checked: ${pos}`);
-        for (let i = 0; i < positions.length; i++) {
-            if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    findMovesForColor(color) {
+    findMovesForColor(color, firstMove) {
         const pieces = Object.values(this.currentPieces);
         for (let i = 0; i < pieces.length; i++) {
             if (pieces[i].color === color && pieces[i].symbol !== 'K') {
-                this.potentialMoves(pieces[i]);
+                this.potentialMoves(pieces[i], firstMove);
             }
         }
     }
 
-    findAllMoves() {
-        // this.kings[this.currentTurnColor]['piece'].moves = this.potentialMoves(this.kings[this.currentTurnColor]['piece']);  // re-enable for real game
-        // this.kings[this.oppColor(this.currentTurnColor)]['piece'].moves = this.potentialMoves(this.kings[this.oppColor(this.currentTurnColor)]['piece']);
-        this.findMovesForColor(this.currentTurnColor);
-        this.findMovesForColor(this.oppColor(this.currentTurnColor));
-    }
-
-    validMove(piece, pos) {
-        if (this.isIncluded(this.movesFor[piece.color][piece.pos], pos)) { // may break w/o Object.values
-            return true;
-        }
-        return false;
+    findAllMoves(aiMove) {
+        this.findMovesForColor(this.currentTurnColor, true);
+        this.findMovesForColor(this.oppColor(this.currentTurnColor), false);
     }
 
     stringifyPos(pos) {
@@ -345,11 +278,14 @@ export class Board {
     }
 
     addToMovesList(piece, endTile, capture = null) {
+        this.moveTree.push(new move(piece, piece.pos.slice(), capture));
+        console.log(this.moveTree);
+
         if (piece.symbol !== 'P') { this.moves += piece.symbol; }
         if (capture) { this.moves += 'x'; }
         this.moves += this.stringifyPos(endTile.pos);
         this.moves += " ";
-        console.log(this.moves);
+        // console.log(this.moves);
     }
 
     promotePawn(tile) {
@@ -359,19 +295,30 @@ export class Board {
         this.potentialMoves(queen);
     }
 
-    movePiece(moveTile, endTile) {
-        // console.log
-        this.potentialMoves(moveTile.piece);
+    isIncluded(positions, pos) {
+        for (let i = 0; i < positions.length; i++) {
+            if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    validMove(piece, pos) {
+        if (this.isIncluded(this.movesFor[piece.color][piece.pos], pos)) {
+            return true;
+        }
+        return false;
+    }
+
+    movePiece(moveTile, endTile, aiMove = false) {
+        // this.potentialMoves(moveTile.piece);
         if (this.validMove(moveTile.piece, endTile.pos)) {
-            // this.kings['white']['direct'] = {}; this.kings['white']['indirect'] = {}; this.kings['white']['saves'] = {} // re-enable with real game
-            // this.kings['black']['direct'] = {}; this.kings['black']['indirect'] = {}; this.kings['black']['saves'] = {}
             
             let gameOver = false;
             if (endTile.piece && endTile.piece.symbol === 'K') {
                 gameOver = true;
             }
-
-            this.lastMove = [moveTile.pos, endTile.pos];
 
             const piece = moveTile.piece;
             if (endTile.piece) {
@@ -380,26 +327,22 @@ export class Board {
                 } else {
                     this.blackCaptures.push(endTile.piece);
                 }
-                this.lastMoveCap = endTile.piece;
-                this.addToMovesList(piece, endTile, true);
+                this.addToMovesList(piece, endTile, endTile.piece);
             } else {
-                this.lastMoveCap = null;
                 this.addToMovesList(piece, endTile);
             }
             endTile.piece = piece;                  // add the piece to the moved to tile
             delete this.currentPieces[piece.pos];       // remove old piece pos from hash
             piece.pos = endTile.pos;                // move the piece's position
-            // if (piece.symbol === 'K') {
-            //     this.kings[piece.color]['piece'].pos = piece.pos // re-enable with real game
-            // }
             this.currentPieces[piece.pos] = piece;      // update hash piece location
             moveTile.piece = null;                  // remove the piece from its old tile
             if (piece.symbol === 'P' && (piece.pos[0] === 7 || piece.pos[0] === 0)) {
                 this.promotePawn(piece);
             }
-            this.movesFor['white'] = {}; this.movesFor['black'] = {};  // reset object values => may be unnecessary
-            this.findAllMoves(); // find all moves beginning with pieces of current turn player
-            this.currentTurnColor = this.oppColor(piece.color);
+            this.movesFor['white'] = {}; this.movesFor['black'] = {};  // reset object values
+
+            this.findAllMoves(aiMove); // find all moves beginning with pieces of current turn player
+            this.currentTurnColor = this.oppColor(this.currentTurnColor);
 
             if (gameOver) { return 'end'; }
             return true;
@@ -409,52 +352,63 @@ export class Board {
         }
     }
 
-    // reverseMove() {
-    //     this.board[this.lastMove[0]].piece = this.currentPieces[this.lastMove[1]];
-    //     // state -> old tile has piece and new tile has piece => same piece
-    //     this.board[this.lastMove[1]].piece = null;
-    //     // state -> only old tile now has the piece
-    //     if (this.lastMoveCap) { this.board[this.lastMove[1]].piece = this.lastMoveCap }
-    //     // add the deleted piece back to the moved pos tile if there was one
+    reverseMove(shouldUndoAgain) {
+        if (this.moveTree.length === 0) {
+            return;
+        }
+        const idx = this.moveTree.length - 1;
+        console.log(idx);
+        console.log(this.moveTree[idx]);
+        const piece = this.moveTree[idx].piece;
+        const capture = this.moveTree[idx].capturedPiece
+        const priorPos = this.moveTree[idx].priorPos;
+        const priorTile = this.board[priorPos];
+        const currentPosTile = this.board[piece.pos];
 
-    //     this.currentPieces[this.lastMove[0]] = this.currentPieces[this.lastMove[1]];
-    //     // state -> currentPieces[oldPos] has the same piece as currentPieces[newPos]
-    //     delete this.currentPieces[this.lastMove[1]];
-    //     // state -> piece deleted from new pos
-    //     if (this.lastMoveCap) { this.currentPieces[this.lastMove[1]] = this.lastMoveCap }
-    //     // replace the moved pos with the deleted piece if there was one
+        priorTile.piece = piece;                  // add the moved piece to the prior tile
+        delete this.currentPieces[piece.pos];       // remove old piece pos from hash
+        piece.pos = priorPos;                // move the piece's position
+        this.currentPieces[piece.pos] = piece;      // update hash piece location
+        currentPosTile.piece = null;                  // remove the piece from its old tile
 
-    //     // need to revserse pawn promotions too but thats gonna take a minute
-
-    //     this.currentTurnColor = this.oppColor(this.currentTurnColor);
-    //     this.findAllMoves();
-    // }
-
-    inCheck(color) {
-
-    }
-
-    checkmate(otherTurnCol) {
-        // console.log(`non-object white king: ${this.kings['white']['direct']}`)
-        // console.log(`non-object black king: ${this.kings['black']['direct']}`)
-        // console.log(`other turn color: ${otherTurnCol}`);
-        const dThreats = Object.keys(this.kings[otherTurnCol]['direct']);
-        console.log(`dThreats: ${dThreats}`);
-        if (dThreats.length !== 0) {
-            console.log('has dThreats');
-            console.log(`king escapes: ${this.kings[otherTurnCol]['piece'].moves}`);
-            const saves = Object.keys(this.kings[otherTurnCol]['saves']);
-            console.log(`piece saves: ${saves}`);
-            if (this.kings[otherTurnCol]['piece'].moves.length === 0 && saves.length === 0) {
-                return true;
+        if (capture) {
+            currentPosTile.piece = capture;
+            // remove from captured list
+            if (capture.color === 'white') {
+                this.whiteCaptures.splice(this.whiteCaptures.length - 1, 1);
             } else {
-                return false;
+                this.blackCaptures.splice(this.blackCaptures.length - 1, 1);
             }
-        } else if (this.kings[otherTurnCol]['piece'].moves.length === 0 && Object.values(this.movesFor[otherTurnCol].length === 0)) {
-            console.log('stalemate');
-            return true;
+            this.currentPieces[capture.pos] = capture;
+        }
+
+        this.currentTurnColor = piece.color;
+        this.moveTree.splice(idx, 1);
+        if (!shouldUndoAgain) {
+            this.reverseMove(true);
         } else {
-            return false;
+            this.movesFor['white'] = {}; this.movesFor['black'] = {};  // reset object values => may be unnecessary
+    
+            this.findAllMoves(); // find all moves beginning with pieces of current turn player
         }
     }
+
+
+
+    check() {
+
+    }
+
+    checkmate() {
+
+    }
 }
+
+
+
+
+// begin game by finding white to move then black to move
+
+// upon move, check move player's next moves then current player
+
+// checkmate === king threatened and no way to move plus no way to block

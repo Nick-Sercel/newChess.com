@@ -29,7 +29,7 @@ class Game extends React.Component {
     }
 
     updateGame() {
-        console.log('update game');
+        // console.log('update game');
         
         if (this.currentMove === 10) {
             this.restartGame();
@@ -41,7 +41,7 @@ class Game extends React.Component {
 
     makeAiMove(board) {
 
-        console.log('ai move called');
+        // console.log('ai move called');
 
         this.currentMove++;
         if (this.currentMove === 1) {
