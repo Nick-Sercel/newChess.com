@@ -1667,10 +1667,12 @@ var Board = /*#__PURE__*/function () {
     this.inCheck = false;
     this.threats = [];
     this.deniedMoves = {};
+    this.kingsMoves = [];
     this.kings = {
       "white": null,
       "black": null
     };
+    this.firstMove = true;
   }
 
   _createClass(Board, [{
@@ -1745,14 +1747,32 @@ var Board = /*#__PURE__*/function () {
 
         if (this.onBoard(movePos)) {
           if (this.currentPieces[movePos] && this.currentPieces[movePos].color !== piece.color) {
-            moves.push(movePos);
+            if (this.firstMove) {
+              moves.push(movePos);
+
+              if (this.currentPieces[movePos] && this.currentPieces[movePos].symbol === 'K') {
+                this.inCheck = true;
+                console.log("Check!");
+              }
+            } else {
+              if (this.checkThreats()) {
+                moves.push(movePos);
+              }
+            }
           } else if (!this.currentPieces[movePos]) {
             moves.push(movePos);
+            var idx = this.isIncluded(this.kingsMoves, movePos);
+            this.kingsMoves.splice(idx, 1);
           }
         }
       }
 
       return moves;
+    }
+  }, {
+    key: "checkThreats",
+    value: function checkThreats() {
+      return true;
     }
   }, {
     key: "moveDirs",
@@ -1764,7 +1784,17 @@ var Board = /*#__PURE__*/function () {
 
         while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
           var tempPush = currentPos.slice();
-          moves.push(tempPush);
+
+          if (this.firstMove) {
+            moves.push(tempPush);
+            var idx = this.isIncluded(this.kingsMoves, tempPush);
+            this.kingsMoves.splice(idx, 1);
+          } else {
+            if (this.checkThreats()) {
+              moves.push(tempPush);
+            }
+          }
+
           currentPos[0] += dirs[i][0];
           currentPos[1] += dirs[i][1];
         }
@@ -1774,6 +1804,11 @@ var Board = /*#__PURE__*/function () {
 
           if (currentPiece.color !== piece.color) {
             moves.push(currentPos);
+
+            if (this.currentPieces[currentPos] && this.currentPieces[currentPos].symbol === 'K') {
+              this.inCheck = true;
+              console.log("Check!");
+            }
           }
         }
       }
@@ -1855,7 +1890,7 @@ var Board = /*#__PURE__*/function () {
     }
   }, {
     key: "potentialMoves",
-    value: function potentialMoves(piece, firstMove) {
+    value: function potentialMoves(piece) {
       var moves;
 
       switch (piece.symbol) {
@@ -1868,7 +1903,7 @@ var Board = /*#__PURE__*/function () {
         case 'R':
           moves = this.rookMoves(piece);
 
-          if (firstMove) {
+          if (this.firstMove) {
             this.threats.push(piece);
           } // console.log(`rook moves: ${moves}`);
 
@@ -1883,7 +1918,7 @@ var Board = /*#__PURE__*/function () {
         case 'B':
           moves = this.bishopMoves(piece);
 
-          if (firstMove) {
+          if (this.firstMove) {
             this.threats.push(piece);
           } // console.log(`bishop moves: ${moves}`);
 
@@ -1893,7 +1928,7 @@ var Board = /*#__PURE__*/function () {
         case 'Q':
           moves = this.rookMoves(piece).concat(this.bishopMoves(piece));
 
-          if (firstMove) {
+          if (this.firstMove) {
             this.threats.push(piece);
           } // console.log(`queen moves: ${moves}`);
 
@@ -1902,7 +1937,12 @@ var Board = /*#__PURE__*/function () {
 
         case 'K':
           // add castling and restrictions on moving near enemy kings
-          moves = this.kingMoves(piece); // console.log(`king moves: ${moves}`);
+          if (this.firstMove) {
+            moves = this.kingMoves(piece);
+          } else {
+            moves = this.kingsMoves;
+          } // console.log(`king moves: ${moves}`);
+
 
           break;
 
@@ -1917,20 +1957,23 @@ var Board = /*#__PURE__*/function () {
     }
   }, {
     key: "findMovesForColor",
-    value: function findMovesForColor(color, firstMove) {
+    value: function findMovesForColor(color) {
       var pieces = Object.values(this.currentPieces);
 
       for (var i = 0; i < pieces.length; i++) {
         if (pieces[i].color === color && pieces[i].symbol !== 'K') {
-          this.potentialMoves(pieces[i], firstMove);
+          this.potentialMoves(pieces[i]);
         }
       }
     }
   }, {
     key: "findAllMoves",
     value: function findAllMoves(aiMove) {
-      this.findMovesForColor(this.currentTurnColor, true);
-      this.findMovesForColor(this.oppColor(this.currentTurnColor), false);
+      this.kingsMoves = this.kingMoves(this.kings[this.oppColor(this.currentTurnColor)]);
+      this.firstMove = true;
+      this.findMovesForColor(this.currentTurnColor);
+      this.firstMove = false;
+      this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
   }, {
     key: "stringifyPos",
@@ -2006,7 +2049,7 @@ var Board = /*#__PURE__*/function () {
     value: function isIncluded(positions, pos) {
       for (var i = 0; i < positions.length; i++) {
         if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
-          return true;
+          return i;
         }
       }
 
@@ -2029,11 +2072,6 @@ var Board = /*#__PURE__*/function () {
       // this.potentialMoves(moveTile.piece);
       if (this.validMove(moveTile.piece, endTile.pos)) {
         var gameOver = false;
-
-        if (endTile.piece && endTile.piece.symbol === 'K') {
-          gameOver = true;
-        }
-
         var piece = moveTile.piece;
 
         if (endTile.piece) {
@@ -2068,6 +2106,11 @@ var Board = /*#__PURE__*/function () {
         this.findAllMoves(aiMove); // find all moves beginning with pieces of current turn player
 
         this.currentTurnColor = this.oppColor(this.currentTurnColor);
+        gameOver = this.checkmate();
+
+        if (endTile.piece && endTile.piece.symbol === 'K') {
+          gameOver = true;
+        }
 
         if (gameOver) {
           return 'end';
@@ -2078,6 +2121,19 @@ var Board = /*#__PURE__*/function () {
         console.log('Invalid move destination');
         return false;
       }
+    }
+  }, {
+    key: "checkmate",
+    value: function checkmate() {
+      if (!this.inCheck) {
+        return false;
+      }
+
+      if (Object.values(this.movesFor[this.currentTurnColor]).length === 0) {
+        return true;
+      }
+
+      return false;
     }
   }, {
     key: "reverseMove",
@@ -2128,12 +2184,6 @@ var Board = /*#__PURE__*/function () {
         this.findAllMoves(); // find all moves beginning with pieces of current turn player
       }
     }
-  }, {
-    key: "check",
-    value: function check() {}
-  }, {
-    key: "checkmate",
-    value: function checkmate() {}
   }]);
 
   return Board;

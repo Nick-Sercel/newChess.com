@@ -45,8 +45,10 @@ export class Board {
         this.threats = [];
         this.deniedMoves = {};
 
+        this.kingsMoves = [];
         this.kings = {"white": null, "black": null};
 
+        this.firstMove = true;
     }
 
 
@@ -112,13 +114,29 @@ export class Board {
             movePos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
             if (this.onBoard(movePos)) {
                 if (this.currentPieces[movePos] && this.currentPieces[movePos].color !== piece.color) {
-                    moves.push(movePos);
+                    if (this.firstMove) {
+                        moves.push(movePos);
+                        if (this.currentPieces[movePos] && this.currentPieces[movePos].symbol === 'K') {
+                            this.inCheck = true;
+                            console.log("Check!");
+                        }
+                    } else {
+                        if (this.checkThreats()) {
+                            moves.push(movePos);
+                        }
+                    }
                 } else if (!(this.currentPieces[movePos])) {
                     moves.push(movePos);
+                    const idx = this.isIncluded(this.kingsMoves, movePos);
+                    this.kingsMoves.splice(idx, 1);
                 }
             }
         }
         return moves;
+    }
+
+    checkThreats() {
+        return true;
     }
 
     moveDirs(piece, dirs) {
@@ -128,7 +146,15 @@ export class Board {
             // console.log(this.currentPieces[currentPos]);
             while (!(this.currentPieces[currentPos]) && this.onBoard(currentPos)) {
                 const tempPush = currentPos.slice();
-                moves.push(tempPush);
+                if (this.firstMove) {
+                    moves.push(tempPush);
+                    const idx = this.isIncluded(this.kingsMoves, tempPush);
+                    this.kingsMoves.splice(idx, 1);
+                } else {
+                    if (this.checkThreats()) {
+                        moves.push(tempPush);
+                    }
+                }
                 currentPos[0] += dirs[i][0];
                 currentPos[1] += dirs[i][1];
             }
@@ -136,6 +162,10 @@ export class Board {
                 const currentPiece = this.currentPieces[currentPos];
                 if (currentPiece.color !== piece.color) {
                     moves.push(currentPos);
+                    if (this.currentPieces[currentPos] && this.currentPieces[currentPos].symbol === 'K') {
+                        this.inCheck = true;
+                        console.log("Check!");
+                    }
                 }
             }
         }
@@ -186,7 +216,7 @@ export class Board {
         return this.singleMoveDirs(piece, moveDirs);
     }
 
-    potentialMoves(piece, firstMove) {
+    potentialMoves(piece) {
         let moves;
         switch (piece.symbol) {
             case 'P':
@@ -195,7 +225,7 @@ export class Board {
                 break;
             case 'R':
                 moves = (this.rookMoves(piece));
-                if (firstMove) {
+                if (this.firstMove) {
                     this.threats.push(piece);
                 }
                 // console.log(`rook moves: ${moves}`);
@@ -206,20 +236,24 @@ export class Board {
                 break;
             case 'B':
                 moves = (this.bishopMoves(piece));
-                if (firstMove) {
+                if (this.firstMove) {
                     this.threats.push(piece);
                 }
                 // console.log(`bishop moves: ${moves}`);
                 break;
             case 'Q':
                 moves = (this.rookMoves(piece).concat(this.bishopMoves(piece)));
-                if (firstMove) {
+                if (this.firstMove) {
                     this.threats.push(piece);
                 }
                 // console.log(`queen moves: ${moves}`);
                 break;
             case 'K': // add castling and restrictions on moving near enemy kings
-                moves = this.kingMoves(piece);
+                if (this.firstMove) {
+                    moves = this.kingMoves(piece);
+                } else {
+                    moves = this.kingsMoves;
+                }
                 // console.log(`king moves: ${moves}`);
                 break;
             default:
@@ -231,18 +265,21 @@ export class Board {
         return moves;
     }
 
-    findMovesForColor(color, firstMove) {
+    findMovesForColor(color) {
         const pieces = Object.values(this.currentPieces);
         for (let i = 0; i < pieces.length; i++) {
             if (pieces[i].color === color && pieces[i].symbol !== 'K') {
-                this.potentialMoves(pieces[i], firstMove);
+                this.potentialMoves(pieces[i]);
             }
         }
     }
 
     findAllMoves(aiMove) {
-        this.findMovesForColor(this.currentTurnColor, true);
-        this.findMovesForColor(this.oppColor(this.currentTurnColor), false);
+        this.kingsMoves = this.kingMoves(this.kings[this.oppColor(this.currentTurnColor)]);
+        this.firstMove = true;
+        this.findMovesForColor(this.currentTurnColor);
+        this.firstMove = false;
+        this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
 
     stringifyPos(pos) {
@@ -298,7 +335,7 @@ export class Board {
     isIncluded(positions, pos) {
         for (let i = 0; i < positions.length; i++) {
             if (positions[i][0] === pos[0] && positions[i][1] === pos[1]) {
-                return true;
+                return i;
             }
         }
         return false;
@@ -316,9 +353,6 @@ export class Board {
         if (this.validMove(moveTile.piece, endTile.pos)) {
             
             let gameOver = false;
-            if (endTile.piece && endTile.piece.symbol === 'K') {
-                gameOver = true;
-            }
 
             const piece = moveTile.piece;
             if (endTile.piece) {
@@ -344,12 +378,27 @@ export class Board {
             this.findAllMoves(aiMove); // find all moves beginning with pieces of current turn player
             this.currentTurnColor = this.oppColor(this.currentTurnColor);
 
+            gameOver = this.checkmate();
+            if (endTile.piece && endTile.piece.symbol === 'K') {
+                gameOver = true;
+            }
+
             if (gameOver) { return 'end'; }
             return true;
         } else {
             console.log('Invalid move destination');
             return false;
         }
+    }
+
+    checkmate() {
+        if (!this.inCheck) {
+            return false;
+        }
+        if (Object.values(this.movesFor[this.currentTurnColor]).length === 0) {
+            return true;
+        }
+        return false;
     }
 
     reverseMove(shouldUndoAgain) {
@@ -391,16 +440,6 @@ export class Board {
     
             this.findAllMoves(); // find all moves beginning with pieces of current turn player
         }
-    }
-
-
-
-    check() {
-
-    }
-
-    checkmate() {
-
     }
 }
 
