@@ -26,7 +26,7 @@ function dupBoard (board) { // this apparently slow af - maybe write custom dupl
     dupBoard.whiteCaptures = board.whiteCaptures.slice();
     dupBoard.blackCaptures = board.blackCaptures.slice();
     dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-    // dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        //re-enable
+    dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        //re-enable
     dupBoard.currentTurnColor = board.currentTurnColor;
     dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
@@ -43,7 +43,7 @@ function dupBoard (board) { // this apparently slow af - maybe write custom dupl
 //     entities[0][0] = entities[0][0].split(",")
 //     entities[0][0][1] = parseInt(entities[0][0][1]); entities[0][0][0] = parseInt(entities[0][0][0])
 //     // console.log(entities[0]);
-//     return [entities[0][0], entities[0][1][0]];
+//     return [420, [entities[0][0], entities[0][1][0]]];
 // }
 
 // function addBoardProps(dupBoard, board) {

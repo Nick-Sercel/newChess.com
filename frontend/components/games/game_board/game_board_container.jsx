@@ -14,7 +14,7 @@ class Game extends React.Component {
         this.currentTile = null;
         this.humanTurn = 'white';
         this.potentialMoves = [];
-        this.aiTurn = 'black';
+        this.aiTurn = 'none';
         this.humanMoved = false;
         this.currentMove = 0;
         this.gameOver = false;
@@ -33,11 +33,11 @@ class Game extends React.Component {
         if (board.currentTurnColor === this.aiTurn && !this.gameOver) {
             this.makeAiMove(board); // make an ai move on the board -> chess_ai.js util
         } else if (!this.gameOver) {
-            console.log(tile)
-            console.log(this.currentTile);
+            // console.log(tile)
+            // console.log(this.currentTile);
             if (!(this.currentTile)) {
                 // console.log('initial click');
-                if (tile.piece && tile.piece.color === this.humanTurn) {
+                if (tile.piece && tile.piece.color === board.currentTurnColor) {
                     // set piece to be moved
                     this.currentTile = tile;
                     if (!board.movesFor[this.currentTile.piece.color][this.currentTile.pos]) {
@@ -51,9 +51,9 @@ class Game extends React.Component {
                     // console.log(this.currentTurn);
                 }
             } else if (tile.piece) {
-                if (tile.piece.color !== this.humanTurn) {
+                if (tile.piece.color !== this.currentTile.piece.color) {
                     // set place to move piece
-                    console.log('secondary click');
+                    // console.log('secondary click');
                     const moveResult = board.movePiece(this.currentTile, tile);
                     if (moveResult === 'end') {
                         console.log('creating a game for db')
@@ -71,7 +71,7 @@ class Game extends React.Component {
                         this.humanMoved = true;
                     }
                 } else {
-                    console.log('You cannot capture your own piece!')
+                    // console.log('You cannot capture your own piece!')
                     this.currentTile = tile;
                     if (!board.movesFor[this.currentTile.piece.color][this.currentTile.pos]) {
                         this.potentialMoves = board.potentialMoves(this.currentTile.piece);
@@ -81,7 +81,7 @@ class Game extends React.Component {
                 }
             } else {
                 // set place to move piece
-                console.log('secondary click');
+                // console.log('secondary click');
                 const moveResult = board.movePiece(this.currentTile, tile);
                 if (moveResult) {
                     this.currentTile = null;
@@ -95,12 +95,12 @@ class Game extends React.Component {
         // }
 
         this.setState({ board: board });
-        if (!this.gameOver) {
-            if (this.humanMoved) {
-                this.humanMoved = false;
-                this.updateGame();
-            }
-        }
+        // if (!this.gameOver) {
+        //     if (this.humanMoved) {
+        //         this.humanMoved = false;
+        //         this.updateGame();
+        //     }
+        // }
     }
 
     makeAiMove(board) {
@@ -138,12 +138,12 @@ class Game extends React.Component {
             // console.log('no, over here')
             dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
             // console.log('actually, here')
-            // dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        // re-enable
+            dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
             dupBoard.currentTurnColor = board.currentTurnColor;
             // not gonna add in the moves array since it doesnt matter for this
             dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
 
-            const move = findAiMove(dupBoard, 2); // make move with (num) depth
+            const move = findAiMove(dupBoard, 1); // make move with (num) depth
 
             console.log('ai move: ', move);
             const pieceTile = board.board[move[1][0]];
