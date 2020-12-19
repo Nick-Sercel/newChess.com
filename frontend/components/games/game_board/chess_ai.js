@@ -21,15 +21,21 @@ function shuffle(array) {
 
 function dupBoard (board) { // this apparently slow af - maybe write custom duplicator?
     const dupBoard = new Utils.Board(false);
-    // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication -> maybe try on base components of each object for speed ?
     dupBoard.board = JSON.parse(JSON.stringify(board.board));
     dupBoard.whiteCaptures = board.whiteCaptures.slice();
     dupBoard.blackCaptures = board.blackCaptures.slice();
     dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-    dupBoard.kings = JSON.parse(JSON.stringify(board.kings));        //re-enable
+    dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
     dupBoard.currentTurnColor = board.currentTurnColor;
-    dupBoard.moves = board.moves.slice(); // maybe type error for string, idk
     dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+    dupBoard.moves = board.moves.slice();
+    dupBoard.moveTree = board.moveTree.slice();
+    dupBoard.inCheck = board.inCheck;
+    dupBoard.threats = board.threats.slice();
+    dupBoard.deniedMoves = JSON.parse(JSON.stringify(board.deniedMoves));
+    dupBoard.kingsMoves = board.kingsMoves.slice();
+    dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+    dupBoard.firstMove = board.firstMove;
     return dupBoard;
 }
 
@@ -93,11 +99,14 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
     }
 
     const entities = Object.entries(board.movesFor[board.currentTurnColor]);
+    if (depth === 2) {
+        console.log("ai potential moves: ", Object.values(board.movesFor[board.currentTurnColor]));
+    }
     let highestVal = 0;
     min ? highestVal = 10000 : highestVal = -10000;
     // playing as black so we want low score
     let bestMove = null;
-    // shuffle(entities);
+    shuffle(entities);
     const dupedBoard = dupBoard(board);
     for (let i = 0; i < entities.length; i++) {
         for (let j = 0; j < entities[i][1].length; j++) {
@@ -126,9 +135,9 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
             }
         }
     }
-    console.log(`ai ${depth} state(s) into the future`);
-    console.log('final best move: ', bestMove);
-    console.log('final score: ', highestVal);
+    // console.log(`ai ${depth} state(s) into the future`);
+    // console.log('final best move: ', bestMove);
+    // console.log('final score: ', highestVal);
     return [highestVal, bestMove];
 }
 

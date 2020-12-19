@@ -14,7 +14,7 @@ class Game extends React.Component {
         this.currentTile = null;
         this.humanTurn = 'white';
         this.potentialMoves = [];
-        this.aiTurn = 'none';
+        this.aiTurn = 'black';
         this.humanMoved = false;
         this.currentMove = 0;
         this.gameOver = false;
@@ -26,36 +26,29 @@ class Game extends React.Component {
     }
 
     updateGame(tile) {
-        // game logic
+        // console.log("update game called");
         const board = this.state.board;
-        // console.log('currentTurnColor: ', board.currentTurnColor);
-        // console.log('aiTurn', this.aiTurn);
+        console.log("current turn color: ", board.currentTurnColor);
         if (board.currentTurnColor === this.aiTurn && !this.gameOver) {
             this.makeAiMove(board); // make an ai move on the board -> chess_ai.js util
         } else if (!this.gameOver) {
-            // console.log(tile)
-            // console.log(this.currentTile);
-            if (!(this.currentTile)) {
-                // console.log('initial click');
-                if (tile.piece && tile.piece.color === board.currentTurnColor) {
-                    // set piece to be moved
-                    this.currentTile = tile;
-                    if (!board.movesFor[this.currentTile.piece.color][this.currentTile.pos]) {
-                        this.potentialMoves = board.potentialMoves(this.currentTile.piece);
-                    } else {
-                        this.potentialMoves = board.movesFor[tile.piece.color][tile.pos];;
-                    }
-                } else {
-                    console.log('invalid piece selected');
-                    // console.log(tile.piece.color);
-                    // console.log(this.currentTurn);
-                }
-            } else if (tile.piece) {
-                if (tile.piece.color !== this.currentTile.piece.color) {
-                    // set place to move piece
-                    // console.log('secondary click');
-                    const moveResult = board.movePiece(this.currentTile, tile);
-                    if (moveResult === 'end') {
+            // console.log('initial click');
+            if (tile.piece && tile.piece.color === board.currentTurnColor) {
+                // set piece to be moved
+                this.currentTile = tile;
+                this.potentialMoves = board.movesFor[tile.piece.color][tile.pos];;
+                // }
+            } else if (this.currentTile) {
+                // set place to move piece
+                // console.log('secondary click');
+                const moveResult = board.movePiece(this.currentTile, tile);
+                if (moveResult) {
+                    this.currentTile = null;
+                    this.potentialMoves = [];
+                    this.humanMoved = true;
+
+                    if (board.checkmate()) {
+                        console.log('checkmate');
                         console.log('creating a game for db')
                         const dbGame = {
                             central_user_id: this.props.sessionId,
@@ -65,104 +58,77 @@ class Game extends React.Component {
                         };
                         this.props.createGame(dbGame);
                         this.gameOver = true;
-                    } else if (moveResult) {
-                        this.currentTile = null;
-                        this.potentialMoves = [];
-                        this.humanMoved = true;
                     }
-                } else {
-                    // console.log('You cannot capture your own piece!')
-                    this.currentTile = tile;
-                    if (!board.movesFor[this.currentTile.piece.color][this.currentTile.pos]) {
-                        this.potentialMoves = board.potentialMoves(this.currentTile.piece);
-                    } else {
-                        this.potentialMoves = board.movesFor[tile.piece.color][tile.pos];;
-                    }
-                }
-            } else {
-                // set place to move piece
-                // console.log('secondary click');
-                const moveResult = board.movePiece(this.currentTile, tile);
-                if (moveResult) {
-                    this.currentTile = null;
-                    this.potentialMoves = [];
-                    this.humanMoved = true;
+
+                    board.inCheck = false;
                 }
             }
         }
-        // if (board.checkmate(board.currentTurnColor)) { // re-enable with real game
-        //     console.log('checkmate')
-        // }
 
         this.setState({ board: board });
-        // if (!this.gameOver) {
-        //     if (this.humanMoved) {
-        //         this.humanMoved = false;
-        //         this.updateGame();
-        //     }
-        // }
+        if (!this.gameOver) {
+            if (this.humanMoved && this.aiTurn !== 'none') {
+                console.log("waiting 1/10 second");
+                setTimeout(() => {
+                    this.humanMoved = false;
+                    this.updateGame();
+                }, 100);
+            }
+        }
     }
 
     makeAiMove(board) {
-
         console.log('ai move called');
 
         // this.currentMove++;
         // if (this.currentMove === 1) {
-        //     const pieceTile = board.board[[1, 2]];
+        //     const pieceTile = board.board[[0, 1]];
         //     const moveTile = board.board[[2, 2]];
         //     board.movePiece(pieceTile, moveTile);
         // } else if (this.currentMove === 2) {
-        //     const pieceTile = board.board[[1, 1]];
-        //     const moveTile = board.board[[3, 1]];
+        //     const pieceTile = board.board[[0, 6]];
+        //     const moveTile = board.board[[2, 5]];
         //     board.movePiece(pieceTile, moveTile);
-        // }
-        // return;
-
-        let moveResult = false;
-        this.currentMove++;
-        if (this.currentMove === 1) {
-            const pieceTile = board.board[[0, 1]];
-            const moveTile = board.board[[2, 2]];
-            board.movePiece(pieceTile, moveTile);
-        } else if (this.currentMove === 2) {
-            const pieceTile = board.board[[0, 6]];
-            const moveTile = board.board[[2, 5]];
-            board.movePiece(pieceTile, moveTile);
-        } else {
+        // } else {
             const dupBoard = new Utils.Board(false);
-            // boarddd.properties = Object.assign({}, board.properties);    // not deep duplication
             dupBoard.board = JSON.parse(JSON.stringify(board.board));
             dupBoard.whiteCaptures = board.whiteCaptures.slice();
             dupBoard.blackCaptures = board.blackCaptures.slice();
-            // console.log('no, over here')
             dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-            // console.log('actually, here')
             dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
             dupBoard.currentTurnColor = board.currentTurnColor;
-            // not gonna add in the moves array since it doesnt matter for this
             dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
+            dupBoard.moves = board.moves.slice();
+            dupBoard.moveTree = board.moveTree.slice();
+            dupBoard.inCheck = board.inCheck;
+            dupBoard.threats = board.threats.slice();
+            dupBoard.deniedMoves = JSON.parse(JSON.stringify(board.deniedMoves));
+            dupBoard.kingsMoves = board.kingsMoves.slice();
+            dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
+            dupBoard.firstMove = board.firstMove;
 
-            const move = findAiMove(dupBoard, 1); // make move with (num) depth
+            const move = findAiMove(dupBoard, 2); // make move with (num) depth
 
             console.log('ai move: ', move);
             const pieceTile = board.board[move[1][0]];
             const moveTile = board.board[move[1][1]];
             console.log('pieceTile: ', pieceTile);
             console.log('moveTile: ', moveTile);
-            moveResult = board.movePiece(pieceTile, moveTile);
-        }
+            board.movePiece(pieceTile, moveTile);
 
-        if (moveResult === 'end') {
-            const dbGame = {
-                central_user_id: this.props.sessionId,
-                foreign_user_id: 1,
-                winner_id: 1,
-                moves_list: board.moves,
-            };
-            this.props.createGame(dbGame);
-            this.gameOver = true;
-        }
+            if (board.checkmate()) {
+                console.log('checkmate');
+                console.log('creating a game for db')
+                const dbGame = {
+                    central_user_id: this.props.sessionId,
+                    foreign_user_id: 1,
+                    winner_id: this.props.sessionId,
+                    moves_list: board.moves,
+                };
+                this.props.createGame(dbGame);
+                this.gameOver = true;
+            }
+        // }
     }
 
     undoMove() {

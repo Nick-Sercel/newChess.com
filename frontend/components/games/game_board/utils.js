@@ -33,7 +33,7 @@ export class Board {
         this.whiteCaptures = [];
         this.blackCaptures = [];
         this.currentPieces = {};
-        this.currentTurnColor = 'white';
+        this.currentTurnColor = 'black';
         this.moves = "";
         this.movesFor = { 'white': {}, 'black': {} };
         
@@ -45,10 +45,15 @@ export class Board {
         
         this.kingsMoves = [];
         this.kings = {"white": null, "black": null};
+        this.kingHasMoved = {"white": false, "black": false};
         
         this.firstMove = true;
 
-        if (genBoard) { this.generateBoard(); }
+        if (genBoard) {
+            this.generateBoard();
+            this.findAllMoves();
+        }
+        this.currentTurnColor = 'white';
     }
 
 
@@ -118,13 +123,16 @@ export class Board {
                         moves.push(movePos);
                         if (this.currentPieces[movePos].symbol === 'K') {
                             this.inCheck = true;
-                            console.log("Check!");
+                            if (!secondary) {
+                                this.threats.push(piece);
+                            }
+                            // console.log("Check!");
                         }
                     } else {
                         if (this.checkThreats(piece, movePos)) {
                             moves.push(movePos);
                         } else {
-                            console.log(piece, movePos, "move excluded due to check");
+                            // console.log(piece, movePos, "move excluded due to check");
                         }
                     }
                 } else if (!(this.currentPieces[movePos])) {
@@ -133,13 +141,13 @@ export class Board {
                         const idx = this.isIncluded(this.kingsMoves, movePos);
                         if (idx) {
                             this.kingsMoves.splice(idx-1, 1);
-                            console.log("Removing move from king by ", piece);
+                            // console.log("Removing move from king by ", piece);
                         }
                     } else if (!secondary) {
                         if (this.checkThreats(piece, movePos)) {
                             moves.push(movePos);
                         } else {
-                            console.log(piece, movePos, "move excluded due to check");
+                            // console.log(piece, movePos, "move excluded due to check");
                         }
                     }
                 }
@@ -153,19 +161,21 @@ export class Board {
         const checkStorage = this.inCheck;
         // make move
         delete this.currentPieces[piece.pos];
+        let capPiece = this.currentPieces[pos];
         this.currentPieces[pos] = piece;
         // set firstmove to true to see checks
         this.firstMove = true;
         // console.log("Threats: ", this.threats);
         for (let i = 0; i < this.threats.length; i++) {
             // check for check
-            this.inCheck = false;
-            // console.log("count: ", i);
-            this.potentialMoves(this.threats[i], true);
-            if (this.inCheck) {
-                bool = false;
-                break;
-                // break on check found
+            if (this.threats[i].pos[0] !== pos[0] || this.threats[i].pos[1] !== pos[1]) {
+                this.inCheck = false;
+                this.potentialMoves(this.threats[i], true);
+                if (this.inCheck) {
+                    bool = false;
+                    break;
+                    // break on check found
+                }
             }
         }
         // revert firstmove to false to prevent accidental checks
@@ -174,6 +184,9 @@ export class Board {
         // revert and return response
         delete this.currentPieces[pos];
         this.currentPieces[piece.pos] = piece;
+        if (capPiece) {
+            this.currentPieces[pos] = capPiece;
+        }
         return bool;
     }
 
@@ -190,14 +203,14 @@ export class Board {
                         const idx = this.isIncluded(this.kingsMoves, tempPush);
                         if (idx) {
                             this.kingsMoves.splice(idx-1, 1);
-                            console.log("Removing move from king by ", piece);
+                            // console.log("Removing move from king by ", piece);
                         }
                     }
                 } else {
                     if (this.checkThreats(piece, tempPush)) {
                         moves.push(tempPush);
                     } else {
-                        console.log(piece, tempPush, "move excluded due to check");
+                        // console.log(piece, tempPush, "move excluded due to check");
                     }
                 }
                 currentPos[0] += dirs[i][0];
@@ -214,7 +227,7 @@ export class Board {
 
                 if (this.firstMove && currentPiece.symbol === 'K') {
                     this.inCheck = true;
-                    console.log("Check!");
+                    // console.log("Check!");
                 }
             }
         }
@@ -225,12 +238,15 @@ export class Board {
         if (this.firstMove) {
             if (cap && cap.symbol === 'K') {
                 this.inCheck = true;
-                console.log("Check!");
+                if (!secondary) {
+                    this.threats.push(piece);
+                }
+                // console.log("Check!");
             } else if (cap && !secondary) {
                 const idx = this.isIncluded(this.kingsMoves, movePos);
                 if (idx) {
                     this.kingsMoves.splice(idx - 1, 1);
-                    console.log("Removing move from king by ", piece);
+                    // console.log("Removing move from king by ", piece);
                 }
             }
             return true;
@@ -238,7 +254,7 @@ export class Board {
             if (this.checkThreats(piece, movePos)) {
                 return true;
             } else {
-                console.log(piece, movePos, "move excluded due to check");
+                // console.log(piece, movePos, "move excluded due to check");
                 return false;
             }
         }
@@ -318,9 +334,6 @@ export class Board {
                 // console.log(`knight moves: ${moves}`);
                 break;
             case 'B':
-                // if (!dontStore) {
-                //     console.log("Bishop moves checked: ", piece);
-                // }
                 moves = (this.bishopMoves(piece, dontStore));
                 if (this.firstMove && !dontStore) {
                     this.threats.push(piece);
@@ -356,6 +369,7 @@ export class Board {
 
     findMovesForColor(color) {
         const pieces = Object.values(this.currentPieces);
+        // console.log(pieces);
         for (let i = 0; i < pieces.length; i++) {
             if (pieces[i].color === color) {
                 this.potentialMoves(pieces[i]);
@@ -367,7 +381,7 @@ export class Board {
         const moveDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [0, 1], [-1, 0], [0, -1]];
         let moves = [];
         for (let i = 0; i < moveDirs.length; i++) {
-            const movePos = [moveDirs[0] + king.pos[0], moveDirs[1] + king.pos[1]]
+            const movePos = [moveDirs[i][0] + king.pos[0], moveDirs[i][1] + king.pos[1]];
             if (this.onBoard(movePos)) {
                 if (this.currentPieces[movePos]) {
                     if (this.currentPieces[movePos].color !== king.color) {
@@ -378,6 +392,12 @@ export class Board {
                 }
             }
         }
+        if (!this.kingHasMoved[king.color]) {
+            const movePos = [moveDirs[i][0] + king.pos[0], moveDirs[i][1] + king.pos[1]];
+            if (!this.currentPieces[movePos]) {
+
+            }
+        }
         return moves;
     }
 
@@ -386,7 +406,7 @@ export class Board {
         // console.log("Kings: ", this.kings);
         const king = this.kings[this.oppColor(this.currentTurnColor)];
         // console.log("King: ", king);
-        this.kingsMoves = this.baseKingMoves(king); // potential
+        this.kingsMoves = this.baseKingMoves(king);
         // console.log("Kings Moves First: ", this.kingsMoves);
         this.firstMove = true;
         this.findMovesForColor(this.currentTurnColor);
@@ -457,9 +477,11 @@ export class Board {
     movePiece(moveTile, endTile) {
         // console.log("piece being moved: ", moveTile.piece);
         // console.log("piece destination: ", endTile.pos);
-        if (this.isIncluded(moveTile.piece.moves, endTile.pos)) {
-            let gameOver = false;
+        if (this.isIncluded(this.movesFor[this.currentTurnColor][moveTile.pos], endTile.pos)) {
             const piece = moveTile.piece;
+            if (piece.symbol === "K") {
+                this.kingHasMoved[this.currentTurnColor] = true;
+            }
             if (endTile.piece) {
                 if (endTile.piece.color === 'black') {
                     this.whiteCaptures.push(endTile.piece);
@@ -484,15 +506,13 @@ export class Board {
             this.findAllMoves(); // find all moves beginning with pieces of current turn player
             this.currentTurnColor = this.oppColor(this.currentTurnColor);
 
-            gameOver = this.checkmate();
-
-            this.inCheck = false;
-            if (gameOver) { return 'end'; }
             return true;
         } else {
             console.log('Invalid move destination');
-            // console.log("piece attempted to move: ", moveTile.piece);
-            // console.log("piece destination attempted: ", endTile.pos);
+            console.log("piece attempted to move: ", moveTile.piece);
+            console.log("piece destination attempted: ", endTile.pos);
+            console.log("end position piece? ", this.currentPieces[endTile.pos]);
+            console.log("Moves List: ", Object.values(this.movesFor[this.currentTurnColor]));
             return false;
         }
     }
@@ -503,10 +523,15 @@ export class Board {
             return false;
         }
         console.log("Moves for", this.currentTurnColor, ': ', this.movesFor[this.currentTurnColor]);
-        if (Object.values(this.movesFor[this.currentTurnColor]).length === 0) {
-            return true;
+        console.log("Threats: ", this.threats);
+        const allMoves = Object.values(this.movesFor[this.currentTurnColor]);
+        for (let i = 0; i < allMoves.length; i++) {
+            if (allMoves[i].length !== 0) {
+                return false;
+            }
         }
-        return false;
+        console.log("no possible moves");
+        return true;
     }
 
     reverseMove(shouldUndoAgain) {
@@ -550,12 +575,3 @@ export class Board {
         }
     }
 }
-
-
-
-
-// begin game by finding white to move then black to move
-
-// upon move, check move player's next moves then current player
-
-// checkmate === king threatened and no way to move plus no way to block
