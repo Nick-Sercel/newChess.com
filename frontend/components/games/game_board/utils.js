@@ -15,7 +15,7 @@ export class Piece {
         this.pos = pos;
         this.symbol = symbol;
         this.color = color;
-        this.moves = [];
+        // this.moves = [];
     }
 }
 
@@ -25,6 +25,7 @@ class move {
         this.priorPos = priorPos;
         this.capturedPiece = capturedPiece;
         this.castle = castle;
+        this.movesFor;
     }
 }
 
@@ -363,7 +364,7 @@ export class Board {
         }
         if (!dontStore) {
             this.movesFor[piece.color][piece.pos] = moves;
-            piece.moves = moves;
+            // piece.moves = moves;
         }
         return moves;
     }
@@ -401,7 +402,7 @@ export class Board {
                 movePos[1] -= 1;
                 if (!this.currentPieces[movePos] && !this.currentPieces[[movePos[0], movePos[1] - 1]]) {
                     moves.push([king.pos[0], king.pos[1] - 2]);
-                    console.log("added left side castle");
+                    // console.log("added left side castle");
                 }
             }
             if (this.currentPieces[[king.pos[0], 7]] && this.currentPieces[[king.pos[0], 7]].symbol === 'R'
@@ -410,7 +411,7 @@ export class Board {
                 if (!this.currentPieces[movePos] && !this.currentPieces[[movePos[0], movePos[1] + 1]]
                                                  && !this.currentPieces[[movePos[0], movePos[1] + 2]]) {
                     moves.push([king.pos[0], king.pos[1] + 2]);
-                    console.log("added right side castle");
+                    // console.log("added right side castle");
                 }
             }
             
@@ -499,7 +500,7 @@ export class Board {
             let castle = false;
             if (piece.symbol === "K" && moveTile.pos[1] - endTile.pos[1] === 2) {
                 this.kingHasMoved[this.currentTurnColor] = true;
-                console.log("preforming king side castle");
+                // console.log("preforming king side castle");
                 const rook = this.currentPieces[[piece.pos[0], 0]];
                 const preTile = this.board[rook.pos];
                 preTile.piece = null;
@@ -510,7 +511,7 @@ export class Board {
                 this.currentPieces[rook.pos] = rook;
                 castle = rook.pos.slice();
             } else if (piece.symbol === 'K' && moveTile.pos[1] - endTile.pos[1] === -2) {
-                console.log("preforming queen side castle");
+                // console.log("preforming queen side castle");
                 const rook = this.currentPieces[[piece.pos[0], 7]];
                 const preTile = this.board[rook.pos];
                 preTile.piece = null;
@@ -540,6 +541,8 @@ export class Board {
             // if (piece.symbol === 'P' && (piece.pos[0] === 7 || piece.pos[0] === 0)) {
             //     this.promotePawn(piece);
             // }
+
+            this.moveTree[this.moveTree.length - 1].movesFor = JSON.parse(JSON.stringify(this.movesFor));
             this.movesFor['white'] = {}; this.movesFor['black'] = {};  // reset object values
 
             this.findAllMoves(); // find all moves beginning with pieces of current turn player
@@ -557,12 +560,12 @@ export class Board {
     }
 
     checkmate() {
-        console.log("Check? ", this.inCheck);
+        // console.log("Check? ", this.inCheck);
         if (!this.inCheck) {
             return false;
         }
-        console.log("Moves for", this.currentTurnColor, ': ', this.movesFor[this.currentTurnColor]);
-        console.log("Threats: ", this.threats);
+        // console.log("Moves for", this.currentTurnColor, ': ', this.movesFor[this.currentTurnColor]);
+        // console.log("Threats: ", this.threats);
         const allMoves = Object.values(this.movesFor[this.currentTurnColor]);
         for (let i = 0; i < allMoves.length; i++) {
             if (allMoves[i].length !== 0) {
@@ -573,17 +576,17 @@ export class Board {
         return true;
     }
 
-    reverseMove(shouldUndoAgain) {
+    reverseMove(shouldUndoAgain=true) {
         if (this.moveTree.length === 0) {
             return;
         }
         const idx = this.moveTree.length - 1;
-        console.log(idx);
-        console.log(this.moveTree[idx]);
+        // console.log("undoing move: ", this.moveTree[idx]);
         const piece = this.moveTree[idx].piece;
         const capture = this.moveTree[idx].capturedPiece
         const priorPos = this.moveTree[idx].priorPos;
         const castle = this.moveTree[idx].castle;
+        const reversedPotMoves = JSON.parse(JSON.stringify(this.moveTree[idx].movesFor));
         const priorTile = this.board[priorPos];
         const currentPosTile = this.board[piece.pos];
 
@@ -594,6 +597,11 @@ export class Board {
         currentPosTile.piece = null;                  // remove the piece from its old tile
 
         if (capture) {
+            if (capture.color === 'white') {
+                this.blackCaptures.splice(this.whiteCaptures.length - 1, 1);
+            } else {
+                this.whiteCaptures.splice(this.whiteCaptures.length - 1, 1);
+            }
             currentPosTile.piece = capture;
             // remove from captured list
             if (capture.color === 'white') {
@@ -619,12 +627,12 @@ export class Board {
 
         this.currentTurnColor = piece.color;
         this.moveTree.splice(idx, 1);
-        if (!shouldUndoAgain) {
-            this.reverseMove(true);
+        if (shouldUndoAgain && this.moveTree.length > 1) {
+            this.reverseMove(false);
         } else {
-            this.movesFor['white'] = {}; this.movesFor['black'] = {};  // reset object values => may be unnecessary
+            this.movesFor = reversedPotMoves;
     
-            this.findAllMoves(); // find all moves beginning with pieces of current turn player
+            // this.findAllMoves(); // find all moves beginning with pieces of current turn player
         }
     }
 }

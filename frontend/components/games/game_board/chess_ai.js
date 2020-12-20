@@ -92,22 +92,23 @@ function dupBoard (board) { // this apparently slow af - maybe write custom dupl
 //     return bestMove;
 // }
 
-function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
+const MAX_DEPTH = 2;
 
+function findAiMove(board, depth=MAX_DEPTH, min = true, alpha = -10000, beta = 10000) {
     if (depth === 0) {
         return [scorePosition(board.currentPieces)];
     }
 
     const entities = Object.entries(board.movesFor[board.currentTurnColor]);
-    if (depth === 2) {
-        console.log("ai potential moves: ", Object.values(board.movesFor[board.currentTurnColor]));
-    }
     let highestVal = 0;
     min ? highestVal = 10000 : highestVal = -10000;
     // playing as black so we want low score
     let bestMove = null;
-    shuffle(entities);
-    const dupedBoard = dupBoard(board);
+    if (depth === MAX_DEPTH) {
+        // console.log("shuffling");
+        shuffle(entities);
+    }
+    // const dupedBoard = dupBoard(board);
     for (let i = 0; i < entities.length; i++) {
         for (let j = 0; j < entities[i][1].length; j++) {
             let move = [entities[i][0], entities[i][1][j]];
@@ -115,8 +116,8 @@ function findAiMove(board, depth, min = true, alpha = -10000, beta = 10000) {
             move[0][1] = parseInt(move[0][1]); move[0][0] = parseInt(move[0][0]);
             board.movePiece(board.board[move[0]], board.board[move[1]]);
             const score = findAiMove(board, depth - 1, !min)[0];
-            board = dupBoard(dupedBoard); // revert state to before a move was made
-            // board.reverseMove();
+            // board = dupBoard(dupedBoard); // revert state to before a move was made
+            board.reverseMove(false);
             if (min) {
                 if (score < highestVal) {
                     highestVal = score;
@@ -175,7 +176,7 @@ function pieceTypePointsCase(piece) {
             return 35;
         case 'Q':
             return 100;
-        case 'K': // add castling and restrictions on moving near enemy kings
+        case 'K':
             return 1000;
         default:
             console.log('that piece doesn\'t exist');
@@ -183,18 +184,5 @@ function pieceTypePointsCase(piece) {
             return;
     }
 }
-
-
-// this.board = {};
-// this.whiteCaptures = [];
-// this.blackCaptures = [];
-// this.currentPieces = {};
-// this.kings = {};
-// this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
-// this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
-// this.currentTurnColor = 'white';
-// this.moves = "";
-// this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } and remove from piece object
-
 
 export default findAiMove;

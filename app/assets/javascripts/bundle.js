@@ -973,7 +973,10 @@ function dupBoard(board) {
 // }
 
 
-function findAiMove(board, depth) {
+var MAX_DEPTH = 2;
+
+function findAiMove(board) {
+  var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : MAX_DEPTH;
   var min = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
   var alpha = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : -10000;
   var beta = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10000;
@@ -983,17 +986,16 @@ function findAiMove(board, depth) {
   }
 
   var entities = Object.entries(board.movesFor[board.currentTurnColor]);
-
-  if (depth === 2) {
-    console.log("ai potential moves: ", Object.values(board.movesFor[board.currentTurnColor]));
-  }
-
   var highestVal = 0;
   min ? highestVal = 10000 : highestVal = -10000; // playing as black so we want low score
 
   var bestMove = null;
-  shuffle(entities);
-  var dupedBoard = dupBoard(board);
+
+  if (depth === MAX_DEPTH) {
+    // console.log("shuffling");
+    shuffle(entities);
+  } // const dupedBoard = dupBoard(board);
+
 
   for (var i = 0; i < entities.length; i++) {
     for (var j = 0; j < entities[i][1].length; j++) {
@@ -1002,9 +1004,9 @@ function findAiMove(board, depth) {
       move[0][1] = parseInt(move[0][1]);
       move[0][0] = parseInt(move[0][0]);
       board.movePiece(board.board[move[0]], board.board[move[1]]);
-      var score = findAiMove(board, depth - 1, !min)[0];
-      board = dupBoard(dupedBoard); // revert state to before a move was made
-      // board.reverseMove();
+      var score = findAiMove(board, depth - 1, !min)[0]; // board = dupBoard(dupedBoard); // revert state to before a move was made
+
+      board.reverseMove(false);
 
       if (min) {
         if (score < highestVal) {
@@ -1077,7 +1079,6 @@ function pieceTypePointsCase(piece) {
       return 100;
 
     case 'K':
-      // add castling and restrictions on moving near enemy kings
       return 1000;
 
     default:
@@ -1085,17 +1086,7 @@ function pieceTypePointsCase(piece) {
       console.log("that piece is: ".concat(piece, " -> in ai code"));
       return;
   }
-} // this.board = {};
-// this.whiteCaptures = [];
-// this.blackCaptures = [];
-// this.currentPieces = {};
-// this.kings = {};
-// this.kings['white'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
-// this.kings['black'] = { 'piece': null, 'direct': {}, 'indirect': {}, 'saves': {} };
-// this.currentTurnColor = 'white';
-// this.moves = "";
-// this.movesFor = { 'white': {}, 'black': {} }; // refactored to { 'white': { piece.pos: [moves] } } and remove from piece object
-
+}
 
 /* harmony default export */ __webpack_exports__["default"] = (findAiMove);
 
@@ -1262,7 +1253,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
     _this.currentTile = null;
     _this.humanTurn = 'white';
     _this.potentialMoves = [];
-    _this.aiTurn = 'none';
+    _this.aiTurn = 'black';
     _this.humanMoved = false;
     _this.currentMove = 0;
     _this.gameOver = false;
@@ -1283,8 +1274,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
       var _this2 = this;
 
       // console.log("update game called");
-      var board = this.state.board;
-      console.log("current turn color: ", board.currentTurnColor);
+      var board = this.state.board; // console.log("current turn color: ", board.currentTurnColor);
 
       if (board.currentTurnColor === this.aiTurn && !this.gameOver) {
         this.makeAiMove(board); // make an ai move on the board -> chess_ai.js util
@@ -1329,7 +1319,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
 
       if (!this.gameOver) {
         if (this.humanMoved && this.aiTurn !== 'none') {
-          console.log("waiting 1/10 second");
+          // console.log("waiting 1/10 second");
           setTimeout(function () {
             _this2.humanMoved = false;
 
@@ -1341,40 +1331,23 @@ var Game = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "makeAiMove",
     value: function makeAiMove(board) {
-      console.log('ai move called'); // this.currentMove++;
-      // if (this.currentMove === 1) {
-      //     const pieceTile = board.board[[0, 1]];
-      //     const moveTile = board.board[[2, 2]];
-      //     board.movePiece(pieceTile, moveTile);
-      // } else if (this.currentMove === 2) {
-      //     const pieceTile = board.board[[0, 6]];
-      //     const moveTile = board.board[[2, 5]];
-      //     board.movePiece(pieceTile, moveTile);
-      // } else {
+      // console.log('ai move called');
+      this.currentMove++;
 
-      var dupBoard = new _utils__WEBPACK_IMPORTED_MODULE_2__["Board"](false);
-      dupBoard.board = JSON.parse(JSON.stringify(board.board));
-      dupBoard.whiteCaptures = board.whiteCaptures.slice();
-      dupBoard.blackCaptures = board.blackCaptures.slice();
-      dupBoard.currentPieces = JSON.parse(JSON.stringify(board.currentPieces));
-      dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
-      dupBoard.currentTurnColor = board.currentTurnColor;
-      dupBoard.movesFor = JSON.parse(JSON.stringify(board.movesFor));
-      dupBoard.moves = board.moves.slice();
-      dupBoard.moveTree = board.moveTree.slice();
-      dupBoard.inCheck = board.inCheck;
-      dupBoard.threats = board.threats.slice();
-      dupBoard.deniedMoves = JSON.parse(JSON.stringify(board.deniedMoves));
-      dupBoard.kingsMoves = board.kingsMoves.slice();
-      dupBoard.kings = JSON.parse(JSON.stringify(board.kings));
-      dupBoard.firstMove = board.firstMove;
-      var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(dupBoard, 2); // make move with (num) depth
+      if (this.currentMove === 1) {
+        var _pieceTile = board.board[[0, 1]];
+        var _moveTile = board.board[[2, 2]];
+        board.movePiece(_pieceTile, _moveTile);
+        return;
+      }
 
-      console.log('ai move: ', move);
+      var t0 = performance.now();
+      var move = Object(_chess_ai__WEBPACK_IMPORTED_MODULE_3__["default"])(board); // make move with (num) depth
+
+      var t1 = performance.now();
+      console.log("Call to make aiMove took " + (t1 - t0) / 1000 + " seconds.");
       var pieceTile = board.board[move[1][0]];
       var moveTile = board.board[move[1][1]];
-      console.log('pieceTile: ', pieceTile);
-      console.log('moveTile: ', moveTile);
       board.movePiece(pieceTile, moveTile);
 
       if (board.checkmate()) {
@@ -1388,14 +1361,13 @@ var Game = /*#__PURE__*/function (_React$Component) {
         };
         this.props.createGame(dbGame);
         this.gameOver = true;
-      } // }
-
+      }
     }
   }, {
     key: "undoMove",
     value: function undoMove() {
       var board = this.state.board;
-      board.reverseMove();
+      board.reverseMove(true);
       this.setState({
         board: board
       });
@@ -1405,6 +1377,8 @@ var Game = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       var whiteCaptures = this.state.board.whiteCaptures;
       var blackCaptures = this.state.board.blackCaptures;
+      var whiteCaptureKey = 0;
+      var blackCaptureKey = 0;
       var gameOverStuff = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null);
 
       if (this.gameOver) {
@@ -1423,11 +1397,17 @@ var Game = /*#__PURE__*/function (_React$Component) {
         className: "white-captures"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, "White Captures")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, whiteCaptures.map(function (capture) {
         // how to fix warning ?
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, capture.symbol)));
+        whiteCaptureKey++;
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+          key: "".concat(whiteCaptureKey)
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, capture.symbol)));
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
         className: "black-captures"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, "Black Captures")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, blackCaptures.map(function (capture) {
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, capture.symbol)));
+        blackCaptureKey++;
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+          key: "".concat(blackCaptureKey)
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, capture.symbol)));
       })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
         className: "undo-button",
         onClick: this.undoMove
@@ -1598,8 +1578,7 @@ var Piece = function Piece(pos, symbol) {
 
   this.pos = pos;
   this.symbol = symbol;
-  this.color = color;
-  this.moves = [];
+  this.color = color; // this.moves = [];
 };
 
 var move = function move(piece, priorPos) {
@@ -1612,6 +1591,7 @@ var move = function move(piece, priorPos) {
   this.priorPos = priorPos;
   this.capturedPiece = capturedPiece;
   this.castle = castle;
+  this.movesFor;
 };
 
 var Board = /*#__PURE__*/function () {
@@ -2023,8 +2003,7 @@ var Board = /*#__PURE__*/function () {
       }
 
       if (!dontStore) {
-        this.movesFor[piece.color][piece.pos] = moves;
-        piece.moves = moves;
+        this.movesFor[piece.color][piece.pos] = moves; // piece.moves = moves;
       }
 
       return moves;
@@ -2068,8 +2047,7 @@ var Board = /*#__PURE__*/function () {
           _movePos[1] -= 1;
 
           if (!this.currentPieces[_movePos] && !this.currentPieces[[_movePos[0], _movePos[1] - 1]]) {
-            moves.push([king.pos[0], king.pos[1] - 2]);
-            console.log("added left side castle");
+            moves.push([king.pos[0], king.pos[1] - 2]); // console.log("added left side castle");
           }
         }
 
@@ -2077,8 +2055,7 @@ var Board = /*#__PURE__*/function () {
           _movePos[1] += 2;
 
           if (!this.currentPieces[_movePos] && !this.currentPieces[[_movePos[0], _movePos[1] + 1]] && !this.currentPieces[[_movePos[0], _movePos[1] + 2]]) {
-            moves.push([king.pos[0], king.pos[1] + 2]);
-            console.log("added right side castle");
+            moves.push([king.pos[0], king.pos[1] + 2]); // console.log("added right side castle");
           }
         }
       }
@@ -2189,8 +2166,8 @@ var Board = /*#__PURE__*/function () {
         var castle = false;
 
         if (piece.symbol === "K" && moveTile.pos[1] - endTile.pos[1] === 2) {
-          this.kingHasMoved[this.currentTurnColor] = true;
-          console.log("preforming king side castle");
+          this.kingHasMoved[this.currentTurnColor] = true; // console.log("preforming king side castle");
+
           var rook = this.currentPieces[[piece.pos[0], 0]];
           var preTile = this.board[rook.pos];
           preTile.piece = null;
@@ -2201,7 +2178,7 @@ var Board = /*#__PURE__*/function () {
           this.currentPieces[rook.pos] = rook;
           castle = rook.pos.slice();
         } else if (piece.symbol === 'K' && moveTile.pos[1] - endTile.pos[1] === -2) {
-          console.log("preforming queen side castle");
+          // console.log("preforming queen side castle");
           var _rook = this.currentPieces[[piece.pos[0], 7]];
           var _preTile = this.board[_rook.pos];
           _preTile.piece = null;
@@ -2240,6 +2217,7 @@ var Board = /*#__PURE__*/function () {
         //     this.promotePawn(piece);
         // }
 
+        this.moveTree[this.moveTree.length - 1].movesFor = JSON.parse(JSON.stringify(this.movesFor));
         this.movesFor['white'] = {};
         this.movesFor['black'] = {}; // reset object values
 
@@ -2259,14 +2237,13 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "checkmate",
     value: function checkmate() {
-      console.log("Check? ", this.inCheck);
-
+      // console.log("Check? ", this.inCheck);
       if (!this.inCheck) {
         return false;
-      }
+      } // console.log("Moves for", this.currentTurnColor, ': ', this.movesFor[this.currentTurnColor]);
+      // console.log("Threats: ", this.threats);
 
-      console.log("Moves for", this.currentTurnColor, ': ', this.movesFor[this.currentTurnColor]);
-      console.log("Threats: ", this.threats);
+
       var allMoves = Object.values(this.movesFor[this.currentTurnColor]);
 
       for (var i = 0; i < allMoves.length; i++) {
@@ -2280,18 +2257,20 @@ var Board = /*#__PURE__*/function () {
     }
   }, {
     key: "reverseMove",
-    value: function reverseMove(shouldUndoAgain) {
+    value: function reverseMove() {
+      var shouldUndoAgain = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
       if (this.moveTree.length === 0) {
         return;
       }
 
-      var idx = this.moveTree.length - 1;
-      console.log(idx);
-      console.log(this.moveTree[idx]);
+      var idx = this.moveTree.length - 1; // console.log("undoing move: ", this.moveTree[idx]);
+
       var piece = this.moveTree[idx].piece;
       var capture = this.moveTree[idx].capturedPiece;
       var priorPos = this.moveTree[idx].priorPos;
       var castle = this.moveTree[idx].castle;
+      var reversedPotMoves = JSON.parse(JSON.stringify(this.moveTree[idx].movesFor));
       var priorTile = this.board[priorPos];
       var currentPosTile = this.board[piece.pos];
       priorTile.piece = piece; // add the moved piece to the prior tile
@@ -2305,6 +2284,12 @@ var Board = /*#__PURE__*/function () {
       currentPosTile.piece = null; // remove the piece from its old tile
 
       if (capture) {
+        if (capture.color === 'white') {
+          this.blackCaptures.splice(this.whiteCaptures.length - 1, 1);
+        } else {
+          this.whiteCaptures.splice(this.whiteCaptures.length - 1, 1);
+        }
+
         currentPosTile.piece = capture; // remove from captured list
 
         if (capture.color === 'white') {
@@ -2334,13 +2319,10 @@ var Board = /*#__PURE__*/function () {
       this.currentTurnColor = piece.color;
       this.moveTree.splice(idx, 1);
 
-      if (!shouldUndoAgain) {
-        this.reverseMove(true);
+      if (shouldUndoAgain && this.moveTree.length > 1) {
+        this.reverseMove(false);
       } else {
-        this.movesFor['white'] = {};
-        this.movesFor['black'] = {}; // reset object values => may be unnecessary
-
-        this.findAllMoves(); // find all moves beginning with pieces of current turn player
+        this.movesFor = reversedPotMoves; // this.findAllMoves(); // find all moves beginning with pieces of current turn player
       }
     }
   }]);
