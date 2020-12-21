@@ -102,7 +102,11 @@
     padding-left: 5px;
     padding-bottom: 5px;
     list-style: none;
+    text-decoration: none;
     color: black;
+}
+.user-auth-banner-title:hover {
+    background-color: lightblue;
 }
 
 #user-auth-banner {

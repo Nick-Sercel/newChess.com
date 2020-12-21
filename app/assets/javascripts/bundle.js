@@ -1253,7 +1253,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
     _this.currentTile = null;
     _this.humanTurn = 'white';
     _this.potentialMoves = [];
-    _this.aiTurn = 'black';
+    _this.aiTurn = 'none';
     _this.humanMoved = false;
     _this.currentMove = 0;
     _this.gameOver = false;
@@ -1615,7 +1615,6 @@ var Board = /*#__PURE__*/function () {
     this.inCheck = false;
     this.threats = [];
     this.deniedMoves = {};
-    this.kingsMoves = [];
     this.kings = {
       "white": null,
       "black": null
@@ -1675,8 +1674,7 @@ var Board = /*#__PURE__*/function () {
             this.currentPieces[piece.pos] = piece;
           }
 
-          var tile = new Tile([i, j], piece); // const posKey = (i * 8) + j;
-
+          var tile = new Tile([i, j], piece);
           this.board[[i, j]] = tile;
         }
       }
@@ -1715,27 +1713,19 @@ var Board = /*#__PURE__*/function () {
 
                 if (!secondary) {
                   this.threats.push(piece);
-                } // console.log("Check!");
-
+                }
               }
             } else {
               if (this.checkThreats(piece, movePos)) {
                 moves.push(movePos);
-              } else {// console.log(piece, movePos, "move excluded due to check");
               }
             }
           } else if (!this.currentPieces[movePos]) {
             if (this.firstMove && !secondary) {
               moves.push(movePos);
-              var idx = this.isIncluded(this.kingsMoves, movePos);
-
-              if (idx) {
-                this.kingsMoves.splice(idx - 1, 1); // console.log("Removing move from king by ", piece);
-              }
             } else if (!secondary) {
               if (this.checkThreats(piece, movePos)) {
                 moves.push(movePos);
-              } else {// console.log(piece, movePos, "move excluded due to check");
               }
             }
           }
@@ -1788,42 +1778,36 @@ var Board = /*#__PURE__*/function () {
       var moves = [];
 
       for (var i = 0; i < dirs.length; i++) {
-        var currentPos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]]; // console.log(this.currentPieces[currentPos]);
+        var currentPos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
 
         while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
           var tempPush = currentPos.slice();
 
           if (this.firstMove) {
             moves.push(tempPush);
-
-            if (!secondary) {
-              var idx = this.isIncluded(this.kingsMoves, tempPush);
-
-              if (idx) {
-                this.kingsMoves.splice(idx - 1, 1); // console.log("Removing move from king by ", piece);
-              }
-            }
           } else {
             if (this.checkThreats(piece, tempPush)) {
               moves.push(tempPush);
-            } else {// console.log(piece, tempPush, "move excluded due to check");
             }
           }
 
           currentPos[0] += dirs[i][0];
           currentPos[1] += dirs[i][1];
-        } // if (!secondary && piece.symbol === 'B') {
-        //     console.log(piece, currentPos, this.firstMove);
-        // }
-
+        }
 
         var currentPiece = this.currentPieces[currentPos];
 
         if (currentPiece && currentPiece.color !== piece.color) {
-          moves.push(currentPos); // there's a bug here
+          if (this.firstMove) {
+            moves.push(currentPos);
 
-          if (this.firstMove && currentPiece.symbol === 'K') {
-            this.inCheck = true; // console.log("Check!");
+            if (currentPiece.symbol === 'K') {
+              this.inCheck = true; // console.log("Check!");
+            }
+          } else {
+            if (this.checkTheThreats(piece, currentPos)) {
+              moves.push(currentPos);
+            }
           }
         }
       }
@@ -1841,13 +1825,6 @@ var Board = /*#__PURE__*/function () {
 
           if (!secondary) {
             this.threats.push(piece);
-          } // console.log("Check!");
-
-        } else if (cap && !secondary) {
-          var idx = this.isIncluded(this.kingsMoves, movePos);
-
-          if (idx) {
-            this.kingsMoves.splice(idx - 1, 1); // console.log("Removing move from king by ", piece);
           }
         }
 
@@ -1899,6 +1876,18 @@ var Board = /*#__PURE__*/function () {
         if (this.checkTheThreats(piece, movePos, secondary, check)) {
           dirs.push(movePos.slice());
         }
+      } else if (this.onBoard(movePos) && !check) {
+        var lastMove = this.moveTree[this.moveTree.length - 1];
+
+        if (lastMove && lastMove.piece && lastMove.piece.symbol === 'P') {
+          if (lastMove.piece.pos[0] - lastMove.priorPos[0] === 2 && lastMove.piece.pos[0] === piece.pos[0] && lastMove.priorPos[1] - movePos[1] === 0) {
+            // 7 to 5 ==> white pawn
+            dirs.push([lastMove.priorPos[0] + 1, lastMove.priorPos[1]]);
+          } else if (lastMove.piece.pos[0] - lastMove.priorPos[0] === -2 && lastMove.piece.pos[0] === piece.pos[0] && lastMove.priorPos[1] - movePos[1] === 0) {
+            // 1 to 3 ==> black pawn
+            dirs.push([lastMove.priorPos[0] - 1, lastMove.priorPos[1]]);
+          }
+        }
       }
 
       movePos[1] += 2;
@@ -1907,6 +1896,18 @@ var Board = /*#__PURE__*/function () {
       if (this.onBoard(movePos) && check && check.color !== piece.color) {
         if (this.checkTheThreats(piece, movePos, secondary, check)) {
           dirs.push(movePos.slice());
+        }
+      } else if (this.onBoard(movePos) && !check) {
+        var _lastMove = this.moveTree[this.moveTree.length - 1];
+
+        if (_lastMove && _lastMove.piece && _lastMove.piece.symbol === 'P') {
+          if (_lastMove.piece.pos[0] - _lastMove.priorPos[0] === 2 && _lastMove.piece.pos[0] === piece.pos[0] && _lastMove.priorPos[1] - movePos[1] === 0) {
+            // 7 to 5 ==> white pawn
+            dirs.push([_lastMove.priorPos[0] + 1, _lastMove.priorPos[1]]);
+          } else if (_lastMove.piece.pos[0] - _lastMove.priorPos[0] === -2 && _lastMove.piece.pos[0] === piece.pos[0] && _lastMove.priorPos[1] - movePos[1] === 0) {
+            // 1 to 3 ==> black pawn
+            dirs.push([_lastMove.priorPos[0] - 1, _lastMove.priorPos[1]]);
+          }
         }
       }
 
@@ -1946,7 +1947,6 @@ var Board = /*#__PURE__*/function () {
       switch (piece.symbol) {
         case 'P':
           moves = this.pawnMoves(piece, dontStore); // add enpausant and test promotion
-          // console.log(`pawn moves: ${moves}`);
 
           break;
 
@@ -1955,14 +1955,12 @@ var Board = /*#__PURE__*/function () {
 
           if (this.firstMove && !dontStore) {
             this.threats.push(piece);
-          } // console.log(`rook moves: ${moves}`);
-
+          }
 
           break;
 
         case 'N':
-          moves = this.knightMoves(piece, dontStore); // console.log(`knight moves: ${moves}`);
-
+          moves = this.knightMoves(piece, dontStore);
           break;
 
         case 'B':
@@ -1970,8 +1968,7 @@ var Board = /*#__PURE__*/function () {
 
           if (this.firstMove && !dontStore) {
             this.threats.push(piece);
-          } // console.log(`bishop moves: ${moves}`);
-
+          }
 
           break;
 
@@ -1980,19 +1977,15 @@ var Board = /*#__PURE__*/function () {
 
           if (this.firstMove && !dontStore) {
             this.threats.push(piece);
-          } // console.log(`queen moves: ${moves}`);
-
+          }
 
           break;
 
         case 'K':
-          // add castling
-          if (this.firstMove) {
-            moves = this.kingMoves(piece, dontStore);
-          } else {
-            moves = this.kingsMoves;
-          } // console.log(`king moves: ${moves}`);
-
+          // if (this.firstMove) {
+          moves = this.kingMoves(piece, dontStore); // } else {
+          //     moves = this.kingsMoves;
+          // }
 
           break;
 
@@ -2003,7 +1996,7 @@ var Board = /*#__PURE__*/function () {
       }
 
       if (!dontStore) {
-        this.movesFor[piece.color][piece.pos] = moves; // piece.moves = moves;
+        this.movesFor[piece.color][piece.pos] = moves;
       }
 
       return moves;
@@ -2065,16 +2058,11 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "findAllMoves",
     value: function findAllMoves() {
-      this.threats = []; // console.log("Kings: ", this.kings);
-
-      var king = this.kings[this.oppColor(this.currentTurnColor)]; // console.log("King: ", king);
-
-      this.kingsMoves = this.baseKingMoves(king); // console.log("Kings Moves First: ", this.kingsMoves);
-
+      this.threats = [];
       this.firstMove = true;
       this.findMovesForColor(this.currentTurnColor);
       this.firstMove = false;
-      this.findMovesForColor(this.oppColor(this.currentTurnColor)); // console.log("Kings Moves Second: ", king.moves);
+      this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
   }, {
     key: "stringifyPos",
@@ -2134,16 +2122,15 @@ var Board = /*#__PURE__*/function () {
       }
 
       this.moves += this.stringifyPos(endTile.pos);
-      this.moves += " "; // console.log(this.moves);
+      this.moves += " ";
     }
   }, {
     key: "promotePawn",
-    value: function promotePawn(tile) {
-      var queen = new Piece(tile.pos, 'Q', tile.piece.color); // auto queen for now
+    value: function promotePawn(piece) {
+      var queen = new Piece(piece.pos, 'Q', piece.color); // auto queen for now
 
-      this.currentPieces[tile.pos] = queen;
-      tile.piece = queen;
-      this.potentialMoves(queen);
+      this.currentPieces[piece.pos] = queen;
+      this.board[piece.pos].piece = queen;
     }
   }, {
     key: "isIncluded",
@@ -2198,6 +2185,18 @@ var Board = /*#__PURE__*/function () {
           }
 
           this.addToMovesList(piece, endTile, endTile.piece, castle);
+        } else if (piece.symbol === 'P' && piece.pos[1] !== endTile.pos[1]) {
+          var capTile;
+
+          if (piece.color === 'white') {
+            capTile = this.board[[endTile.pos[0] + 1, endTile.pos[1]]];
+          } else {
+            capTile = this.board[[endTile.pos[0] - 1, endTile.pos[1]]];
+          }
+
+          this.addToMovesList(piece, endTile, capTile.piece, false);
+          delete this.currentPieces[capTile.pos];
+          capTile.piece = null;
         } else {
           this.addToMovesList(piece, endTile, false, castle);
         }
@@ -2213,9 +2212,10 @@ var Board = /*#__PURE__*/function () {
         this.currentPieces[piece.pos] = piece; // update hash piece location
 
         moveTile.piece = null; // remove the piece from its old tile
-        // if (piece.symbol === 'P' && (piece.pos[0] === 7 || piece.pos[0] === 0)) {
-        //     this.promotePawn(piece);
-        // }
+
+        if (piece.symbol === 'P' && (piece.pos[0] === 7 || piece.pos[0] === 0)) {
+          this.promotePawn(piece);
+        }
 
         this.moveTree[this.moveTree.length - 1].movesFor = JSON.parse(JSON.stringify(this.movesFor));
         this.movesFor['white'] = {};
@@ -2285,19 +2285,12 @@ var Board = /*#__PURE__*/function () {
 
       if (capture) {
         if (capture.color === 'white') {
-          this.blackCaptures.splice(this.whiteCaptures.length - 1, 1);
-        } else {
-          this.whiteCaptures.splice(this.whiteCaptures.length - 1, 1);
-        }
-
-        currentPosTile.piece = capture; // remove from captured list
-
-        if (capture.color === 'white') {
-          this.whiteCaptures.splice(this.whiteCaptures.length - 1, 1);
-        } else {
           this.blackCaptures.splice(this.blackCaptures.length - 1, 1);
+        } else {
+          this.whiteCaptures.splice(this.whiteCaptures.length - 1, 1);
         }
 
+        this.board[capture.pos].piece = capture;
         this.currentPieces[capture.pos] = capture;
       } else if (castle) {
         this.kingHasMoved[this.oppColor(this.currentTurnColor)] = false;
@@ -2322,7 +2315,7 @@ var Board = /*#__PURE__*/function () {
       if (shouldUndoAgain && this.moveTree.length > 1) {
         this.reverseMove(false);
       } else {
-        this.movesFor = reversedPotMoves; // this.findAllMoves(); // find all moves beginning with pieces of current turn player
+        this.movesFor = reversedPotMoves;
       }
     }
   }]);
@@ -4058,6 +4051,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _signed_in__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./signed_in */ "./frontend/components/users/user_auth_banner/signed_in.jsx");
 /* harmony import */ var _signed_out__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./signed_out */ "./frontend/components/users/user_auth_banner/signed_out.jsx");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4079,6 +4073,7 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
 
 
 
@@ -4113,7 +4108,8 @@ var UserAuthBanner = /*#__PURE__*/function (_React$Component) {
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         id: "user-auth-banner-container"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_3__["Link"], {
+        to: "/",
         className: "user-auth-banner-title"
       }, "Chess with Friends"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("nav", {
         id: "user-auth-banner"
