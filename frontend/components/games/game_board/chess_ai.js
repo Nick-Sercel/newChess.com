@@ -92,7 +92,7 @@ function dupBoard (board) { // this apparently slow af - maybe write custom dupl
 //     return bestMove;
 // }
 
-const MAX_DEPTH = 2;
+const MAX_DEPTH = 3;
 
 function findAiMove(board, depth=MAX_DEPTH, min = true, alpha = -10000, beta = 10000) {
     if (depth === 0) {

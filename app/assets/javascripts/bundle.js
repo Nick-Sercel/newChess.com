@@ -973,7 +973,7 @@ function dupBoard(board) {
 // }
 
 
-var MAX_DEPTH = 2;
+var MAX_DEPTH = 3;
 
 function findAiMove(board) {
   var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : MAX_DEPTH;
@@ -1253,7 +1253,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
     _this.currentTile = null;
     _this.humanTurn = 'white';
     _this.potentialMoves = [];
-    _this.aiTurn = 'none';
+    _this.aiTurn = 'black';
     _this.humanMoved = false;
     _this.currentMove = 0;
     _this.gameOver = false;
@@ -1697,6 +1697,23 @@ var Board = /*#__PURE__*/function () {
     key: "singleMoveDirs",
     value: function singleMoveDirs(piece, dirs) {
       var secondary = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (this.firstMove) {
+        var enemyKing = this.kings[this.oppColor(this.currentTurnColor)];
+
+        if (piece.symbol === 'N') {
+          if (Math.abs(piece.pos[0] - enemyKing.pos[0]) > 3 || Math.abs(piece.pos[1] - enemyKing.pos[1]) > 3) {
+            // console.log("no possible moves for knight");
+            return [];
+          }
+        } else if (piece.symbol === 'K') {
+          if (Math.abs(piece.pos[0] - enemyKing.pos[0]) > 2 || Math.abs(piece.pos[1] - enemyKing.pos[1]) > 2) {
+            // console.log("no possible moves for king");
+            return [];
+          }
+        }
+      }
+
       var moves = [];
       var movePos;
 
@@ -1712,7 +1729,7 @@ var Board = /*#__PURE__*/function () {
                 this.inCheck = true;
 
                 if (!secondary) {
-                  this.threats.push(piece);
+                  this.threats.push([piece, null]);
                 }
               }
             } else {
@@ -1748,9 +1765,9 @@ var Board = /*#__PURE__*/function () {
 
       for (var i = 0; i < this.threats.length; i++) {
         // check for check
-        if (this.threats[i].pos[0] !== pos[0] || this.threats[i].pos[1] !== pos[1]) {
+        if (this.threats[i][0].pos[0] !== pos[0] || this.threats[i][0].pos[1] !== pos[1]) {
           this.inCheck = false;
-          this.potentialMoves(this.threats[i], true);
+          this.potentialMoves(this.threats[i][0], true, this.threats[i][1]);
 
           if (this.inCheck) {
             bool = false;
@@ -1775,39 +1792,68 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "moveDirs",
     value: function moveDirs(piece, dirs, secondary) {
-      var moves = [];
+      if (this.firstMove) {
+        var check = true;
+        var kingPos = this.kings[this.oppColor(this.currentTurnColor)].pos;
+        var posDif = [kingPos[0] - piece.pos[0], kingPos[1] - piece.pos[1]];
 
-      for (var i = 0; i < dirs.length; i++) {
-        var currentPos = [piece.pos[0] + dirs[i][0], piece.pos[1] + dirs[i][1]];
-
-        while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
-          var tempPush = currentPos.slice();
-
-          if (this.firstMove) {
-            moves.push(tempPush);
-          } else {
-            if (this.checkThreats(piece, tempPush)) {
-              moves.push(tempPush);
-            }
+        for (var i = 0; i < dirs.length; i++) {
+          if ((dirs[i][0] === 0 && posDif[0] === 0 || dirs[i][1] === 0 && posDif[1] === 0 || posDif[0] * dirs[i][0] === posDif[1] * dirs[i][1]) && (dirs[i][0] < 0 && posDif[0] < 0 || dirs[i][0] > 0 && posDif[0] > 0 || dirs[i][1] < 0 && posDif[1] < 0 || dirs[i][1] > 0 && posDif[1] > 0)) {
+            dirs = dirs[i];
+            check = false;
+            break;
           }
-
-          currentPos[0] += dirs[i][0];
-          currentPos[1] += dirs[i][1];
         }
 
-        var currentPiece = this.currentPieces[currentPos];
+        if (check) {// console.log("no potential threats for ", piece);
+        } else {
+          var currentPos = [piece.pos[0] + dirs[0], piece.pos[1] + dirs[1]];
 
-        if (currentPiece && currentPiece.color !== piece.color) {
-          if (this.firstMove) {
-            moves.push(currentPos);
+          while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
+            currentPos[0] += dirs[0];
+            currentPos[1] += dirs[1];
+          }
 
-            if (currentPiece.symbol === 'K') {
-              this.inCheck = true; // console.log("Check!");
+          var currentPiece = this.currentPieces[currentPos];
+
+          if (currentPiece && currentPiece.symbol === 'K' && currentPiece.color !== piece.color) {
+            this.inCheck = true;
+
+            if (!secondary) {
+              this.threats.push([piece, [dirs]]);
+            } // console.log("Check!");
+
+          } else if (currentPiece && currentPiece.color !== piece.color) {
+            if (!secondary) {
+              this.threats.push([piece, [dirs]]);
             }
-          } else {
-            if (this.checkTheThreats(piece, currentPos)) {
-              moves.push(currentPos);
-            }
+          }
+        }
+
+        return [];
+      }
+
+      var moves = [];
+
+      for (var _i = 0; _i < dirs.length; _i++) {
+        var _currentPos = [piece.pos[0] + dirs[_i][0], piece.pos[1] + dirs[_i][1]];
+
+        while (!this.currentPieces[_currentPos] && this.onBoard(_currentPos)) {
+          var tempPush = _currentPos.slice();
+
+          if (this.checkThreats(piece, tempPush)) {
+            moves.push(tempPush);
+          }
+
+          _currentPos[0] += dirs[_i][0];
+          _currentPos[1] += dirs[_i][1];
+        }
+
+        var _currentPiece = this.currentPieces[_currentPos];
+
+        if (_currentPiece && _currentPiece.color !== piece.color) {
+          if (this.checkTheThreats(piece, _currentPos)) {
+            moves.push(_currentPos);
           }
         }
       }
@@ -1824,7 +1870,7 @@ var Board = /*#__PURE__*/function () {
           this.inCheck = true;
 
           if (!secondary) {
-            this.threats.push(piece);
+            this.threats.push([piece, null]);
           }
         }
 
@@ -1841,6 +1887,15 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "pawnMoves",
     value: function pawnMoves(piece, secondary) {
+      if (this.firstMove) {
+        var enemyKing = this.kings[this.oppColor(this.currentTurnColor)];
+
+        if (Math.abs(piece.pos[0] - enemyKing.pos[0]) > 2 || Math.abs(piece.pos[1] - enemyKing.pos[1]) > 2) {
+          // console.log("no possible moves for pawn");
+          return [];
+        }
+      }
+
       var dirs = [];
       var movePos;
       var addition;
@@ -1853,20 +1908,22 @@ var Board = /*#__PURE__*/function () {
 
       movePos = [piece.pos[0] + addition, piece.pos[1]];
 
-      if (!this.currentPieces[movePos]) {
-        if (this.checkTheThreats(piece, movePos, secondary)) {
-          dirs.push(movePos.slice());
-        }
-
-        movePos[0] += addition;
-
-        if ((piece.color === 'white' && piece.pos[0] === 6 || piece.color === 'black' && piece.pos[0] === 1) && !this.currentPieces[movePos]) {
+      if (!this.firstMove) {
+        if (!this.currentPieces[movePos]) {
           if (this.checkTheThreats(piece, movePos, secondary)) {
             dirs.push(movePos.slice());
           }
-        }
 
-        movePos[0] -= addition;
+          movePos[0] += addition;
+
+          if ((piece.color === 'white' && piece.pos[0] === 6 || piece.color === 'black' && piece.pos[0] === 1) && !this.currentPieces[movePos]) {
+            if (this.checkTheThreats(piece, movePos, secondary)) {
+              dirs.push(movePos.slice());
+            }
+          }
+
+          movePos[0] -= addition;
+        }
       }
 
       movePos[1] -= 1;
@@ -1916,7 +1973,12 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "rookMoves",
     value: function rookMoves(piece, secondary) {
-      var dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+      var dirs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+      if (!dirs) {
+        dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+      }
+
       return this.moveDirs(piece, dirs, secondary);
     }
   }, {
@@ -1942,6 +2004,7 @@ var Board = /*#__PURE__*/function () {
     key: "potentialMoves",
     value: function potentialMoves(piece) {
       var dontStore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var dirs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
       var moves;
 
       switch (piece.symbol) {
@@ -1951,12 +2014,7 @@ var Board = /*#__PURE__*/function () {
           break;
 
         case 'R':
-          moves = this.rookMoves(piece, dontStore);
-
-          if (this.firstMove && !dontStore) {
-            this.threats.push(piece);
-          }
-
+          moves = this.rookMoves(piece, dontStore, dirs);
           break;
 
         case 'N':
@@ -1964,29 +2022,24 @@ var Board = /*#__PURE__*/function () {
           break;
 
         case 'B':
-          moves = this.bishopMoves(piece, dontStore);
-
-          if (this.firstMove && !dontStore) {
-            this.threats.push(piece);
-          }
-
+          moves = this.bishopMoves(piece, dontStore, dirs);
           break;
 
         case 'Q':
-          moves = this.rookMoves(piece, dontStore).concat(this.bishopMoves(piece, dontStore));
-
-          if (this.firstMove && !dontStore) {
-            this.threats.push(piece);
+          if (dirs) {
+            if (dirs[0][0] === 1 && dirs[0][1] === 1) {
+              moves = this.bishopMoves(piece, dontStore, dirs);
+            } else {
+              moves = this.rookMoves(piece, dontStore, dirs);
+            }
+          } else {
+            moves = this.rookMoves(piece, dontStore, dirs).concat(this.bishopMoves(piece, dontStore, dirs));
           }
 
           break;
 
         case 'K':
-          // if (this.firstMove) {
-          moves = this.kingMoves(piece, dontStore); // } else {
-          //     moves = this.kingsMoves;
-          // }
-
+          moves = this.kingMoves(piece, dontStore);
           break;
 
         default:
@@ -2060,7 +2113,8 @@ var Board = /*#__PURE__*/function () {
     value: function findAllMoves() {
       this.threats = [];
       this.firstMove = true;
-      this.findMovesForColor(this.currentTurnColor);
+      this.findMovesForColor(this.currentTurnColor); // console.log("Threats: ", this.threats);
+
       this.firstMove = false;
       this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
