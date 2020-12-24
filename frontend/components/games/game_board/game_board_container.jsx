@@ -14,7 +14,7 @@ class Game extends React.Component {
         this.currentTile = null;
         this.humanTurn = 'white';
         this.potentialMoves = [];
-        this.aiTurn = 'none';
+        this.aiTurn = 'black';
         this.humanMoved = false;
         this.currentMove = 0;
         this.gameOver = false;
