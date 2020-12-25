@@ -113,6 +113,53 @@ export class Board {
         );
     }
 
+    kingCastleMoves(king, moves) {
+        // console.log("King: ", king);
+        if (!this.kingHasMoved[king.color]) {
+            const movePos = king.pos.slice();
+            if (this.currentPieces[[king.pos[0], 0]] && this.currentPieces[[king.pos[0], 0]].symbol === 'R'
+                                                     && this.currentPieces[[king.pos[0], 0]].color === king.color) {
+                movePos[1] -= 1;
+                if (!this.currentPieces[movePos] && !this.currentPieces[[movePos[0], movePos[1] - 1]]) {
+                    let checker = false;
+                    for (let i = 0; i < moves.length; i++) {
+                        if (moves[i][0] === movePos[0] && moves[i][1] === movePos[1]) {
+                            checker = true;
+                            break;
+                        }
+                    }
+                    if (checker) {
+                        moves.push([king.pos[0], king.pos[1] - 2]);
+                    } else {
+                        return;
+                    }
+                    // console.log("added left side castle");
+                }
+            }
+            if (this.currentPieces[[king.pos[0], 7]] && this.currentPieces[[king.pos[0], 7]].symbol === 'R'
+                                                     && this.currentPieces[[king.pos[0], 7]].color === king.color) {
+                movePos[1] += 2;
+                if (!this.currentPieces[movePos] && !this.currentPieces[[movePos[0], movePos[1] + 1]]
+                                                 && !this.currentPieces[[movePos[0], movePos[1] + 2]]) {
+                    let checker = false;
+                    for (let i = 0; i < moves.length; i++) {
+                        if (moves[i][0] === movePos[0] && moves[i][1] === movePos[1]) {
+                            checker = true;
+                            break;
+                        }
+                    }
+                    if (checker) {
+                        moves.push([king.pos[0], king.pos[1] + 2]);
+                    } else {
+                        return;
+                    }
+                    // console.log("added left side castle");
+                }
+            }
+        }
+        return moves;
+    }
+
     singleMoveDirs(piece, dirs, secondary=false) {
         if (this.firstMove) {
             const enemyKing = this.kings[this.oppColor(this.currentTurnColor)];
@@ -159,6 +206,9 @@ export class Board {
         if (this.firstMove && !secondary) {
             this.threats.push([piece, null]);
         }
+        if (!this.firstMove && piece.symbol === 'K') {
+            this.kingCastleMoves(piece, moves);
+        }
         return moves;
     }
 
@@ -199,7 +249,7 @@ export class Board {
         return bool;
     }
 
-    moveDirsBools(dirs, posDif, symbol, piecePos, kingPos) {
+    moveDirsBools(dirs, posDif, symbol, directionDir, kingPos) {
         if (((dirs[0] === 0 && posDif[0] === 0) || (dirs[1] === 0 && posDif[1] === 0)
                                                 || (posDif[0] * dirs[0] === posDif[1] * dirs[1]))
                                                 && (((dirs[0] < 0 && posDif[0] < 0) || (dirs[0] > 0 && posDif[0] > 0))
@@ -208,7 +258,7 @@ export class Board {
             return [true, true];
         } else {
             const checkPositions = {};
-            if (symbol === 'Q' || symbol === 'R') {
+            if (directionDir === 0) {
                 // rook indirect threats
                 if ((dirs[0] === 0 && Math.abs(posDif[0]) === 1) && ((dirs[1] < 0 && posDif[1] < 0) || (dirs[1] > 0 && posDif[1] > 0))) {
                     if (posDif[0] < 0) {
@@ -233,11 +283,11 @@ export class Board {
                         checkPositions[[[kingPos[0] - 1, kingPos[1] - 1]]] = true;
                     }
                 }
-                if (Object.values(checkPositions).length !== 0 && symbol !== 'Q') {
+                if (Object.values(checkPositions).length !== 0) {
                     return [true, checkPositions];
                 }
             } 
-            if (symbol === 'B' || symbol === 'Q') {
+            if (directionDir === 1) {
                 // bishop indirect threats
                 const checkDirs = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]];
                 for (let i = 0; i < checkDirs.length; i++) {
@@ -256,50 +306,65 @@ export class Board {
 
     moveDirs(piece, dirs, secondary) {
         if (this.firstMove) {
-            let check = true;
-            let direct = false;
+            let direct = [];
             const kingPos = this.kings[this.oppColor(this.currentTurnColor)].pos;
             const posDif = [kingPos[0] - piece.pos[0], kingPos[1] - piece.pos[1]];
+            const returnDirs = [];
+            let multipleDirsPossible = false;
+            if (((dirs[0][1] === 0) && !(Math.abs(piece.pos[0] - kingPos[0]) > 1 || Math.abs(piece.pos[1] - kingPos[1]) > 1))
+                            || ((dirs[0][1] === 1) && !(Math.abs(piece.pos[0] - kingPos[0]) > 2 || Math.abs(piece.pos[1] - kingPos[1]) > 2))
+                            || (dirs.length < 4)) {
+                multipleDirsPossible = true;
+                // if (!secondary) {
+                //     console.log("multiple dirs possible for ", piece.symbol);
+                // }
+            }
             for (let i = 0; i < dirs.length; i++) {
-                const items = this.moveDirsBools(dirs[i], posDif, piece.symbol, piece.pos, kingPos)
+                const items = this.moveDirsBools(dirs[i], posDif, piece.symbol, dirs[0][1], kingPos)
                 if (items[0]) {
                     // console.log(piece, "potential checks: ", items[1]);
-                    dirs = dirs[i];
-                    check = false;
-                    direct = items[1];
-                    break;
+                    returnDirs.push(dirs[i]);
+                    direct.push(items[1]);
+                    if (!multipleDirsPossible) {
+                        break;
+                    }
                 }
             }
-            if (check) {
-                // console.log("no potential threats for ", piece);
-            } else {
-                let currentPos = [piece.pos[0] + dirs[0], piece.pos[1] + dirs[1]];
+            for (let i = 0; i < returnDirs.length; i++) {
+                let currentPos = [piece.pos[0] + returnDirs[i][0], piece.pos[1] + returnDirs[i][1]];
+                let returnedThreat = false;
                 while (!(this.currentPieces[currentPos]) && this.onBoard(currentPos)) {
-                    if (!direct && !secondary) {
-                        if (direct[currentPos]) {
-                            this.threats.push([piece, [dirs]]);
+                    if (direct[i] !== true && !secondary) {
+                        if (direct[i][currentPos]) {
+                            // console.log("piece: ", piece);
+                            // console.log("direct: ", direct[i]);
+                            this.threats.push([piece, [returnDirs[i]]]);
+                            returnedThreat = true;
+                            break;
                         }
                     }
-                    currentPos[0] += dirs[0];
-                    currentPos[1] += dirs[1];
+                    currentPos[0] += returnDirs[i][0];
+                    currentPos[1] += returnDirs[i][1];
+                }
+                if (returnedThreat) {
+                    continue;
                 }
                 const currentPiece = this.currentPieces[currentPos];
                 if (currentPiece) {
-                    if (!direct && !secondary) {
-                        if (direct[currentPos] && currentPiece.color !== piece.color) {
-                            this.threats.push([piece, [dirs]]);
-                            return [];
+                    if (direct[i] !== true && !secondary) {
+                        if (direct[i][currentPos] && currentPiece.color === piece.color) {
+                            this.threats.push([piece, [returnDirs[i]]]);
                         }
                     } else {
                         if (currentPiece.symbol === 'K' && currentPiece.color !== piece.color) {
                             this.inCheck = true;
                             if (!secondary) {
-                                this.threats.push([piece, [dirs]]);
+                                this.threats.push([piece, [returnDirs[i]]]);
                             }
                                 // console.log("Check!");
                         } else if (currentPiece.color !== piece.color) {
                             if (!secondary) {
-                                this.threats.push([piece, [dirs]]);
+                                this.threats.push([piece, [returnDirs[i]]]);
                             }
                         }
                     }
@@ -350,7 +415,7 @@ export class Board {
                     this.inCheck = true;
                 }
                 if (!secondary) {
-                    console.log("pawn threat");
+                    // console.log("pawn threat");
                     this.threats.push([piece, null]);
                 }
             }
@@ -432,7 +497,9 @@ export class Board {
 
     queenMoves(piece, secondary, dirs) {
         if (!dirs) {
-            dirs = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
+            const dirsOne = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+            const dirsTwo = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
+            return (this.moveDirs(piece, dirsOne, secondary).concat(this.moveDirs(piece, dirsTwo, secondary)));
         }
         return (this.moveDirs(piece, dirs, secondary));
     }
@@ -491,46 +558,6 @@ export class Board {
         }
     }
 
-    baseKingMoves(king) {
-        // console.log("King: ", king);
-        const moveDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [0, 1], [-1, 0], [0, -1]];
-        let moves = [];
-        for (let i = 0; i < moveDirs.length; i++) {
-            const movePos = [moveDirs[i][0] + king.pos[0], moveDirs[i][1] + king.pos[1]];
-            if (this.onBoard(movePos)) {
-                if (this.currentPieces[movePos]) {
-                    if (this.currentPieces[movePos].color !== king.color) {
-                        moves.push(movePos);
-                    }
-                } else {
-                    moves.push(movePos);
-                }
-            }
-        }
-        if (!this.kingHasMoved[king.color]) {
-            const movePos = king.pos.slice();
-            if (this.currentPieces[[king.pos[0], 0]] && this.currentPieces[[king.pos[0], 0]].symbol === 'R'
-                                                     && this.currentPieces[[king.pos[0], 0]].color === king.color) {
-                movePos[1] -= 1;
-                if (!this.currentPieces[movePos] && !this.currentPieces[[movePos[0], movePos[1] - 1]]) {
-                    moves.push([king.pos[0], king.pos[1] - 2]);
-                    // console.log("added left side castle");
-                }
-            }
-            if (this.currentPieces[[king.pos[0], 7]] && this.currentPieces[[king.pos[0], 7]].symbol === 'R'
-                                                     && this.currentPieces[[king.pos[0], 7]].color === king.color) {
-                movePos[1] += 2;
-                if (!this.currentPieces[movePos] && !this.currentPieces[[movePos[0], movePos[1] + 1]]
-                                                 && !this.currentPieces[[movePos[0], movePos[1] + 2]]) {
-                    moves.push([king.pos[0], king.pos[1] + 2]);
-                    // console.log("added right side castle");
-                }
-            }
-            
-        }
-        return moves;
-    }
-
     emptyKingMoves(piece) {
         const moveDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [0, 1], [-1, 0], [0, -1]];
         let moves = [];
@@ -550,7 +577,7 @@ export class Board {
         this.emptyKingMoves(this.kings[this.oppColor(this.currentTurnColor)]);
         this.firstMove = true;
         this.findMovesForColor(this.currentTurnColor);
-        console.log("Threats: ", this.threats);
+        // console.log("Threats: ", this.threats);
         this.firstMove = false;
         this.findMovesForColor(this.oppColor(this.currentTurnColor));
     }
@@ -618,29 +645,33 @@ export class Board {
         if (this.isIncluded(this.movesFor[this.currentTurnColor][moveTile.pos], endTile.pos)) {
             const piece = moveTile.piece;
             let castle = false;
-            if (piece.symbol === "K" && moveTile.pos[1] - endTile.pos[1] === 2) {
-                this.kingHasMoved[this.currentTurnColor] = true;
-                // console.log("preforming king side castle");
-                const rook = this.currentPieces[[piece.pos[0], 0]];
-                const preTile = this.board[rook.pos];
-                preTile.piece = null;
-                delete this.currentPieces[rook.pos];
-                rook.pos = [piece.pos[0], 2];
-                const postTile = this.board[rook.pos];
-                postTile.piece = rook;
-                this.currentPieces[rook.pos] = rook;
-                castle = rook.pos.slice();
-            } else if (piece.symbol === 'K' && moveTile.pos[1] - endTile.pos[1] === -2) {
-                // console.log("preforming queen side castle");
-                const rook = this.currentPieces[[piece.pos[0], 7]];
-                const preTile = this.board[rook.pos];
-                preTile.piece = null;
-                delete this.currentPieces[rook.pos];
-                rook.pos = [piece.pos[0], 4];
-                const postTile = this.board[rook.pos];
-                postTile.piece = rook;
-                this.currentPieces[rook.pos] = rook;
-                castle = rook.pos.slice();
+            if (piece.symbol === 'K') {
+                if (!this.kingHasMoved[this.currentTurnColor]) {
+                    this.kingHasMoved[this.currentTurnColor] = this.moveTree.length;
+                }
+                if (moveTile.pos[1] - endTile.pos[1] === 2) {
+                    // console.log("preforming king side castle");
+                    const rook = this.currentPieces[[piece.pos[0], 0]];
+                    const preTile = this.board[rook.pos];
+                    preTile.piece = null;
+                    delete this.currentPieces[rook.pos];
+                    rook.pos = [piece.pos[0], 2];
+                    const postTile = this.board[rook.pos];
+                    postTile.piece = rook;
+                    this.currentPieces[rook.pos] = rook;
+                    castle = rook.pos.slice();
+                } else if (moveTile.pos[1] - endTile.pos[1] === -2) {
+                    // console.log("preforming queen side castle");
+                    const rook = this.currentPieces[[piece.pos[0], 7]];
+                    const preTile = this.board[rook.pos];
+                    preTile.piece = null;
+                    delete this.currentPieces[rook.pos];
+                    rook.pos = [piece.pos[0], 4];
+                    const postTile = this.board[rook.pos];
+                    postTile.piece = rook;
+                    this.currentPieces[rook.pos] = rook;
+                    castle = rook.pos.slice();
+                }
             }
             if (endTile.piece) {
                 if (endTile.piece.color === 'black') {
@@ -720,6 +751,10 @@ export class Board {
         const reversedPotMoves = JSON.parse(JSON.stringify(this.moveTree[idx].movesFor));
         const priorTile = this.board[priorPos];
         const currentPosTile = this.board[piece.pos];
+
+        if (this.kingHasMoved[this.oppColor(this.currentTurnColor)] === idx) {
+            this.kingHasMoved[this.oppColor(this.currentTurnColor)] = false;
+        }
 
         priorTile.piece = piece;                  // add the moved piece to the prior tile
         delete this.currentPieces[piece.pos];       // remove old piece pos from hash
