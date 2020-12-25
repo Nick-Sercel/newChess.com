@@ -1253,7 +1253,7 @@ var Game = /*#__PURE__*/function (_React$Component) {
     _this.currentTile = null;
     _this.humanTurn = 'white';
     _this.potentialMoves = [];
-    _this.aiTurn = 'none';
+    _this.aiTurn = 'black';
     _this.humanMoved = false;
     _this.currentMove = 0;
     _this.gameOver = false;
@@ -1566,9 +1566,9 @@ var Tile = function Tile(pos) {
   this.piece = piece;
 
   if ((pos[0] + pos[1]) % 2 === 0) {
-    this.color = "black-tile";
-  } else {
     this.color = "white-tile";
+  } else {
+    this.color = "black-tile";
   }
 };
 var Piece = function Piece(pos, symbol) {
@@ -1614,7 +1614,7 @@ var Board = /*#__PURE__*/function () {
     this.moveTree = [];
     this.inCheck = false;
     this.threats = [];
-    this.deniedMoves = {};
+    this.kingSpecificThreats = [];
     this.kings = {
       "white": null,
       "black": null
@@ -1622,8 +1622,8 @@ var Board = /*#__PURE__*/function () {
     this.kingHasMoved = {
       "white": false,
       "black": false
-    };
-    this.kingsMoves = [];
+    }; // this.kingsMoves = [];
+
     this.firstMove = true;
 
     if (genBoard) {
@@ -1650,7 +1650,7 @@ var Board = /*#__PURE__*/function () {
               piece = new Piece([i, j], 'N');
             } else if (j === 2 || j === 5) {
               piece = new Piece([i, j], 'B');
-            } else if (j === 3) {
+            } else if (j === 4) {
               piece = new Piece([i, j], 'K');
 
               if (i > 5) {
@@ -1835,6 +1835,20 @@ var Board = /*#__PURE__*/function () {
             break; // break on check found
           }
         }
+      }
+
+      if (piece.symbol === 'K') {
+        for (var _i2 = 0; _i2 < this.kingSpecificThreats.length; _i2++) {
+          if (this.kingSpecificThreats[_i2][0].pos[0] !== pos[0] || this.kingSpecificThreats[_i2][0].pos[1] !== pos[1]) {
+            this.inCheck = false;
+            this.potentialMoves(this.kingSpecificThreats[_i2][0], true, this.kingSpecificThreats[_i2][1]);
+
+            if (this.inCheck) {
+              bool = false;
+              break; // break on check found
+            }
+          }
+        }
       } // revert firstmove to false to prevent accidental checks
 
 
@@ -1939,23 +1953,23 @@ var Board = /*#__PURE__*/function () {
           }
         }
 
-        for (var _i2 = 0; _i2 < returnDirs.length; _i2++) {
-          var currentPos = [piece.pos[0] + returnDirs[_i2][0], piece.pos[1] + returnDirs[_i2][1]];
+        for (var _i3 = 0; _i3 < returnDirs.length; _i3++) {
+          var currentPos = [piece.pos[0] + returnDirs[_i3][0], piece.pos[1] + returnDirs[_i3][1]];
           var returnedThreat = false;
 
           while (!this.currentPieces[currentPos] && this.onBoard(currentPos)) {
-            if (direct[_i2] !== true && !secondary) {
-              if (direct[_i2][currentPos]) {
+            if (direct[_i3] !== true && !secondary) {
+              if (direct[_i3][currentPos]) {
                 // console.log("piece: ", piece);
                 // console.log("direct: ", direct[i]);
-                this.threats.push([piece, [returnDirs[_i2]]]);
+                this.kingSpecificThreats.push([piece, [returnDirs[_i3]]]);
                 returnedThreat = true;
                 break;
               }
             }
 
-            currentPos[0] += returnDirs[_i2][0];
-            currentPos[1] += returnDirs[_i2][1];
+            currentPos[0] += returnDirs[_i3][0];
+            currentPos[1] += returnDirs[_i3][1];
           }
 
           if (returnedThreat) {
@@ -1965,21 +1979,21 @@ var Board = /*#__PURE__*/function () {
           var currentPiece = this.currentPieces[currentPos];
 
           if (currentPiece) {
-            if (direct[_i2] !== true && !secondary) {
-              if (direct[_i2][currentPos] && currentPiece.color === piece.color) {
-                this.threats.push([piece, [returnDirs[_i2]]]);
+            if (direct[_i3] !== true && !secondary) {
+              if (direct[_i3][currentPos] && currentPiece.color === piece.color) {
+                this.kingSpecificThreats.push([piece, [returnDirs[_i3]]]);
               }
             } else {
               if (currentPiece.symbol === 'K' && currentPiece.color !== piece.color) {
                 this.inCheck = true;
 
                 if (!secondary) {
-                  this.threats.push([piece, [returnDirs[_i2]]]);
+                  this.threats.push([piece, [returnDirs[_i3]]]);
                 } // console.log("Check!");
 
               } else if (currentPiece.color !== piece.color) {
                 if (!secondary) {
-                  this.threats.push([piece, [returnDirs[_i2]]]);
+                  this.threats.push([piece, [returnDirs[_i3]]]);
                 }
               }
             }
@@ -1991,8 +2005,8 @@ var Board = /*#__PURE__*/function () {
 
       var moves = [];
 
-      for (var _i3 = 0; _i3 < dirs.length; _i3++) {
-        var _currentPos = [piece.pos[0] + dirs[_i3][0], piece.pos[1] + dirs[_i3][1]];
+      for (var _i4 = 0; _i4 < dirs.length; _i4++) {
+        var _currentPos = [piece.pos[0] + dirs[_i4][0], piece.pos[1] + dirs[_i4][1]];
 
         while (!this.currentPieces[_currentPos] && this.onBoard(_currentPos)) {
           var tempPush = _currentPos.slice();
@@ -2001,8 +2015,8 @@ var Board = /*#__PURE__*/function () {
             moves.push(tempPush);
           }
 
-          _currentPos[0] += dirs[_i3][0];
-          _currentPos[1] += dirs[_i3][1];
+          _currentPos[0] += dirs[_i4][0];
+          _currentPos[1] += dirs[_i4][1];
         }
 
         var _currentPiece = this.currentPieces[_currentPos];
@@ -2229,33 +2243,26 @@ var Board = /*#__PURE__*/function () {
           this.potentialMoves(pieces[i]);
         }
       }
-    }
-  }, {
-    key: "emptyKingMoves",
-    value: function emptyKingMoves(piece) {
-      var moveDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [0, 1], [-1, 0], [0, -1]];
-      var moves = [];
-      var pos = piece.pos.slice();
+    } // emptyKingMoves(piece) {
+    //     const moveDirs = [[1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [0, 1], [-1, 0], [0, -1]];
+    //     let moves = [];
+    //     const pos = piece.pos.slice();
+    //     for (let i = 0; i < moveDirs.length; i++) {
+    //         pos[0] += moveDirs[i][0]; pos[1] += moveDirs[i][1];
+    //         if (this.onBoard(pos)) {
+    //             moves.push(pos);
+    //         }
+    //         pos[0] -= moveDirs[i][0]; pos[1] -= moveDirs[i][1];
+    //     }
+    //     this.kingsMoves = moves;
+    // }
 
-      for (var i = 0; i < moveDirs.length; i++) {
-        pos[0] += moveDirs[i][0];
-        pos[1] += moveDirs[i][1];
-
-        if (this.onBoard(pos)) {
-          moves.push(pos);
-        }
-
-        pos[0] -= moveDirs[i][0];
-        pos[1] -= moveDirs[i][1];
-      }
-
-      this.kingsMoves = moves;
-    }
   }, {
     key: "findAllMoves",
     value: function findAllMoves() {
       this.threats = [];
-      this.emptyKingMoves(this.kings[this.oppColor(this.currentTurnColor)]);
+      this.kingSpecificThreats = []; // this.emptyKingMoves(this.kings[this.oppColor(this.currentTurnColor)]);
+
       this.firstMove = true;
       this.findMovesForColor(this.currentTurnColor); // console.log("Threats: ", this.threats);
 
