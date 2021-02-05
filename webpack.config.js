@@ -12,13 +12,27 @@ module.exports = {
             {
                 test: /\.jsx?$/,
                 exclude: /(node_modules)/,
-                use: {
+                use: [
+                    {
                     loader: 'babel-loader',
                     query: {
                         presets: ['@babel/env', '@babel/react']
                     }
-                },
+                }
+                ]
             }
+            // {
+            //     test: /\.(jpe?g|png|gif|svg)$/i,
+            //     exclude: /(node_modules)/,
+            //     use: [
+            //         {
+            //             loader: "url-loader",
+            //             options: {
+            //                 limit: 500
+            //             }
+            //         }
+            //     ]
+            // }
         ]
     },
     devtool: 'source-map',

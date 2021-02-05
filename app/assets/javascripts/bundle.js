@@ -1489,7 +1489,8 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-
+ // const something = require("/chess-piece-sprites.png");
+// console.log(something);
 
 var Tile = /*#__PURE__*/function (_React$Component) {
   _inherits(Tile, _React$Component);
@@ -1517,18 +1518,25 @@ var Tile = /*#__PURE__*/function (_React$Component) {
       var piece = this.props.tile.piece;
       var symbol = null;
       var color = 'missing';
+      var style;
 
       if (piece) {
         symbol = piece.symbol;
         color = piece.color;
+        style = {
+          background: "lightblue url(".concat(window.images.chessSprites, ") ").concat(-piece.spriteRules[0], "px ").concat(-piece.spriteRules[1], "px / 570px 190px"),
+          width: "90px",
+          height: "90px",
+          zIndex: "100"
+        };
       }
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "board-element ".concat(this.props.tile.color, " ").concat(this.props.green),
         onClick: this.handleClick
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
-        className: "piece-type ".concat(color)
-      }, symbol));
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        style: style
+      }));
     }
   }]);
 
@@ -1557,6 +1565,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// import pieceSpritesImport from '../../../../app/assets/images/chess-piece-sprites.png';
+// import pieceSprites from './chess-piece-sprites.png';
 var Tile = function Tile(pos) {
   var piece = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
@@ -1571,13 +1581,15 @@ var Tile = function Tile(pos) {
     this.color = "black-tile";
   }
 };
-var Piece = function Piece(pos, symbol) {
-  var color = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+var Piece = function Piece(pos, symbol, imgRules) {
+  var color = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
   _classCallCheck(this, Piece);
 
   this.pos = pos;
   this.symbol = symbol;
+  this.spriteRules = imgRules; // console.log("piece image: ", imgRules);
+
   this.color = color; // this.moves = [];
 };
 
@@ -1637,39 +1649,57 @@ var Board = /*#__PURE__*/function () {
   _createClass(Board, [{
     key: "generateBoard",
     value: function generateBoard() {
+      var pieceType;
+      var pieceStyle;
+
       for (var i = 0; i < 8; i++) {
         for (var j = 0; j < 8; j++) {
-          var piece = null;
+          pieceType = null;
+          pieceStyle = [];
 
           if (i === 1 || i === 6) {
-            piece = new Piece([i, j], 'P');
+            pieceType = 'P';
+            pieceStyle = [475, 0];
           } else if (i === 0 || i === 7) {
             if (j === 0 || j === 7) {
-              piece = new Piece([i, j], 'R');
+              pieceStyle = [380, 0];
+              pieceType = "R";
             } else if (j === 1 || j === 6) {
-              piece = new Piece([i, j], 'N');
+              pieceStyle = [285, 0];
+              pieceType = "N";
             } else if (j === 2 || j === 5) {
-              piece = new Piece([i, j], 'B');
+              pieceStyle = [190, 0];
+              pieceType = "B";
             } else if (j === 4) {
-              piece = new Piece([i, j], 'K');
+              pieceStyle = [0, 0];
+              pieceType = "K";
+            } else {
+              pieceStyle = [95, 0];
+              pieceType = "Q";
+            }
+          }
 
+          var piece = void 0;
+
+          if (pieceType) {
+            piece = new Piece([i, j], pieceType, pieceStyle);
+
+            if (j === 4) {
               if (i > 5) {
                 this.kings["white"] = piece;
               } else {
                 this.kings["black"] = piece;
               }
-            } else {
-              piece = new Piece([i, j], 'Q');
             }
-          }
 
-          if (piece) {
             this.movesFor['white'][(i, j)] = [];
 
             if (piece.pos[0] > 5) {
               piece.color = 'white';
+              piece.spriteRules[1] = 0;
             } else {
               piece.color = 'black';
+              piece.spriteRules[1] = 95;
             }
 
             this.currentPieces[piece.pos] = piece;

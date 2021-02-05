@@ -1,3 +1,6 @@
+// import pieceSpritesImport from '../../../../app/assets/images/chess-piece-sprites.png';
+// import pieceSprites from './chess-piece-sprites.png';
+
 export class Tile {
     constructor(pos, piece = null) {
         this.pos = pos;
@@ -11,9 +14,11 @@ export class Tile {
 }
 
 export class Piece {
-    constructor(pos, symbol, color = null) {
+    constructor(pos, symbol, imgRules, color = null) {
         this.pos = pos;
         this.symbol = symbol;
+        this.spriteRules = imgRules;
+        // console.log("piece image: ", imgRules);
         this.color = color;
         // this.moves = [];
     }
@@ -60,35 +65,50 @@ export class Board {
 
 
     generateBoard() {
+        let pieceType;
+        let pieceStyle
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
-                let piece = null;
+                pieceType = null;
+                pieceStyle = [];
                 if (i === 1 || i === 6) {
-                    piece = new Piece([i, j], 'P');
+                    pieceType = 'P';
+                    pieceStyle = [475, 0];
                 } else if (i === 0 || i === 7) {
                     if (j === 0 || j === 7) {
-                        piece = new Piece([i, j], 'R');
+                        pieceStyle = [380, 0];
+                        pieceType = "R";
                     } else if (j === 1 || j === 6) {
-                        piece = new Piece([i, j], 'N');
+                        pieceStyle = [285, 0];
+                        pieceType = "N";
                     } else if (j === 2 || j === 5) {
-                        piece = new Piece([i, j], 'B');
+                        pieceStyle = [190, 0];
+                        pieceType = "B";
                     } else if (j === 4) {
-                        piece = new Piece([i, j], 'K');
+                        pieceStyle = [0, 0];
+                        pieceType = "K";
+                    } else {
+                        pieceStyle = [95, 0];
+                        pieceType = "Q";
+                    }
+                }
+                let piece;
+                if (pieceType) {
+                    piece = new Piece([i, j], pieceType, pieceStyle);
+                    if (j === 4) {
                         if (i > 5) {
                             this.kings["white"] = piece;
                         } else {
                             this.kings["black"] = piece;
                         }
-                    } else {
-                        piece = new Piece([i, j], 'Q');
                     }
-                }
-                if (piece) {
                     this.movesFor['white'][i, j] = [];
                     if (piece.pos[0] > 5) {
                         piece.color = 'white';
+                        piece.spriteRules[1] = 0;
                     } else {
                         piece.color = 'black';
+                        piece.spriteRules[1] = 95;
                     }
                     this.currentPieces[piece.pos] = piece;
                 }
